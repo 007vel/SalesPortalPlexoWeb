@@ -16,6 +16,15 @@ export interface RepDocs {
   w4: RepDocRecord | null;
 }
 
+/** A single document row across every rep — used by admin oversight views. */
+export interface RepDocumentRecord {
+  oId: number;
+  repId: string;
+  kind: string;
+  fileName: string;
+  uploadedAt: string;
+}
+
 export interface CommissionDay {
   date: string;
   amount: number;
@@ -246,6 +255,13 @@ export class RepDirectoryStore {
 
   downloadDocument(oId: number): Observable<Blob> {
     return this.api.get(`documents/${oId}`, undefined, 'blob');
+  }
+
+  /** Fetches every document uploaded by every rep (via `api/documents`) — used by admin oversight. */
+  loadAllDocuments(): Observable<RepDocumentRecord[]> {
+    return this.api.get<RepDocumentDto[]>('documents').pipe(
+      map((dtos) => dtos.map((dto) => ({ oId: dto.oId, repId: dto.repId, kind: dto.kind, fileName: dto.fileName, uploadedAt: dto.uploadedAt }))),
+    );
   }
 
   private putRep(repId: string, changes: Partial<Pick<RepRecord, 'status' | 'googleLink' | 'resourceLink'>>): Observable<RepRecord> {

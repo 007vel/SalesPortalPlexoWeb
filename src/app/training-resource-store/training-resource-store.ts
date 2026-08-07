@@ -6,6 +6,9 @@ export type TrainingResourceType = 'video' | 'image' | 'pdf' | 'doc' | 'link';
 
 export interface TrainingResource {
   id: string;
+  oId: number;
+  /** The RepId of the rep who uploaded this resource. */
+  repId: string;
   title: string;
   category: string;
   type: TrainingResourceType;
@@ -13,8 +16,7 @@ export interface TrainingResource {
   featured: boolean;
   description: string;
   url: string;
-  /** Set only for resources backed by a real uploaded file (api/traininghub); absent for admin link-only entries. */
-  oId?: number;
+  fileName: string;
 }
 
 export interface NewTrainingHubUpload {
@@ -24,16 +26,6 @@ export interface NewTrainingHubUpload {
   description: string;
   /** The uploading rep's RepId — the backend filters retrieval by this same value. */
   roleId: string;
-}
-
-export interface ResourcePayload {
-  title: string;
-  category: string;
-  type: TrainingResourceType;
-  duration: string;
-  featured: boolean;
-  description: string;
-  url: string;
 }
 
 /** Shape returned by POST/GET api/traininghub (PlexoRepPortal.Models.TrainingHubDocumentDto). */
@@ -62,29 +54,30 @@ export function trainingResourceTypeLabel(type: TrainingResourceType): string {
 }
 
 /**
- * The team-wide Training & Resource Hub library. Reps upload real files
- * (video/image/pdf/etc, backed by `api/traininghub`, filtered server-side by
- * the uploading rep's RepId); admin can additionally curate plain link-only
- * resources, which stay purely client-side (no file, no backend row) — those
- * entries never carry an `oId`.
+ * The team-wide Training & Resource Hub library — real files (video/image/pdf/etc)
+ * reps upload, backed by `api/traininghub`. Reps see their own uploads
+ * (`loadForRole`); admin can browse every rep's uploads at once (`loadAll`).
  */
 @Injectable({ providedIn: 'root' })
 export class TrainingResourceStore {
   private readonly api = inject(Api);
   private readonly resourcesSignal = signal<TrainingResource[]>([]);
-  private readonly sharedHubLinkSignal = signal('');
-  private nextId = 1;
 
   readonly resources = this.resourcesSignal.asReadonly();
-  readonly sharedHubLink = this.sharedHubLinkSignal.asReadonly();
 
-  /** Fetches every training hub document uploaded under the given RepId and merges it into the list, keeping any local-only link resources. */
+  /** Fetches every training hub document uploaded under the given RepId. */
   loadForRole(roleId: string): Observable<TrainingResource[]> {
     return this.api.get<TrainingHubDocumentDto[]>(`traininghub/role/${roleId}`).pipe(
       map((dtos) => dtos.map((dto) => this.mapDto(dto))),
-      tap((docs) => {
-        this.resourcesSignal.update((list) => [...docs, ...list.filter((r) => r.oId == null)]);
-      }),
+      tap((docs) => this.resourcesSignal.set(docs)),
+    );
+  }
+
+  /** Fetches every training hub document across every rep — used by admin oversight. */
+  loadAll(): Observable<TrainingResource[]> {
+    return this.api.get<TrainingHubDocumentDto[]>('traininghub').pipe(
+      map((dtos) => dtos.map((dto) => this.mapDto(dto))),
+      tap((docs) => this.resourcesSignal.set(docs)),
     );
   }
 
@@ -104,24 +97,15 @@ export class TrainingResourceStore {
     );
   }
 
-  addResource(payload: ResourcePayload): void {
-    this.insert(payload);
+  /** Fetches the raw file bytes for a resource — used to view or download it. */
+  downloadDocument(oId: number): Observable<Blob> {
+    return this.api.get(`traininghub/${oId}`, undefined, 'blob');
   }
 
-  updateResource(id: string, payload: ResourcePayload): void {
-    this.resourcesSignal.update((list) =>
-      list.map((r) => {
-        if (r.id === id) return { ...r, ...payload };
-        return payload.featured ? { ...r, featured: false } : r;
-      }),
-    );
-  }
-
-  /** Removes a resource — deletes the backend file/row first when it's a real upload, otherwise just drops the local entry. */
+  /** Deletes the resource from the backend and drops it from the list. */
   remove(id: string): Observable<void> {
     const resource = this.resourcesSignal().find((r) => r.id === id);
-    if (!resource || resource.oId == null) {
-      this.resourcesSignal.update((list) => list.filter((r) => r.id !== id));
+    if (!resource) {
       return of(undefined);
     }
     return this.api.delete<void>(`traininghub/${resource.oId}`).pipe(
@@ -129,14 +113,11 @@ export class TrainingResourceStore {
     );
   }
 
-  setSharedHubLink(url: string): void {
-    this.sharedHubLinkSignal.set(url);
-  }
-
   private mapDto(dto: TrainingHubDocumentDto): TrainingResource {
     return {
       id: `doc-${dto.oId}`,
       oId: dto.oId,
+      repId: dto.roleId,
       title: dto.title,
       category: dto.category ?? 'Team Uploads',
       type: FILE_TYPE_TO_RESOURCE_TYPE[dto.fileType] ?? 'doc',
@@ -144,14 +125,7 @@ export class TrainingResourceStore {
       featured: false,
       description: dto.description ?? '',
       url: this.api.fileUrl(`traininghub/${dto.oId}`),
+      fileName: dto.fileName,
     };
-  }
-
-  private insert(resource: Omit<TrainingResource, 'id'>): void {
-    const full: TrainingResource = { id: String(this.nextId++), ...resource };
-    this.resourcesSignal.update((list) => {
-      const cleared = full.featured ? list.map((r) => ({ ...r, featured: false })) : list;
-      return [full, ...cleared];
-    });
   }
 }
