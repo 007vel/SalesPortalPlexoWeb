@@ -33,8 +33,8 @@ export class Login {
   readonly adminPasswordVisible = signal(false);
 
   readonly form = this.fb.nonNullable.group({
-    email: [MOCK_CONFIG.demoLoginCredentials.email, [Validators.required, Validators.email]],
-    repId: [MOCK_CONFIG.demoLoginCredentials.repId, [Validators.required, Validators.pattern(/^\d+$/)]],
+    email: ['', [Validators.required, Validators.email]],
+    repId: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
   });
 
   readonly adminForm = this.fb.nonNullable.group({

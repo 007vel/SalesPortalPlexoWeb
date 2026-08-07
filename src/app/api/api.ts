@@ -36,6 +36,11 @@ export class Api {
     return this.http.delete<T>(this.url(path));
   }
 
+  /** Absolute URL for a path, for use outside HttpClient (e.g. a direct `<a href>`/`<img src>` link to a file endpoint). */
+  fileUrl(path: string): string {
+    return this.url(path);
+  }
+
   private url(path: string): string {
     return `${this.baseUrl}/${path.replace(/^\/+/, '')}`;
   }

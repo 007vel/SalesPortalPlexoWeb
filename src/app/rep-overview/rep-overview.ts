@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Auth } from '../auth/auth';
 import { RepProfileStore, RepProfileData } from '../rep-profile-store/rep-profile-store';
 import { TrainingResourceStore } from '../training-resource-store/training-resource-store';
-import { portalLink } from '../rep-directory-store/rep-directory-store';
+import { RepDirectoryStore, portalLink } from '../rep-directory-store/rep-directory-store';
 import { MOCK_CONFIG } from '../mock-config/mock-config';
 import { Toast } from '../toast/toast';
 
@@ -37,8 +37,10 @@ function calcProgressPct(profile: RepProfileData, email: string | undefined): nu
 export class RepOverview {
   private readonly auth = inject(Auth);
   private readonly repProfileStore = inject(RepProfileStore);
+  private readonly directory = inject(RepDirectoryStore);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
   private readonly toast = inject(Toast);
+  private loadedForRepId: string | null = null;
 
   readonly portalDomain = MOCK_CONFIG.portalDomain;
 
@@ -65,6 +67,18 @@ export class RepOverview {
       { label: 'W-4 form', done: !!p.docs.w4 },
     ];
   });
+
+  constructor() {
+    // Docs live in RepDirectoryStore's in-memory list, keyed by rep — fetch them once the
+    // signed-in rep is actually present in that list (it loads asynchronously on app start).
+    effect(() => {
+      const repId = this.auth.session()?.repId;
+      if (!repId || repId === this.loadedForRepId) return;
+      if (!this.directory.findByRepId(repId)) return;
+      this.loadedForRepId = repId;
+      this.directory.loadDocuments(repId).subscribe();
+    });
+  }
 
   copyMyLink(): void {
     const repId = this.repId();

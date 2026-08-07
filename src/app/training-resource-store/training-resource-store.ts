@@ -1,9 +1,14 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, map, of, tap } from 'rxjs';
+import { Api } from '../api/api';
 
-export type TrainingResourceType = 'video' | 'pdf' | 'doc' | 'link';
+export type TrainingResourceType = 'video' | 'image' | 'pdf' | 'doc' | 'link';
 
 export interface TrainingResource {
   id: string;
+  oId: number;
+  /** The RepId of the rep who uploaded this resource. */
+  repId: string;
   title: string;
   category: string;
   type: TrainingResourceType;
@@ -11,30 +16,34 @@ export interface TrainingResource {
   featured: boolean;
   description: string;
   url: string;
-  addedBy?: string;
+  fileName: string;
 }
 
-export interface NewVideoResource {
+export interface NewTrainingHubUpload {
   title: string;
   category: string;
-  duration: string;
+  length: string;
   description: string;
-  url: string;
-  addedBy: string;
+  /** The uploading rep's RepId — the backend filters retrieval by this same value. */
+  roleId: string;
 }
 
-export interface ResourcePayload {
+/** Shape returned by POST/GET api/traininghub (PlexoRepPortal.Models.TrainingHubDocumentDto). */
+interface TrainingHubDocumentDto {
+  oId: number;
+  roleId: string;
   title: string;
-  category: string;
-  type: TrainingResourceType;
-  duration: string;
-  featured: boolean;
-  description: string;
-  url: string;
+  category: string | null;
+  description: string | null;
+  fileType: string;
+  fileName: string;
+  length: string | null;
+  uploadedAt: string;
 }
 
-const TYPE_ICON: Record<TrainingResourceType, string> = { video: 'movie', pdf: 'description', doc: 'article', link: 'link' };
-const TYPE_LABEL: Record<TrainingResourceType, string> = { video: 'Video', pdf: 'PDF', doc: 'Guide', link: 'Link' };
+const TYPE_ICON: Record<TrainingResourceType, string> = { video: 'movie', image: 'image', pdf: 'description', doc: 'article', link: 'link' };
+const TYPE_LABEL: Record<TrainingResourceType, string> = { video: 'Video', image: 'Image', pdf: 'PDF', doc: 'Guide', link: 'Link' };
+const FILE_TYPE_TO_RESOURCE_TYPE: Record<string, TrainingResourceType> = { Video: 'video', Image: 'image', Pdf: 'pdf', Document: 'doc' };
 
 export function trainingResourceTypeIcon(type: TrainingResourceType): string {
   return TYPE_ICON[type] ?? 'school';
@@ -45,59 +54,78 @@ export function trainingResourceTypeLabel(type: TrainingResourceType): string {
 }
 
 /**
- * The team-wide Training & Resource Hub library. Now updated from two
- * places: reps can add their own videos, and admin can curate any resource
- * type (add/edit/remove, feature one at a time). Starts empty — no
- * predefined resources.
+ * The team-wide Training & Resource Hub library — real files (video/image/pdf/etc)
+ * reps upload, backed by `api/traininghub`. Reps see their own uploads
+ * (`loadForRole`); admin can browse every rep's uploads at once (`loadAll`).
  */
 @Injectable({ providedIn: 'root' })
 export class TrainingResourceStore {
+  private readonly api = inject(Api);
   private readonly resourcesSignal = signal<TrainingResource[]>([]);
-  private readonly sharedHubLinkSignal = signal('');
-  private nextId = 1;
 
   readonly resources = this.resourcesSignal.asReadonly();
-  readonly sharedHubLink = this.sharedHubLinkSignal.asReadonly();
 
-  addVideo(input: NewVideoResource): void {
-    this.insert({
-      title: input.title,
-      category: input.category,
-      type: 'video',
-      duration: input.duration,
-      featured: false,
-      description: input.description,
-      url: input.url,
-      addedBy: input.addedBy,
-    });
-  }
-
-  addResource(payload: ResourcePayload): void {
-    this.insert(payload);
-  }
-
-  updateResource(id: string, payload: ResourcePayload): void {
-    this.resourcesSignal.update((list) =>
-      list.map((r) => {
-        if (r.id === id) return { ...r, ...payload };
-        return payload.featured ? { ...r, featured: false } : r;
-      }),
+  /** Fetches every training hub document uploaded under the given RepId. */
+  loadForRole(roleId: string): Observable<TrainingResource[]> {
+    return this.api.get<TrainingHubDocumentDto[]>(`traininghub/role/${roleId}`).pipe(
+      map((dtos) => dtos.map((dto) => this.mapDto(dto))),
+      tap((docs) => this.resourcesSignal.set(docs)),
     );
   }
 
-  remove(id: string): void {
-    this.resourcesSignal.update((list) => list.filter((r) => r.id !== id));
+  /** Fetches every training hub document across every rep — used by admin oversight. */
+  loadAll(): Observable<TrainingResource[]> {
+    return this.api.get<TrainingHubDocumentDto[]>('traininghub').pipe(
+      map((dtos) => dtos.map((dto) => this.mapDto(dto))),
+      tap((docs) => this.resourcesSignal.set(docs)),
+    );
   }
 
-  setSharedHubLink(url: string): void {
-    this.sharedHubLinkSignal.set(url);
+  /** Uploads a real file (video/image/pdf/etc) to api/traininghub and adds it to the hub. */
+  uploadDocument(input: NewTrainingHubUpload, file: File): Observable<TrainingResource> {
+    const formData = new FormData();
+    formData.append('roleId', input.roleId);
+    formData.append('title', input.title);
+    formData.append('category', input.category);
+    formData.append('description', input.description);
+    formData.append('length', input.length);
+    formData.append('file', file);
+
+    return this.api.post<TrainingHubDocumentDto>('traininghub', formData).pipe(
+      map((dto) => this.mapDto(dto)),
+      tap((resource) => this.resourcesSignal.update((list) => [resource, ...list])),
+    );
   }
 
-  private insert(resource: Omit<TrainingResource, 'id'>): void {
-    const full: TrainingResource = { id: String(this.nextId++), ...resource };
-    this.resourcesSignal.update((list) => {
-      const cleared = full.featured ? list.map((r) => ({ ...r, featured: false })) : list;
-      return [full, ...cleared];
-    });
+  /** Fetches the raw file bytes for a resource — used to view or download it. */
+  downloadDocument(oId: number): Observable<Blob> {
+    return this.api.get(`traininghub/${oId}`, undefined, 'blob');
+  }
+
+  /** Deletes the resource from the backend and drops it from the list. */
+  remove(id: string): Observable<void> {
+    const resource = this.resourcesSignal().find((r) => r.id === id);
+    if (!resource) {
+      return of(undefined);
+    }
+    return this.api.delete<void>(`traininghub/${resource.oId}`).pipe(
+      tap(() => this.resourcesSignal.update((list) => list.filter((r) => r.id !== id))),
+    );
+  }
+
+  private mapDto(dto: TrainingHubDocumentDto): TrainingResource {
+    return {
+      id: `doc-${dto.oId}`,
+      oId: dto.oId,
+      repId: dto.roleId,
+      title: dto.title,
+      category: dto.category ?? 'Team Uploads',
+      type: FILE_TYPE_TO_RESOURCE_TYPE[dto.fileType] ?? 'doc',
+      duration: dto.length ?? '',
+      featured: false,
+      description: dto.description ?? '',
+      url: this.api.fileUrl(`traininghub/${dto.oId}`),
+      fileName: dto.fileName,
+    };
   }
 }
