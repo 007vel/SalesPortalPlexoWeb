@@ -11,6 +11,9 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
+.field-row.single {
+  grid-template-columns: 1fr;
+}
 .file-pick {
   display: flex;
   align-items: center;

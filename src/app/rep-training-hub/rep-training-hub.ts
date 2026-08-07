@@ -8,6 +8,7 @@ import { TrainingResource, TrainingResourceStore, trainingResourceTypeIcon, trai
 import { Toast } from '../toast/toast';
 import { RepVideoDialog } from '../rep-video-dialog/rep-video-dialog';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
+import { Auth } from '../auth/auth';
 
 @Component({
   selector: 'app-rep-training-hub',
@@ -17,6 +18,7 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 })
 export class RepTrainingHub {
   private readonly dialog = inject(MatDialog);
+  private readonly auth = inject(Auth);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
   private readonly toast = inject(Toast);
 
@@ -35,13 +37,20 @@ export class RepTrainingHub {
     return category === 'All' ? this.resources() : this.resources().filter((r) => r.category === category);
   });
 
+  constructor() {
+    const repId = this.auth.session()?.repId;
+    if (repId) {
+      this.trainingResourceStore.loadForRole(repId).subscribe();
+    }
+  }
+
   selectCategory(category: string): void {
     this.activeCategory.set(category);
   }
 
   openAddVideoModal(): void {
     this.dialog.open(RepVideoDialog).afterClosed().subscribe((added) => {
-      if (added) this.toast.show('Video added to the hub');
+      if (added) this.toast.show('Added to the hub');
     });
   }
 
@@ -57,8 +66,7 @@ export class RepTrainingHub {
       .afterClosed()
       .subscribe((confirmed) => {
         if (confirmed) {
-          this.trainingResourceStore.remove(resource.id);
-          this.toast.show('Removed from the hub');
+          this.trainingResourceStore.remove(resource.id).subscribe(() => this.toast.show('Removed from the hub'));
         }
       });
   }

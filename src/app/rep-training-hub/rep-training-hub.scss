@@ -191,15 +191,13 @@
     }
 
     .th-chip {
+      background: #fff !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 999px;
 
       .mdc-evolution-chip__cell,
       .mdc-evolution-chip__action {
         height: 32px;
-      }
-
-      .mdc-evolution-chip {
-        background: #F1F3F7 !important;
-        border-radius: 999px;
       }
 
       .mdc-evolution-chip__text-label {
@@ -208,16 +206,13 @@
         color: var(--muted);
       }
 
-      &.mdc-evolution-chip--selected .mdc-evolution-chip {
-        background: var(--orange) !important;
+      &.mdc-evolution-chip--selected {
+        background: #133359 !important;
+        border-color: #133359 !important;
       }
 
       &.mdc-evolution-chip--selected .mdc-evolution-chip__text-label {
         color: #fff;
-      }
-
-      .mdc-evolution-chip__checkmark {
-        display: none;
       }
     }
   }
@@ -232,9 +227,11 @@
   .hl {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 2px;
     color: var(--text);
     font-weight: 700;
+    vertical-align: middle;
   }
 
   mat-icon {
@@ -260,12 +257,12 @@
 .th-card {
   padding: 20px !important;
   border-radius: 16px;
-  border: 1px solid #EEF1F6;
+  border: 1px solid #D6DDE7;
+  background-color: white;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
   transition: transform .15s ease, box-shadow .15s ease;
   display: flex;
   flex-direction: column;
-
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 24px -12px rgba(16, 24, 40, 0.16);
@@ -332,16 +329,12 @@
 }
 
 .th-remove {
-  width: 28px;
-  height: 28px;
-  line-height: 28px;
+
+
   color: var(--faint, #9AA6B8);
 
   mat-icon {
     font-size: 16px;
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
   }
 
   &:hover {
@@ -369,27 +362,6 @@
   color: var(--text);
   line-height: 1.35;
   margin-bottom: 6px;
-}
-
-.th-owner {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .05em;
-  text-transform: uppercase;
-  color: #1A8A5F;
-  background: #E4F7EE;
-  padding: 3px 8px;
-  border-radius: 20px;
-  margin-bottom: 8px;
-
-  mat-icon {
-    font-size: 12px;
-    width: 12px;
-    height: 12px;
-  }
 }
 
 .th-card p {

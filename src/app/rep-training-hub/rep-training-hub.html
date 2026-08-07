@@ -17,7 +17,7 @@
       </div>
     </div>
     <button type="button" mat-stroked-button class="invert-btn" (click)="openAddVideoModal()"><mat-icon>add</mat-icon>
-      Add video</button>
+      Add material</button>
   </div>
 </div>
 
@@ -33,7 +33,7 @@
 </div>
 }
 
-<mat-chip-listbox class="th-filters" aria-label="Filter by category">
+<mat-chip-listbox class="th-filters" aria-label="Filter by category" hideSingleSelectionIndicator>
   @for (cat of filterOptions(); track cat) {
   <mat-chip-option class="th-chip" [selected]="activeCategory() === cat" (click)="selectCategory(cat)">{{ cat
     }}</mat-chip-option>
@@ -41,7 +41,7 @@
 </mat-chip-listbox>
 
 <div class="th-upload-note">
-  <span>Add your own recordings with <b class="hl"><mat-icon>add</mat-icon>Add video</b>, or use the <mat-icon
+  <span>Add your own materials with <b class="hl"><mat-icon>add</mat-icon>Add material</b>, or use the <mat-icon
       class="inline-ic">close</mat-icon> on a card to remove one from the hub.</span>
 </div>
 
@@ -65,7 +65,6 @@
     <div class="th-card-body">
       <div class="th-cat">{{ res.category }}</div>
       <h4>{{ res.title }}</h4>
-      @if (res.addedBy) { <span class="th-owner"><mat-icon>upload</mat-icon> Added by {{ res.addedBy }}</span> }
       <p>{{ res.description }}</p>
     </div>
     <a mat-stroked-button class="open-link-btn" [href]="res.url" target="_blank" rel="noopener">{{ typeLabel(res.type)

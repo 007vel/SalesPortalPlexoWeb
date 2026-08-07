@@ -64,8 +64,7 @@ export class AdminSettings {
   // Admins are a more trusted actor than reps — delete here is immediate,
   // unlike the rep-side remove flow which confirms first.
   deleteResource(id: string): void {
-    this.trainingResourceStore.remove(id);
-    this.toast.show('Resource removed');
+    this.trainingResourceStore.remove(id).subscribe(() => this.toast.show('Resource removed'));
   }
 
   handleTemplateUpload(kind: DocTemplateKind, event: Event): void {

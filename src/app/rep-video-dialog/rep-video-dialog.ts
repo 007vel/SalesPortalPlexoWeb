@@ -1,12 +1,25 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { RepProfileStore } from '../rep-profile-store/rep-profile-store';
+import { Auth } from '../auth/auth';
 import { TrainingResourceStore } from '../training-resource-store/training-resource-store';
+
+type UploadKind = 'video' | 'image' | 'pdf' | 'doc';
+
+const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'webm', 'mkv', 'm4v'];
+const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'];
+
+function detectKind(fileName: string): UploadKind {
+  const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
+  if (VIDEO_EXTENSIONS.includes(extension)) return 'video';
+  if (IMAGE_EXTENSIONS.includes(extension)) return 'image';
+  if (extension === 'pdf') return 'pdf';
+  return 'doc';
+}
 
 @Component({
   selector: 'app-rep-video-dialog',
@@ -16,27 +29,34 @@ import { TrainingResourceStore } from '../training-resource-store/training-resou
 })
 export class RepVideoDialog {
   private readonly fb = inject(FormBuilder);
-  private readonly repProfileStore = inject(RepProfileStore);
+  private readonly auth = inject(Auth);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
   private readonly dialogRef = inject(MatDialogRef<RepVideoDialog, boolean>);
 
-  readonly pendingVideoFileName = signal<string | null>(null);
+  private pendingFile: File | null = null;
+
+  readonly pendingFileName = signal<string | null>(null);
+  readonly pendingFileKind = signal<UploadKind | null>(null);
+  readonly isVideo = computed(() => this.pendingFileKind() === 'video');
   readonly validationError = signal<string | null>(null);
+  readonly submitting = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     title: [''],
     category: [''],
     duration: [''],
-    url: [''],
     description: [''],
   });
 
-  handleVideoFile(event: Event): void {
+  handleFile(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
-    this.pendingVideoFileName.set(file.name);
+    this.pendingFile = file;
+    this.pendingFileName.set(file.name);
+    this.pendingFileKind.set(detectKind(file.name));
+
     const titleControl = this.form.controls.title;
     if (!titleControl.value.trim()) {
       titleControl.setValue(file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' '));
@@ -49,33 +69,46 @@ export class RepVideoDialog {
   }
 
   submit(): void {
-    const { title, category, duration, url, description } = this.form.getRawValue();
+    const { title, category, duration, description } = this.form.getRawValue();
     const trimmedTitle = title.trim();
-    const trimmedUrl = url.trim();
-    const pendingFile = this.pendingVideoFileName();
+    const file = this.pendingFile;
 
     if (!trimmedTitle) {
-      this.validationError.set('Give the video a title');
+      this.validationError.set('Give it a title');
       return;
     }
-    if (!trimmedUrl && !pendingFile) {
-      this.validationError.set('Choose a file or paste a video link');
+    if (!file) {
+      this.validationError.set('Choose a file to upload');
+      return;
+    }
+    const repId = this.auth.session()?.repId;
+    if (!repId) {
+      this.validationError.set('You must be signed in to upload');
       return;
     }
     this.validationError.set(null);
 
-    const repName = this.repProfileStore.profile().name;
-    const addedBy = repName ? repName.split(' ')[0] : 'a rep';
-
-    this.trainingResourceStore.addVideo({
-      title: trimmedTitle,
-      category: category.trim() || 'Team Uploads',
-      duration: duration.trim(),
-      description: description.trim() || (pendingFile ? `Uploaded file: ${pendingFile}` : 'Shared by a team member.'),
-      url: trimmedUrl || `https://training.plexopro.com/uploads/${encodeURIComponent(pendingFile || trimmedTitle)}`,
-      addedBy,
-    });
-
-    this.dialogRef.close(true);
+    this.submitting.set(true);
+    this.trainingResourceStore
+      .uploadDocument(
+        {
+          title: trimmedTitle,
+          category: category.trim() || 'Team Uploads',
+          length: this.isVideo() ? duration.trim() : '',
+          description: description.trim() || `Uploaded file: ${file.name}`,
+          roleId: repId,
+        },
+        file,
+      )
+      .subscribe({
+        next: () => {
+          this.submitting.set(false);
+          this.dialogRef.close(true);
+        },
+        error: () => {
+          this.submitting.set(false);
+          this.validationError.set('Upload failed — try again');
+        },
+      });
   }
 }
