@@ -19,36 +19,55 @@
   }
 }
 
-// ---------- card shell ----------
-.settings-card {
-  padding: 28px !important;
-  margin-bottom: 20px;
-  border-radius: 16px;
+// ---------- stat cards ----------
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 26px;
+  max-width: 480px;
+}
+
+.stat-card {
+  padding: 18px 20px !important;
+  border-radius: 14px;
   border: 1px solid #EEF1F6;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 
-  h3 {
-    font-size: 16px;
+  .num {
+    font-family: var(--font-display);
+    font-size: 26px;
     font-weight: 700;
     color: var(--navy);
-    margin-bottom: 4px;
+    line-height: 1;
+  }
+
+  .lbl {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 8px;
+    font-weight: 500;
   }
 }
 
-.head-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  flex-wrap: wrap;
-  margin-bottom: 22px;
+// ---------- section title ----------
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 12px;
+
+  &:not(:first-of-type) {
+    margin-top: 26px;
+  }
 }
 
-// ---------- resources table ----------
-.table-wrap {
-  margin-top: 24px;
+// ---------- table card ----------
+.table-card {
+  padding: 0 !important;
+  border-radius: 16px;
   border: 1px solid #EEF1F6;
-  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
   overflow-x: auto;
 }
 
@@ -64,11 +83,11 @@ th.mat-mdc-header-cell {
   letter-spacing: .06em;
   background: #FAFBFD;
   border-bottom: 1px solid #EEF1F6;
-  padding: 13px 18px;
+  padding: 14px 20px;
 }
 
 td.mat-mdc-cell {
-  padding: 13px 18px;
+  padding: 14px 20px;
   border-bottom: 1px solid #F3F5F9;
   font-size: 13.5px;
   color: var(--text);
@@ -116,6 +135,20 @@ td.mat-mdc-cell {
 .muted-cell {
   font-size: 13px;
   color: #4B6580;
+}
+
+// ---------- rep id chip ----------
+.chip-id {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display), monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--navy);
+  background: #EAF1FB;
+  border: 1px dashed #B9CDE8;
+  border-radius: 7px;
+  padding: 4px 10px;
 }
 
 .row-actions {
@@ -168,35 +201,59 @@ td.mat-mdc-cell {
   }
 }
 
-@media (max-width: 640px) {
-  .settings-card {
-    padding: 20px !important;
+@media (max-width: 860px) {
+  .stat-row {
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-row {
+    grid-template-columns: 1fr;
   }
 }
 
 // ---------- mobile resource/document cards ----------
-// Same grid-area technique as admin-reps: keeps the existing cell
-// components, just rearranged into a card instead of a flat row.
+// Same grid-area technique as admin-reps: hides the header row and turns
+// each row into a bordered card instead of a flat table row.
 @media (max-width: 640px) {
-  .table-wrap table.responsive-table tr.mat-mdc-row {
+  .table-card {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  thead {
+    display: none;
+  }
+
+  table.responsive-table,
+  tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .table-card table.responsive-table tr.mat-mdc-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     row-gap: 10px;
     column-gap: 12px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    margin: 12px;
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #EEF1F6);
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(16, 24, 40, 0.05));
+    margin: 0 0 14px;
     padding: 16px;
   }
 
-  .table-wrap table.responsive-table tr.mat-mdc-row:last-child {
-    margin-bottom: 12px;
+  td.mat-mdc-cell {
+    padding: 0;
+    border: none !important;
   }
 
   // Training & resource hub table
-  .table-wrap table.responsive-table:has(.mat-column-resource) tr.mat-mdc-row {
+  .table-card table.responsive-table:has(.mat-column-resource) tr.mat-mdc-row {
     grid-template-areas:
       "resource resource"
       "category type"
@@ -216,7 +273,12 @@ td.mat-mdc-cell {
     gap: 2px;
 
     &::before {
+      content: attr(data-label);
       font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--muted, #9AA6B8);
     }
   }
 
@@ -239,7 +301,7 @@ td.mat-mdc-cell {
   }
 
   // Documents table
-  .table-wrap table.responsive-table:has(.mat-column-rep) tr.mat-mdc-row {
+  .table-card table.responsive-table:has(.mat-column-rep) tr.mat-mdc-row {
     grid-template-areas:
       "rep      repId"
       "document document"
@@ -251,7 +313,7 @@ td.mat-mdc-cell {
     justify-content: flex-start !important;
   }
 
-  .table-wrap table.responsive-table:has(.mat-column-rep) td.mat-column-repId {
+  .table-card table.responsive-table:has(.mat-column-rep) td.mat-column-repId {
     justify-content: flex-end !important;
   }
 
@@ -260,6 +322,17 @@ td.mat-mdc-cell {
     border-top: 1px dashed var(--border) !important;
     padding-top: 10px !important;
     margin-top: 2px;
+
+    &::before {
+      content: attr(data-label);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--muted, #9AA6B8);
+      display: block;
+      margin-bottom: 2px;
+    }
   }
 
   td.mat-column-actions {

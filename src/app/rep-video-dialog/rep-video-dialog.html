@@ -14,14 +14,14 @@
 
   <form [formGroup]="form" (ngSubmit)="submit()">
     <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Title</mat-label>
+      <mat-label>Title *</mat-label>
       <input matInput formControlName="title" placeholder="Live call walkthrough — renewal pitch">
     </mat-form-field>
 
     <div class="field-row" [class.single]="!isVideo()">
       <mat-form-field appearance="outline">
-        <mat-label>Category</mat-label>
-        <input matInput formControlName="category" placeholder="Team Uploads">
+        <mat-label>Category *</mat-label>
+        <input matInput formControlName="category" placeholder="e.g. Team Uploads">
       </mat-form-field>
       @if (isVideo()) {
       <mat-form-field appearance="outline">
@@ -35,10 +35,6 @@
       <mat-label>Short description</mat-label>
       <input matInput formControlName="description" placeholder="What this covers, in one line">
     </mat-form-field>
-
-    @if (validationError()) {
-      <p class="validation-error">{{ validationError() }}</p>
-    }
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">

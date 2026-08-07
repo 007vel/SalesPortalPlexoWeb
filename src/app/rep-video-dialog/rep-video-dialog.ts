@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Auth } from '../auth/auth';
+import { Toast } from '../toast/toast';
 import { TrainingResourceStore } from '../training-resource-store/training-resource-store';
 
 type UploadKind = 'video' | 'image' | 'pdf' | 'doc';
@@ -30,6 +31,7 @@ function detectKind(fileName: string): UploadKind {
 export class RepVideoDialog {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(Auth);
+  private readonly toast = inject(Toast);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
   private readonly dialogRef = inject(MatDialogRef<RepVideoDialog, boolean>);
 
@@ -38,7 +40,6 @@ export class RepVideoDialog {
   readonly pendingFileName = signal<string | null>(null);
   readonly pendingFileKind = signal<UploadKind | null>(null);
   readonly isVideo = computed(() => this.pendingFileKind() === 'video');
-  readonly validationError = signal<string | null>(null);
   readonly submitting = signal(false);
 
   readonly form = this.fb.nonNullable.group({
@@ -71,29 +72,33 @@ export class RepVideoDialog {
   submit(): void {
     const { title, category, duration, description } = this.form.getRawValue();
     const trimmedTitle = title.trim();
+    const trimmedCategory = category.trim();
     const file = this.pendingFile;
 
     if (!trimmedTitle) {
-      this.validationError.set('Give it a title');
+      this.toast.show('Give it a title');
+      return;
+    }
+    if (!trimmedCategory) {
+      this.toast.show('Give it a category');
       return;
     }
     if (!file) {
-      this.validationError.set('Choose a file to upload');
+      this.toast.show('Choose a file to upload');
       return;
     }
     const repId = this.auth.session()?.repId;
     if (!repId) {
-      this.validationError.set('You must be signed in to upload');
+      this.toast.show('You must be signed in to upload');
       return;
     }
-    this.validationError.set(null);
 
     this.submitting.set(true);
     this.trainingResourceStore
       .uploadDocument(
         {
           title: trimmedTitle,
-          category: category.trim() || 'Team Uploads',
+          category: trimmedCategory,
           length: this.isVideo() ? duration.trim() : '',
           description: description.trim() || `Uploaded file: ${file.name}`,
           roleId: repId,
@@ -107,7 +112,7 @@ export class RepVideoDialog {
         },
         error: () => {
           this.submitting.set(false);
-          this.validationError.set('Upload failed — try again');
+          this.toast.show('Upload failed — try again');
         },
       });
   }

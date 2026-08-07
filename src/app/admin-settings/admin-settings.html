@@ -5,94 +5,95 @@
   </div>
 </div>
 
-<mat-card class="settings-card">
-  <div class="head-row">
-    <div>
-      <h3>Training &amp; resource hub</h3>
-    </div>
-  </div>
+<div class="stat-row">
+  <mat-card class="stat-card">
+    <div class="num">{{ resources().length }}</div>
+    <div class="lbl">Training resources</div>
+  </mat-card>
+  <mat-card class="stat-card">
+    <div class="num">{{ documentRows().length }}</div>
+    <div class="lbl">Documents</div>
+  </mat-card>
+</div>
 
-  <div class="table-wrap">
-    @if (resources().length === 0) {
-      <div class="empty-state">
-        <mat-icon>school</mat-icon>
-        <div>No training hub uploads yet.</div>
-      </div>
-    } @else {
-      <table mat-table [dataSource]="resources()" class="responsive-table">
-        <ng-container matColumnDef="resource">
-          <th mat-header-cell *matHeaderCellDef>Resource</th>
-          <td mat-cell *matCellDef="let res">
-            <div class="rep-name-cell">
-              <span class="nm"><mat-icon>{{ typeIcon(res.type) }}</mat-icon>{{ res.title }}</span>
-              <span class="em">{{ res.duration }}</span>
-            </div>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="category">
-          <th mat-header-cell *matHeaderCellDef>Category</th>
-          <td mat-cell *matCellDef="let res" class="muted-cell" data-label="Category">{{ res.category }}</td>
-        </ng-container>
-        <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef>Type</th>
-          <td mat-cell *matCellDef="let res" class="muted-cell" data-label="Type">{{ typeLabel(res.type) }}</td>
-        </ng-container>
-        <ng-container matColumnDef="repId">
-          <th mat-header-cell *matHeaderCellDef>Rep Id</th>
-          <td mat-cell *matCellDef="let res" class="muted-cell" data-label="Rep Id">{{ res.repId }}</td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let res">
-            <div class="row-actions">
-              <button type="button" mat-icon-button class="action-btn" title="View" (click)="viewResource(res.oId)"><mat-icon>visibility</mat-icon></button>
-              <button type="button" mat-icon-button class="action-btn" title="Download" (click)="downloadResource(res.oId, res.fileName)"><mat-icon>download</mat-icon></button>
-              <!-- <button type="button" mat-icon-button class="action-btn action-danger" title="Delete" (click)="deleteResource(res.id)"><mat-icon>delete</mat-icon></button> -->
-            </div>
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="resource-row"></tr>
-      </table>
-    }
-  </div>
+<h3 class="section-title">Training &amp; resource hub</h3>
+<mat-card class="table-card">
+  @if (resources().length === 0) {
+    <div class="empty-state">
+      <mat-icon>school</mat-icon>
+      <div>No training hub uploads yet.</div>
+    </div>
+  } @else {
+    <table mat-table [dataSource]="resources()" class="responsive-table">
+      <ng-container matColumnDef="resource">
+        <th mat-header-cell *matHeaderCellDef>Resource</th>
+        <td mat-cell *matCellDef="let res">
+          <div class="rep-name-cell">
+            <span class="nm"><mat-icon>{{ typeIcon(res.type) }}</mat-icon>{{ res.title }}</span>
+            <span class="em">{{ res.duration }}</span>
+          </div>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>Category</th>
+        <td mat-cell *matCellDef="let res" class="muted-cell" data-label="Category">{{ res.category }}</td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let res" class="muted-cell" data-label="Type">{{ typeLabel(res.type) }}</td>
+      </ng-container>
+      <ng-container matColumnDef="repId">
+        <th mat-header-cell *matHeaderCellDef>Rep Id</th>
+        <td mat-cell *matCellDef="let res" data-label="Rep Id"><span class="chip-id">{{ res.repId }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let res">
+          <div class="row-actions">
+            <button type="button" mat-icon-button class="action-btn" title="View" (click)="viewResource(res.oId)"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download" (click)="downloadResource(res.oId, res.fileName)"><mat-icon>download</mat-icon></button>
+            <!-- <button type="button" mat-icon-button class="action-btn action-danger" title="Delete" (click)="deleteResource(res.id)"><mat-icon>delete</mat-icon></button> -->
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="resource-row"></tr>
+    </table>
+  }
 </mat-card>
 
-<mat-card class="settings-card templates-card">
-  <h3>Documents</h3>
-
-  <div class="table-wrap">
-    @if (documentRows().length === 0) {
-      <div class="empty-state">
-        <mat-icon>description</mat-icon>
-        <div>No documents uploaded yet.</div>
-      </div>
-    } @else {
-      <table mat-table [dataSource]="documentRows()" class="responsive-table">
-        <ng-container matColumnDef="rep">
-          <th mat-header-cell *matHeaderCellDef>Rep</th>
-          <td mat-cell *matCellDef="let doc" data-label="Rep"><span class="nm">{{ doc.repName }}</span></td>
-        </ng-container>
-        <ng-container matColumnDef="repId">
-          <th mat-header-cell *matHeaderCellDef>Rep Id</th>
-          <td mat-cell *matCellDef="let doc" class="muted-cell" data-label="Rep Id">{{ doc.repId }}</td>
-        </ng-container>
-        <ng-container matColumnDef="document">
-          <th mat-header-cell *matHeaderCellDef>Document</th>
-          <td mat-cell *matCellDef="let doc" class="muted-cell" data-label="Document">{{ doc.label }}</td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let doc">
-            <div class="row-actions">
-              <button type="button" mat-icon-button class="action-btn" title="View" (click)="viewDocument(doc.oId)"><mat-icon>visibility</mat-icon></button>
-              <button type="button" mat-icon-button class="action-btn" title="Download" (click)="downloadDocument(doc.oId, doc.fileName)"><mat-icon>download</mat-icon></button>
-            </div>
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="documentColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: documentColumns;" class="resource-row"></tr>
-      </table>
-    }
-  </div>
+<h3 class="section-title">Documents</h3>
+<mat-card class="table-card">
+  @if (documentRows().length === 0) {
+    <div class="empty-state">
+      <mat-icon>description</mat-icon>
+      <div>No documents uploaded yet.</div>
+    </div>
+  } @else {
+    <table mat-table [dataSource]="documentRows()" class="responsive-table">
+      <ng-container matColumnDef="rep">
+        <th mat-header-cell *matHeaderCellDef>Rep</th>
+        <td mat-cell *matCellDef="let doc" data-label="Rep"><span class="nm">{{ doc.repName }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="repId">
+        <th mat-header-cell *matHeaderCellDef>Rep Id</th>
+        <td mat-cell *matCellDef="let doc" data-label="Rep Id"><span class="chip-id">{{ doc.repId }}</span></td>
+      </ng-container>
+      <ng-container matColumnDef="document">
+        <th mat-header-cell *matHeaderCellDef>Document</th>
+        <td mat-cell *matCellDef="let doc" class="muted-cell" data-label="Document">{{ doc.label }}</td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let doc">
+          <div class="row-actions">
+            <button type="button" mat-icon-button class="action-btn" title="View" (click)="viewDocument(doc.oId)"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download" (click)="downloadDocument(doc.oId, doc.fileName)"><mat-icon>download</mat-icon></button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="documentColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: documentColumns;" class="resource-row"></tr>
+    </table>
+  }
 </mat-card>
