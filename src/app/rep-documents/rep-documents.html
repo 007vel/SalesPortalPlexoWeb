@@ -1,0 +1,46 @@
+<div class="rep-page-head">
+  <div class="eyebrow">Paperwork</div>
+  <h1>Documents</h1>
+  <p>Upload your signed agreement and W-4, or download a blank copy to fill out first.</p>
+</div>
+
+<mat-card class="rp-docs-card">
+  <div class="section-head">
+    <span class="icon-chip"><mat-icon>description</mat-icon></span>
+    <h2>Agreements &amp; forms</h2>
+  </div>
+
+  <div class="section-body">
+    <div class="rp-doc-grid">
+      @for (doc of docCards(); track doc.kind) {
+      <div class="rp-doc-card" [class.filled]="doc.filled">
+        <div class="rp-doc-top">
+          <div class="doc-icon" [class.filled]="doc.filled"><mat-icon>{{ doc.filled ? 'check' : 'description'
+              }}</mat-icon></div>
+          <div class="doc-meta">
+            <div class="doc-name">{{ doc.label }}</div>
+            <div class="doc-status" [class.filled]="doc.filled">{{ doc.statusText }}</div>
+          </div>
+        </div>
+
+        <div class="rp-doc-actions">
+          <button type="button" mat-stroked-button class="ghost-btn"
+            (click)="downloadTemplate(doc.label, doc.templateFilename)">
+            <mat-icon>description</mat-icon> Blank copy
+          </button>
+          @if (doc.filled) {
+          <button type="button" mat-stroked-button class="ghost-btn"
+            (click)="downloadDocument(doc.oId!, doc.fileName!, doc.label)">
+            <mat-icon>download</mat-icon> Download mine
+          </button>
+          }
+          <button type="button" mat-flat-button class="upload-btn" (click)="fileInput.click()">
+            <mat-icon>upload</mat-icon> Upload
+          </button>
+          <input #fileInput type="file" class="hidden-file-input" (change)="handleUpload(doc.kind, doc.label, $event)">
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</mat-card>

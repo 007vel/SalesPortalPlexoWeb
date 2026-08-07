@@ -1,0 +1,50 @@
+<h2 mat-dialog-title>Add a video</h2>
+<mat-dialog-content>
+  <p class="sub">Share a recording with the team. It appears in the Training &amp; Resource Hub for everyone.</p>
+
+  <div class="file-pick">
+    <mat-icon>movie</mat-icon>
+    <div class="fp-txt">
+      <b>Video file</b>
+      <span>{{ pendingVideoFileName() ?? 'No file chosen — or paste a link below instead.' }}</span>
+    </div>
+    <button type="button" mat-stroked-button (click)="fileInput.click()">Choose file</button>
+    <input #fileInput type="file" accept="video/*" class="hidden-file-input" (change)="handleVideoFile($event)">
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" placeholder="Live call walkthrough — renewal pitch">
+    </mat-form-field>
+
+    <div class="field-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
+        <input matInput formControlName="category" placeholder="Team Uploads">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Length (optional)</mat-label>
+        <input matInput formControlName="duration" placeholder="12 min">
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Video link</mat-label>
+      <input matInput type="url" formControlName="url" placeholder="https://...">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Short description</mat-label>
+      <input matInput formControlName="description" placeholder="What this video covers, in one line">
+    </mat-form-field>
+
+    @if (validationError()) {
+      <p class="validation-error">{{ validationError() }}</p>
+    }
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="submit()">Add to hub</button>
+</mat-dialog-actions>

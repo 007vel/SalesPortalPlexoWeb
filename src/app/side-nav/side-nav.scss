@@ -1,0 +1,226 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.shell {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+// ---------- mobile topbar ----------
+// Sticky bar with hamburger + logo, shown only below the nav breakpoint —
+// the sidenav itself becomes an overlay drawer at that width (see .app-sidebar mode binding).
+.mobile-topbar {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 56px;
+  padding: 0 16px;
+  background: linear-gradient(180deg, var(--navy-3) 0%, #0a1c30 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 12px rgba(0, 0, 0, 0.12);
+
+  .menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 22px;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .gate-logo {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 960px) {
+  .mobile-topbar {
+    display: flex;
+  }
+}
+
+// ---------- sidenav host ----------
+.app-sidebar {
+  width: 236px;
+  background: linear-gradient(180deg, var(--navy-3) 0%, #0a1c30 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+
+  // Material renders our projected content inside .mat-drawer-inner-container,
+  // NOT directly inside the mat-sidenav host — flex rules have to target that
+  // inner wrapper or the spacer/sign-out layout never actually applies.
+  ::ng-deep .mat-drawer-inner-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px 14px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+// ---------- logo ----------
+.gate-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-bottom: 24px;
+  padding-left: 6px;
+  flex-shrink: 0;
+
+  .mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--orange);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .wordmark {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+  }
+}
+
+// ---------- rep identity chip ----------
+.rep-side-id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  margin-bottom: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  flex-shrink: 0;
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--orange);
+    color: var(--navy-3);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .nm {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.35;
+  }
+}
+
+// ---------- nav items ----------
+mat-nav-list {
+  flex-shrink: 0;
+  padding: 0 !important;
+}
+
+mat-nav-list a[mat-list-item] {
+  color: #AEC1D9;
+  border-radius: 9px;
+  margin-bottom: 3px;
+  height: 42px;
+
+  mat-icon,
+  .mdc-list-item__primary-text {
+    color: inherit;
+  }
+
+  .mdc-list-item__primary-text {
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  &.active {
+    background: var(--orange);
+    color: #fff;
+  }
+
+  &:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+  }
+}
+
+mat-divider {
+  border-top-color: rgba(255, 255, 255, 0.12);
+  margin: 10px 4px;
+}
+
+// ---------- spacer + sign out ----------
+.spacer {
+  flex: 1 1 auto;
+  min-height: 12px;
+}
+
+.signout-list {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 10px !important;
+
+  a[mat-list-item] {
+    color: #C7A9A9;
+
+    mat-icon {
+      color: inherit;
+    }
+
+    &:hover {
+      background: rgba(220, 90, 90, 0.14);
+      color: #FF9B9B;
+    }
+  }
+}
+
+// ---------- content area ----------
+.main-content {
+  padding: 30px clamp(18px, 3.2vw, 56px) 72px;
+}
+
+// Below the nav breakpoint the sidenav is an overlay drawer (mode="over"), so it no
+// longer needs to reserve a fixed 236px of layout width — narrow it to fit small
+// phones and let Material's backdrop handle dismissal.
+@media (max-width: 960px) {
+  .app-sidebar {
+    width: min(84vw, 280px);
+  }
+}
+
+@media (max-width: 860px) {
+  .main-content {
+    padding: 22px 18px 50px;
+  }
+}

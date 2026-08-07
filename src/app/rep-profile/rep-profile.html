@@ -1,0 +1,36 @@
+<div class="rep-page-head">
+  <div class="eyebrow">Profile</div>
+  <h1>Your information</h1>
+  <p>This is the contact record admin holds for you. It's read-only here — ask your admin if anything needs correcting.
+  </p>
+</div>
+
+<mat-card class="rp-profile-card">
+  <div class="head-row">
+    <div class="head-title">
+      <div class="eyebrow">Profile</div>
+      <div class="title-line">
+        <span class="icon-chip"><mat-icon>person</mat-icon></span>
+        <h2>Contact information</h2>
+      </div>
+    </div>
+    <span class="ro-badge"><span class="ro-dot"></span>Read only</span>
+  </div>
+
+  <div class="rp-card-body">
+    <div class="rp-locked-note">
+      <mat-icon>lock</mat-icon>
+      <span><b>Managed by admin.</b> These details were set when your account was created. To change your name, address,
+        phone or email, message your admin and they'll update it here.</span>
+    </div>
+
+    <div class="rp-readonly">
+      @for (row of rows(); track row.key) {
+      <div class="rp-ro-item" [class.wide]="row.wide">
+        <div class="rl">{{ row.label }}</div>
+        <div class="rv" [class.empty]="!row.value">{{ row.value || 'Not provided — ask your admin to add it' }}</div>
+      </div>
+      }
+    </div>
+  </div>
+</mat-card>

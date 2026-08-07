@@ -1,0 +1,43 @@
+<div class="rep-page-head">
+  <div class="eyebrow">Your links</div>
+  <h1>Google &amp; resource links</h1>
+  <p>The links admin needs on file for you. These are yours to edit — update them any time.</p>
+</div>
+
+<mat-card class="rp-links-card">
+  <div class="head-row">
+    <div class="head-title">
+      <div class="eyebrow">Editable</div>
+      <div class="title-line">
+        <span class="icon-chip"><mat-icon>link</mat-icon></span>
+        <h2>Link details</h2>
+      </div>
+    </div>
+    <button mat-flat-button color="primary" class="save-btn" (click)="save()">Save links</button>
+  </div>
+
+  <div class="rp-card-body">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="field-block">
+        <label class="fl">Google link</label>
+        <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
+          <input matInput type="url" formControlName="googleLink"
+            placeholder="https://maps.google.com/?cid=jordanreyes">
+        </mat-form-field>
+        <p class="fh">Your Google Business, Maps, or Drive link — whatever's most useful for admin to have on file.</p>
+      </div>
+
+      <div class="field-block">
+        <label class="fl">Resource link</label>
+        <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
+          <input matInput type="url" formControlName="resourceLink"
+            placeholder="https://synergyworld.bitdocs.ai/share/d/ebWkTeGeRV05vl6k">
+        </mat-form-field>
+        <p class="fh">A personal doc link, e.g. your BitDocs share link. (The team-wide Training &amp; Resource Hub
+          lives in its own tab.)</p>
+      </div>
+
+      <button mat-flat-button color="primary" type="submit" class="save-btn save-btn-bottom">Save links</button>
+    </form>
+  </div>
+</mat-card>

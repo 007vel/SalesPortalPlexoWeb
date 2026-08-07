@@ -1,0 +1,128 @@
+@if (rep(); as rep) {
+<button type="button" mat-button class="back-btn" routerLink="/admin/reps"><mat-icon>arrow_back</mat-icon> Back to
+  reps</button>
+
+<div class="detail-head">
+  <div>
+    <div class="detail-title-row">
+      <h1>{{ rep.name || 'Unnamed rep' }}</h1>
+      <span class="badge" [class]="statusBadge(rep.status).cssClass">
+        <span class="badge-dot"></span>{{ statusBadge(rep.status).label }}
+      </span>
+    </div>
+    <div class="detail-sub">
+      <span class="chip-id">{{ rep.repId }}</span>
+      <span class="mono">{{ portalLink(rep.repId) }}</span>
+      <button type="button" mat-icon-button class="copy-btn" title="Copy link"
+        (click)="copyLink()"><mat-icon>content_copy</mat-icon></button>
+    </div>
+  </div>
+
+  <mat-form-field appearance="outline" class="status-field">
+    <mat-select [value]="rep.status" (selectionChange)="updateStatus($event.value)">
+      <mat-option value="active">Active</mat-option>
+      <mat-option value="pending">Pending</mat-option>
+      <mat-option value="inactive">Inactive</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="detail-grid">
+  <div>
+    <mat-card class="section">
+      <div class="section-head">
+        <div class="eyebrow">Profile</div>
+        <h2>Contact information</h2>
+      </div>
+      <div class="section-body">
+        <ng-container *ngTemplateOutlet="field; context: {label:'Full name', value: rep.name}"></ng-container>
+        <ng-container *ngTemplateOutlet="field; context: {label:'Address', value: fullAddress()}"></ng-container>
+        <ng-container *ngTemplateOutlet="field; context: {label:'Phone', value: rep.phone}"></ng-container>
+        <ng-container *ngTemplateOutlet="field; context: {label:'Email', value: rep.email}"></ng-container>
+      </div>
+    </mat-card>
+
+    <mat-card class="section">
+      <div class="section-head">
+        <div class="eyebrow">Links</div>
+        <h2>Google &amp; resource links</h2>
+      </div>
+      <div class="section-body">
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Google link', value: rep.googleLink, isLink: true}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Resource link', value: rep.resourceLink, isLink: true}"></ng-container>
+      </div>
+    </mat-card>
+  </div>
+
+  <div>
+    <mat-card class="section">
+      <div class="section-head">
+        <div class="eyebrow">Documents</div>
+        <h2>Agreements &amp; forms</h2>
+      </div>
+      <div class="section-body no-pad">
+        <div class="doc-row">
+          <div class="doc-info">
+            <div class="doc-icon" [class.filled]="!!rep.docs.agreement"><mat-icon>{{ rep.docs.agreement ? 'check' :
+                'description' }}</mat-icon></div>
+            <div>
+              <div class="doc-name">Representative Agreement</div>
+              <div class="doc-status" [class.filled]="!!rep.docs.agreement">{{ rep.docs.agreement ?
+                (rep.docs.agreement.name + ' · ' + rep.docs.agreement.uploadedAt) : 'Not uploaded' }}</div>
+            </div>
+          </div>
+          @if (rep.docs.agreement; as doc) {
+          <button type="button" mat-icon-button class="action-btn" title="Download"
+            (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+          }
+        </div>
+        <div class="doc-row">
+          <div class="doc-info">
+            <div class="doc-icon" [class.filled]="!!rep.docs.w4"><mat-icon>{{ rep.docs.w4 ? 'check' : 'description'
+                }}</mat-icon></div>
+            <div>
+              <div class="doc-name">W-4 Form</div>
+              <div class="doc-status" [class.filled]="!!rep.docs.w4">{{ rep.docs.w4 ? (rep.docs.w4.name + ' · ' +
+                rep.docs.w4.uploadedAt) : 'Not uploaded' }}</div>
+            </div>
+          </div>
+          @if (rep.docs.w4; as doc) {
+          <button type="button" mat-icon-button class="action-btn" title="Download"
+            (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+          }
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="section">
+      <div class="section-head">
+        <div class="eyebrow">Meta</div>
+        <h2>Rep record</h2>
+      </div>
+      <div class="section-body">
+        <ng-container *ngTemplateOutlet="field; context: {label:'Rep ID', value: rep.repId}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Portal link', value: 'https://' + portalLink(rep.repId), isLink: true}"></ng-container>
+        <ng-container *ngTemplateOutlet="field; context: {label:'Created', value: rep.createdAt}"></ng-container>
+      </div>
+    </mat-card>
+  </div>
+</div>
+} @else {
+<p class="not-found">Rep not found.</p>
+}
+
+<ng-template #field let-label="label" let-value="value" let-isLink="isLink">
+  <div class="readonly-field">
+    <div class="rl">{{ label }}</div>
+    @if (!value) {
+    <div class="rv empty">Not provided</div>
+    } @else if (isLink) {
+    <div class="rv"><a [href]="value" target="_blank">{{ value }}</a></div>
+    } @else {
+    <div class="rv">{{ value }}</div>
+    }
+  </div>
+</ng-template>

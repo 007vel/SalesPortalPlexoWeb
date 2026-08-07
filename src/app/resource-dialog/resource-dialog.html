@@ -1,0 +1,58 @@
+<h2 mat-dialog-title>{{ dialogTitle() }}</h2>
+<mat-dialog-content>
+  <p class="sub">Appears on every rep's Training Hub tab, grouped by category.</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" placeholder="Objection Handling Playbook">
+      @if (missingRequiredFields().title) { <mat-error>Title is required</mat-error> }
+    </mat-form-field>
+
+    <div class="field-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
+        <input matInput formControlName="category" placeholder="Sales Playbooks">
+        @if (missingRequiredFields().category) { <mat-error>Category is required</mat-error> }
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Type</mat-label>
+        <mat-select formControlName="type">
+          <mat-option value="video">Video</mat-option>
+          <mat-option value="pdf">PDF</mat-option>
+          <mat-option value="doc">Doc / guide</mat-option>
+          <mat-option value="link">Link</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="field-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Duration / length (optional)</mat-label>
+        <input matInput formControlName="duration" placeholder="12 min">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Featured</mat-label>
+        <mat-select formControlName="featured">
+          <mat-option value="no">No</mat-option>
+          <mat-option value="yes">Yes — pin to top</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>URL</mat-label>
+      <input matInput type="url" formControlName="url" placeholder="https://...">
+      @if (missingRequiredFields().url) { <mat-error>URL is required</mat-error> }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Short description</mat-label>
+      <input matInput formControlName="description" placeholder="What this resource covers, in one line">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="submit()">Save resource</button>
+</mat-dialog-actions>

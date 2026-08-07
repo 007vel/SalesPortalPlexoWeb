@@ -1,0 +1,522 @@
+* {
+  box-sizing: border-box;
+}
+
+:host {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  background: #F6F8FC;
+  overflow-x: hidden;
+}
+
+/* ----- left: brand panel ----- */
+.lg-brand {
+  flex: 1.05;
+  position: relative;
+  overflow: hidden;
+  color: var(--white);
+  background: linear-gradient(155deg, #0b1f38 0%, #133359 46%, #1b4577 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 44px clamp(38px, 4vw, 72px);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 88% 8%, rgba(244, 128, 27, 0.34), transparent 45%),
+      radial-gradient(circle at 6% 92%, rgba(53, 132, 214, 0.30), transparent 48%);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .5;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(circle at 30% 40%, #000 0%, transparent 78%);
+    mask-image: radial-gradient(circle at 30% 40%, #000 0%, transparent 78%);
+  }
+}
+
+.lg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  animation: lgFloat 14s ease-in-out infinite;
+
+  &.a {
+    width: 320px;
+    height: 320px;
+    top: -110px;
+    right: -90px;
+    background: rgba(244, 128, 27, 0.24);
+  }
+
+  &.b {
+    width: 300px;
+    height: 300px;
+    bottom: -120px;
+    left: -100px;
+    background: rgba(46, 120, 200, 0.26);
+    animation-delay: -6s;
+  }
+}
+
+@keyframes lgFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(14px, -22px, 0) scale(1.08);
+  }
+}
+
+.lg-brand-top,
+.lg-brand-mid,
+.lg-brand-foot {
+  position: relative;
+  z-index: 1;
+}
+
+.lg-brand-mid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 34px 0;
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 2.9vw, 42px);
+    font-weight: 700;
+    line-height: 1.14;
+    letter-spacing: -0.03em;
+    margin: 0 0 16px;
+    max-width: 16ch;
+
+    em {
+      font-style: normal;
+      background: linear-gradient(100deg, var(--orange) 0%, #FFC078 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  }
+
+  .lead {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #B7C9DF;
+    max-width: 44ch;
+    margin: 0 0 34px;
+  }
+}
+
+.lg-logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  .mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.06));
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--orange);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 19px;
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--white);
+    letter-spacing: -0.02em;
+
+    .dot {
+      color: var(--orange);
+    }
+  }
+}
+
+.lg-eyebrow {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 13px;
+  margin-bottom: 22px;
+  border-radius: 30px;
+  background: rgba(244, 128, 27, 0.14);
+  border: 1px solid rgba(244, 128, 27, 0.30);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: #FFB367;
+
+  .pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--orange);
+    box-shadow: 0 0 0 0 rgba(244, 128, 27, .6);
+    animation: lgPulse 2.2s infinite;
+  }
+}
+
+@keyframes lgPulse {
+  70% {
+    box-shadow: 0 0 0 8px rgba(244, 128, 27, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(244, 128, 27, 0);
+  }
+}
+
+.lg-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 420px;
+
+  li {
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+  }
+
+  .pic {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: var(--orange);
+  }
+
+  b {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+
+  span.pt {
+    display: block;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: #94A9C4;
+  }
+}
+
+.lg-brand-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #7E93B0;
+
+  .lock {
+    display: flex;
+    color: #9BB0CC;
+  }
+}
+
+/* ----- right: form panel ----- */
+.lg-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 44px clamp(20px, 4vw, 60px);
+  background: #F6F8FC;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 78% 12%, rgba(244, 128, 27, 0.07), transparent 42%),
+      radial-gradient(circle at 10% 88%, rgba(19, 51, 89, 0.06), transparent 45%);
+  }
+}
+
+.lg-card {
+  width: 100%;
+  max-width: 430px;
+  position: relative;
+  z-index: 1;
+  animation: lgRise .5s ease both;
+  overflow: visible;
+}
+
+@keyframes lgRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg-card,
+  .lg-orb,
+  .lg-eyebrow .pulse {
+    animation: none;
+  }
+}
+
+.lg-mobile-logo {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 26px;
+
+  .mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--orange);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 21px;
+    color: var(--navy);
+
+    .dot {
+      color: var(--orange);
+    }
+  }
+}
+
+/* ----- tabs ----- */
+.tab-content {
+  padding-top: 22px;
+  height: fit-content;
+  width: 100%;
+}
+
+.gate-title {
+  font-family: var(--font-display);
+  font-size: 25px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.025em;
+  margin: 0 0 7px;
+}
+
+.gate-sub {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  line-height: 1.55;
+}
+
+.gate-error {
+  background: #FDF0EF;
+  border: 1px solid #F3D2D0;
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  padding: 11px 13px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* ----- rep id helper text ----- */
+.rep-id-hint {
+  display: block;
+  font-size: 11.5px;
+  color: var(--faint);
+  margin: 6px 0 2px;
+
+  b {
+    color: var(--muted);
+    font-weight: 600;
+  }
+}
+
+/* ----- submit buttons ----- */
+.submit-btn {
+  margin-top: 6px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  border-radius: 10px;
+
+  &.rep {
+    color: var(--white) !important;
+    background-color: var(--orange) !important;
+
+    &:disabled {
+      background-color: #F3B57C !important;
+      color: rgba(255, 255, 255, 0.85) !important;
+      cursor: not-allowed;
+    }
+  }
+
+  &.admin {
+    color: var(--white) !important;
+    background-color: var(--navy) !important;
+  }
+}
+
+.lg-foot {
+  margin-top: 26px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--faint);
+  line-height: 1.6;
+
+  a {
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* ----- responsive ----- */
+@media (max-width: 1020px) {
+  .lg-brand {
+    display: none;
+  }
+
+  .lg-panel {
+    flex: 1;
+    padding: 38px 20px;
+  }
+
+  .lg-mobile-logo {
+    display: flex;
+  }
+}
+
+@media (max-width: 420px) {
+  .gate-title {
+    font-size: 22px;
+  }
+}
+
+/* =========================================================
+   Material component internals — these live in shadow-free
+   but view-encapsulated DOM that plain class selectors above
+   can't reach, hence ::ng-deep here.
+   ========================================================= */
+:host ::ng-deep {
+
+  // Card should size to its content, not force scrollbars
+  .mat-mdc-tab-group,
+  .mat-mdc-tab-body-wrapper,
+  .mat-mdc-tab-body,
+  .mat-mdc-tab-body-content {
+    overflow: visible !important;
+  }
+
+  .mat-mdc-tab-header {
+    overflow: visible;
+  }
+
+  // Kill Material's default purple ink bar + label color, use brand navy
+  .mdc-tab-indicator__content--underline {
+    border-color: var(--navy) !important;
+  }
+
+  .mdc-tab {
+    &.mdc-tab--active .mdc-tab__text-label {
+      color: var(--navy) !important;
+    }
+
+    .mdc-tab__text-label {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 13.5px;
+    }
+
+    .mdc-tab__ripple::before {
+      background-color: var(--navy);
+    }
+  }
+
+  // Outlined form fields: match card width exactly, no overflow
+  .mat-mdc-form-field {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    width: 100%;
+  }
+
+  // Focused outline colour → navy instead of default Material purple
+  .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+  .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+  .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+    border-color: var(--navy) !important;
+  }
+
+  .mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+    color: var(--navy) !important;
+  }
+
+  // Prefix icons sit correctly on the baseline, muted grey by default
+  .mat-mdc-form-field-icon-prefix mat-icon,
+  .mat-mdc-form-field-icon-suffix mat-icon {
+    color: var(--muted);
+    margin-right: 4px;
+  }
+}

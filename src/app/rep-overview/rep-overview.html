@@ -1,0 +1,75 @@
+<div class="rp-hero">
+  <div class="rp-hero-text">
+    <div class="eyebrow">Your portal</div>
+    <h1>{{ welcomeText() }}</h1>
+    <p>Your links, paperwork and training in one place. Admin keeps your contact record up to date.</p>
+
+  </div>
+
+  <div class="rp-ring-wrap">
+    <mat-progress-spinner mode="determinate" [value]="progressPct()" [diameter]="96" [strokeWidth]="8"></mat-progress-spinner>
+    <div class="rp-ring-num">
+      <span class="n">{{ progressPct() }}%</span>
+      <span class="l">Complete</span>
+    </div>
+  </div>
+</div>
+
+<div class="ov-quick-grid">
+  <mat-card class="ov-quick-card" routerLink="/rep/profile">
+    <mat-card-content>
+      <div class="ic ic-purple"><mat-icon>person</mat-icon></div>
+      <h3>Profile</h3>
+      <p>Your contact details on file, kept up to date by admin.</p>
+      <span class="go">View profile <mat-icon>arrow_forward</mat-icon></span>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="ov-quick-card" routerLink="/rep/links">
+    <mat-card-content>
+      <div class="ic ic-blue"><mat-icon>link</mat-icon></div>
+      <h3>Google &amp; links</h3>
+      <p>Add your Google Business link and personal resource link.</p>
+      <span class="go">Manage links <mat-icon>arrow_forward</mat-icon></span>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="ov-quick-card" routerLink="/rep/documents">
+    <mat-card-content>
+      <div class="ic ic-teal"><mat-icon>description</mat-icon></div>
+      <h3>Documents</h3>
+      <p>Upload your signed agreement and W-4, or grab blank copies.</p>
+      <span class="go">View documents <mat-icon>arrow_forward</mat-icon></span>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="ov-quick-card" routerLink="/rep/commission">
+    <mat-card-content>
+      <div class="ic ic-orange"><mat-icon>payments</mat-icon></div>
+      <h3>Commission</h3>
+      <p>See what you've earned per day, this month.</p>
+      <span class="go">View commission <mat-icon>arrow_forward</mat-icon></span>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="ov-quick-card" routerLink="/rep/training">
+    <mat-card-content>
+      <div class="ic ic-navy"><mat-icon>school</mat-icon></div>
+      <h3>Training Hub</h3>
+      <p><span>{{ trainingResourceCount() }}</span> resources — playbooks, videos &amp; guides.</p>
+      <span class="go">Open hub <mat-icon>arrow_forward</mat-icon></span>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<mat-card class="checklist-card">
+  <div class="checklist-head">
+    <div class="eyebrow">Status</div>
+    <h2>Setup checklist</h2>
+  </div>
+
+  <div class="checklist-row">
+    @for (item of checklist(); track item.label) {
+      <div class="checklist-item" [class.done]="item.done">
+        <mat-icon>{{ item.done ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+        <span>{{ item.label }}</span>
+      </div>
+    }
+  </div>
+</mat-card>

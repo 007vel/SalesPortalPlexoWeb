@@ -1,0 +1,157 @@
+<div class="lg-brand">
+  <div class="lg-orb a"></div>
+  <div class="lg-orb b"></div>
+
+  <div class="lg-brand-top">
+    <div class="lg-logo">
+      <span class="mark">P</span>
+      <span class="wordmark">plexo<span class="dot">.</span></span>
+    </div>
+  </div>
+
+  <div class="lg-brand-mid">
+    <div class="lg-eyebrow"><span class="pulse"></span>Representative Portal</div>
+    <h1>Everything your <em>reps</em> need, in one link.</h1>
+    <p class="lead">Profile, paperwork and the full training library — set up once, always up to date.</p>
+    <ul class="lg-points">
+      <li>
+        <span class="pic"><mat-icon>bolt</mat-icon></span>
+        <div>
+          <b>Sign in with your Rep ID</b>
+          <span class="pt">No password to remember — the number in your portal link is your key.</span>
+        </div>
+      </li>
+      <li>
+        <span class="pic"><mat-icon>description</mat-icon></span>
+        <div>
+          <b>Paperwork, sorted</b>
+          <span class="pt">Grab blank forms, upload your signed agreement and W-4, track status.</span>
+        </div>
+      </li>
+      <li>
+        <span class="pic"><mat-icon>school</mat-icon></span>
+        <div>
+          <b>Training that stays current</b>
+          <span class="pt">Playbooks, videos and guides curated by admin, updated as new material lands.</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="lg-brand-foot">
+    <span class="lock"><mat-icon>lock</mat-icon></span>
+    <span>Secure portal · © 2026 Plexo</span>
+  </div>
+</div>
+
+<div class="lg-panel">
+  <div class="lg-card">
+
+    <div class="lg-mobile-logo">
+      <span class="mark">P</span>
+      <span class="wordmark">plexo<span class="dot">.</span></span>
+    </div>
+
+    <mat-tab-group [(selectedIndex)]="activeTabIndex" mat-stretch-tabs="true" animationDuration="0ms">
+
+      <mat-tab label="Rep Login">
+        <div class="tab-content">
+          <div class="gate-title">Welcome back</div>
+          <div class="gate-sub">Enter the email and Rep ID from your welcome message — no password needed.</div>
+
+          @if (loginFailed()) {
+          <div class="gate-error">
+            We couldn't match that email and Rep ID. Double-check your portal link and try again.
+          </div>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email address</mat-label>
+              <mat-icon matPrefix>mail</mat-icon>
+              <input matInput type="email" formControlName="email" placeholder="you@example.com" autocomplete="email">
+            </mat-form-field>
+            @if (form.controls.email.invalid && form.controls.email.touched) {
+            @if (form.controls.email.hasError('required')) {
+            <mat-error>Email is required</mat-error>
+            } @else {
+            <mat-error>Enter a valid email address</mat-error>
+            }
+            }
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Rep ID</mat-label>
+              <mat-icon matPrefix>tag</mat-icon>
+              <input matInput type="text" formControlName="repId" placeholder="1234" inputmode="numeric"
+                autocomplete="off">
+            </mat-form-field>
+            @if (form.controls.repId.invalid && form.controls.repId.touched) {
+            @if (form.controls.repId.hasError('required')) {
+            <mat-error>Rep ID is required</mat-error>
+            } @else {
+            <mat-error>Rep ID should only contain numbers</mat-error>
+            }
+            }
+            <span class="rep-id-hint">The number at the end of your portal link — plexopro.com/<b>1234</b></span>
+
+            <button mat-flat-button type="submit" class="full-width submit-btn rep" [disabled]="submitting()">
+              Sign in to your portal <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </form>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Admin Login">
+        <div class="tab-content">
+          <div class="gate-title">Admin sign in</div>
+          <div class="gate-sub">Manage reps, review documents, and curate the shared training hub.</div>
+
+          @if (adminLoginFailed()) {
+          <div class="gate-error">We couldn't match that email and password.</div>
+          }
+
+          <form [formGroup]="adminForm" (ngSubmit)="submitAdmin()" novalidate>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email address</mat-label>
+              <mat-icon matPrefix>mail</mat-icon>
+              <input matInput type="email" formControlName="email" placeholder="admin@plexopro.com"
+                autocomplete="username">
+            </mat-form-field>
+            @if (adminForm.controls.email.invalid && adminForm.controls.email.touched) {
+            @if (adminForm.controls.email.hasError('required')) {
+            <mat-error>Email is required</mat-error>
+            } @else {
+            <mat-error>Enter a valid email address</mat-error>
+            }
+            }
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Password</mat-label>
+              <mat-icon matPrefix>lock</mat-icon>
+              <input matInput [type]="adminPasswordVisible() ? 'text' : 'password'" formControlName="repId"
+                placeholder="Enter password" autocomplete="current-password">
+              <button type="button" mat-icon-button matSuffix (click)="adminPasswordVisible.set(!adminPasswordVisible())"
+                [attr.aria-label]="adminPasswordVisible() ? 'Hide password' : 'Show password'">
+                <mat-icon>{{ adminPasswordVisible() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            </mat-form-field>
+            @if (adminForm.controls.repId.invalid && adminForm.controls.repId.touched) {
+            @if (adminForm.controls.repId.hasError('required')) {
+            <mat-error>Password is required</mat-error>
+            }
+            }
+
+            <button mat-flat-button type="submit" class="full-width submit-btn admin" [disabled]="adminSubmitting()">
+              Sign in to admin <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </form>
+        </div>
+      </mat-tab>
+      
+
+    </mat-tab-group>
+
+    <div class="lg-foot">Can't find your Rep ID? <a href="#" (click)="$event.preventDefault()">Ask your admin</a></div>
+
+  </div>
+</div>

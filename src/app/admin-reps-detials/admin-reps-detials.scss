@@ -1,0 +1,373 @@
+:host {
+  display: block;
+}
+
+.back-btn {
+  color: var(--muted);  
+
+
+  mat-icon {
+    font-size: 17px;
+ 
+
+  }
+}
+
+.not-found {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+// ---------- header ----------
+.detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+}
+
+.detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+}
+
+.detail-sub {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chip-id {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display), monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--navy);
+  background: #EAF1FB;
+  border: 1px dashed #B9CDE8;
+  border-radius: 7px;
+  padding: 4px 10px;
+}
+
+.mono {
+  font-family: var(--font-display), monospace;
+  font-size: 12.5px;
+  color: #4B6580;
+}
+
+.copy-btn {
+
+  color: var(--orange);
+
+  mat-icon {
+    font-size: 16px;
+  }
+}
+
+// ---------- status badge ----------
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.badge-active {
+  color: #1A8A5F;
+  background: #E4F7EE;
+
+  .badge-dot {
+    background: #1A8A5F;
+  }
+}
+
+.badge-pending {
+  color: #B36B0D;
+  background: #FDF1DD;
+
+  .badge-dot {
+    background: #E0942A;
+  }
+}
+
+.badge-inactive {
+  color: var(--muted);
+  background: #EEF1F5;
+
+  .badge-dot {
+    background: #9AA6B8;
+  }
+}
+
+// ---------- status select ----------
+.status-field {
+  width: 150px;
+  flex-shrink: 0;
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      padding: 0;
+      background: transparent;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #E1E6ED !important;
+      border-width: 1.5px !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding: 8px 12px !important;
+      min-height: 0;
+      background: #fff;
+      border-radius: 9px;
+    }
+
+    .mat-mdc-floating-label {
+      display: none !important;
+    }
+
+    .mdc-notched-outline__notch {
+      display: none !important;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__trailing {
+      border-radius: 9px;
+    }
+
+    .mat-mdc-select-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .mat-mdc-select-arrow {
+      color: var(--muted);
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    &.mat-focused {
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__trailing {
+        border-color: var(--orange) !important;
+      }
+    }
+  }
+}
+
+// ---------- layout ----------
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+// ---------- section cards ----------
+.section {
+  margin-bottom: 20px;
+  padding: 0 !important;
+  border-radius: 16px;
+  border: 1px solid #EEF1F6;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  overflow: hidden;
+}
+
+.section-head {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #F0F2F6;
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 4px;
+  }
+
+  h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+}
+
+.section-body {
+  padding: 20px 24px 22px;
+
+  &.no-pad {
+    padding: 4px 24px 4px;
+  }
+}
+
+// ---------- readonly field ----------
+.readonly-field {
+  margin-bottom: 18px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .rl {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 5px;
+  }
+
+  .rv {
+    font-size: 14px;
+    color: var(--text);
+    padding: 10px 13px;
+    background: #FAFBFD;
+    border: 1.5px solid #E9EDF3;
+    border-radius: 9px;
+    overflow-wrap: anywhere;
+
+    &.empty {
+      color: var(--faint, #9AA6B8);
+      font-style: italic;
+      background: transparent;
+      border-style: dashed;
+    }
+
+    a {
+      color: var(--navy);
+      font-weight: 600;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+        color: var(--orange);
+      }
+    }
+  }
+}
+
+// ---------- document rows ----------
+.doc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid #F0F2F6;
+
+  &:first-of-type {
+    border-top: none;
+  }
+}
+
+.doc-info {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.doc-icon {
+  border-radius: 10px;
+  background: #F1F3F7;
+  color: #9AA6B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 19px;
+  }
+
+  &.filled {
+    background: #E4F7EE;
+    color: #1A8A5F;
+  }
+}
+
+.doc-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.doc-status {
+  font-size: 12.5px;
+  color: var(--faint, #9AA6B8);
+  margin-top: 2px;
+
+  &.filled {
+    color: var(--muted);
+  }
+}
+
+.action-btn {
+
+  line-height: 34px;
+  border: 1px solid #E5E9F0;
+  border-radius: 8px;
+  color: var(--muted);
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 17px;
+ 
+    line-height: 17px;
+  }
+
+  &:hover {
+    background: #F5F7FA;
+    color: var(--orange);
+    border-color: #F0D9C4;
+  }
+}
+
+@media (max-width: 860px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .detail-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .status-field {
+    width: 100%;
+  }
+}

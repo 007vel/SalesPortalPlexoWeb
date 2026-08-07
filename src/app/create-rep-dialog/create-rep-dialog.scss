@@ -1,0 +1,24 @@
+.sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 16px;
+}
+.full-width {
+  width: 100%;
+}
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.error {
+  font-size: 13px;
+  color: var(--danger);
+  margin-top: 4px;
+}
+
+@media (max-width: 520px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}
