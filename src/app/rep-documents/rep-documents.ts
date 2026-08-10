@@ -47,7 +47,12 @@ export class RepDocuments {
   private readonly dialog = inject(MatDialog);
   private loadedForRepId: string | null = null;
 
+  /** Minimum time the view-loading overlay stays up — keeps it from flashing on fast/mocked responses. */
+  private static readonly MIN_VIEWING_MS = 200;
+
   private readonly uploadingKinds = signal<ReadonlySet<DocTemplateKind>>(new Set());
+
+  readonly viewing = signal(false);
 
   readonly docCards = computed<DocCardView[]>(() => {
     const docs = this.repProfileStore.profile().docs;
@@ -123,19 +128,32 @@ export class RepDocuments {
 
   /** Opens the document in the in-app viewer instead of forcing a download. */
   viewDocument(oId: number, fileName: string, label: string): void {
+    this.viewing.set(true);
+    const startedAt = Date.now();
     this.directory.downloadDocument(oId).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
-        this.dialog
-          .open(MediaViewerDialog, {
-            data: { title: label, type: detectFileKind(fileName), url, fileName },
-            maxWidth: '90vw',
-            panelClass: 'media-viewer-panel',
-          })
-          .afterClosed()
-          .subscribe(() => URL.revokeObjectURL(url));
+        this.stopViewing(startedAt, () => {
+          this.dialog
+            .open(MediaViewerDialog, {
+              data: { title: label, type: detectFileKind(fileName), url, fileName },
+              maxWidth: '90vw',
+              panelClass: 'media-viewer-panel',
+            })
+            .afterClosed()
+            .subscribe(() => URL.revokeObjectURL(url));
+        });
       },
-      error: () => this.toast.show(`Failed to open ${label}`),
+      error: () => this.stopViewing(startedAt, () => this.toast.show(`Failed to open ${label}`)),
     });
+  }
+
+  /** Keeps the loading overlay up for at least MIN_VIEWING_MS so it doesn't flash on fast/mocked responses. */
+  private stopViewing(startedAt: number, after: () => void): void {
+    const remaining = RepDocuments.MIN_VIEWING_MS - (Date.now() - startedAt);
+    setTimeout(() => {
+      this.viewing.set(false);
+      after();
+    }, Math.max(remaining, 0));
   }
 }
