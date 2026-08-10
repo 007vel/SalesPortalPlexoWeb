@@ -95,7 +95,57 @@
     padding: 24px 26px 26px;
 }
 
-// ---------- save buttons ----------
+// ---------- head actions ----------
+.head-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-btn {
+    border-radius: 9px;
+    font-weight: 600;
+    font-size: 13px;
+    height: 38px;
+    padding: 0 16px;
+    border-color: #E1E6ED !important;
+    color: var(--text) !important;
+
+    mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+    }
+
+    &:hover {
+        background: #F5F7FA;
+        border-color: #D6DDE7 !important;
+    }
+}
+
+// ---------- full-page loading overlay (shown while saving) ----------
+.rl-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(1px);
+
+    mat-progress-spinner {
+        --mdc-circular-progress-active-indicator-color: var(--orange);
+        --mat-progress-spinner-active-indicator-color: var(--orange);
+    }
+
+    ::ng-deep .mat-mdc-progress-spinner circle {
+        stroke: var(--orange) !important;
+    }
+}
+
+// ---------- save button ----------
 .save-btn {
     background: var(--orange) !important;
     color: #fff !important;
@@ -104,10 +154,94 @@
     font-size: 13.5px;
     padding: 0 18px;
     height: 38px;
+
+    &:disabled {
+        background: #F3B57C !important;
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+
+    mat-progress-spinner {
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 6px;
+        --mdc-circular-progress-active-indicator-color: var(--white);
+        --mat-progress-spinner-active-indicator-color: var(--white);
+    }
+
+    ::ng-deep .mat-mdc-progress-spinner circle {
+        stroke: var(--white) !important;
+    }
 }
 
-.save-btn-bottom {
-    margin-top: 6px;
+// ---------- read-only field grid ----------
+.rp-readonly {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px 24px;
+}
+
+.rp-ro-item {
+    .rl {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        margin-bottom: 7px;
+    }
+
+    .rv {
+        display: block;
+        font-size: 14.5px;
+        font-weight: 500;
+        color: var(--text);
+        padding: 12px 15px;
+        background: #FAFBFD;
+        border: 1.5px solid #E9EDF3;
+        border-radius: 10px;
+        overflow-wrap: anywhere;
+        box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.03);
+        transition: border-color .15s ease, background .15s ease;
+
+        &:hover {
+            border-color: #DCE3ED;
+            background: #F7F9FC;
+        }
+
+        &.empty {
+            color: var(--faint, #9AA6B8);
+            font-style: italic;
+            font-weight: 400;
+            font-size: 13px;
+        }
+    }
+
+    .link-value {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--orange);
+        text-decoration: none;
+        cursor: pointer;
+
+        span {
+            overflow-wrap: anywhere;
+        }
+
+        mat-icon {
+            flex-shrink: 0;
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            color: var(--orange);
+        }
+
+        &:hover {
+            text-decoration: underline;
+            border-color: #F3B57C;
+            background: #FFF6EE;
+        }
+    }
 }
 
 // ---------- fields ----------
@@ -219,7 +353,16 @@
         align-items: stretch;
     }
 
-    .save-btn:not(.save-btn-bottom) {
+    .head-actions {
+        justify-content: stretch;
+
+        .save-btn {
+            flex: 1;
+        }
+    }
+
+    .edit-btn,
+    .save-btn {
         width: 100%;
     }
 }

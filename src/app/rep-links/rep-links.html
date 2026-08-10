@@ -7,22 +7,35 @@
 <mat-card class="rp-links-card">
   <div class="head-row">
     <div class="head-title">
-      <div class="eyebrow">Editable</div>
+      <div class="eyebrow">{{ editing() ? 'Editing' : 'View' }}</div>
       <div class="title-line">
         <span class="icon-chip"><mat-icon>link</mat-icon></span>
         <h2>Link details</h2>
       </div>
     </div>
-    <button mat-flat-button color="primary" class="save-btn" (click)="save()">Save links</button>
+
+    @if (editing()) {
+    <div class="head-actions">
+      <button mat-button [disabled]="saving()" (click)="cancelEdit()">Cancel</button>
+      <button mat-flat-button color="primary" class="save-btn" [disabled]="saving()" (click)="save()">
+        {{ saving() ? 'Saving…' : 'Save links' }}
+      </button>
+    </div>
+    } @else {
+    <button mat-stroked-button class="edit-btn" (click)="startEdit()">
+      <mat-icon>edit</mat-icon> Edit links
+    </button>
+    }
   </div>
 
   <div class="rp-card-body">
+    @if (editing()) {
     <form [formGroup]="form" (ngSubmit)="save()">
       <div class="field-block">
         <label class="fl">Google link</label>
         <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
           <input matInput type="url" formControlName="googleLink"
-            placeholder="https://maps.google.com/?cid=jordanreyes">
+            placeholder="Enter Google link">
         </mat-form-field>
         <p class="fh">Your Google Business, Maps, or Drive link — whatever's most useful for admin to have on file.</p>
       </div>
@@ -31,13 +44,34 @@
         <label class="fl">Resource link</label>
         <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
           <input matInput type="url" formControlName="resourceLink"
-            placeholder="https://synergyworld.bitdocs.ai/share/d/ebWkTeGeRV05vl6k">
+            placeholder="Enter Resource link">
         </mat-form-field>
         <p class="fh">A personal doc link, e.g. your BitDocs share link. (The team-wide Training &amp; Resource Hub
           lives in its own tab.)</p>
       </div>
-
-      <button mat-flat-button color="primary" type="submit" class="save-btn save-btn-bottom">Save links</button>
     </form>
+    } @else {
+    <div class="rp-readonly">
+      @for (row of linkRows(); track row.key) {
+      <div class="rp-ro-item">
+        <div class="rl">{{ row.label }}</div>
+        @if (row.value) {
+        <a class="rv link-value" [href]="row.href" target="_blank" rel="noopener noreferrer">
+          <mat-icon>open_in_new</mat-icon>
+          <span>{{ row.value }}</span>
+        </a>
+        } @else {
+        <div class="rv empty">Not added yet — click Edit links to add one</div>
+        }
+      </div>
+      }
+    </div>
+    }
   </div>
 </mat-card>
+
+@if (saving()) {
+<div class="rl-loading-overlay">
+  <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
+</div>
+}
