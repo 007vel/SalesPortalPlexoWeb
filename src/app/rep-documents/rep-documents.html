@@ -24,23 +24,36 @@
         </div>
 
         <div class="rp-doc-actions">
-          <button type="button" mat-stroked-button class="ghost-btn"
-            (click)="downloadTemplate(doc.label, doc.templateFilename)">
-            <mat-icon>description</mat-icon> Blank copy
-          </button>
           @if (doc.filled) {
           <button type="button" mat-stroked-button class="ghost-btn"
+            (click)="viewDocument(doc.oId!, doc.fileName!, doc.label)">
+            <mat-icon>visibility</mat-icon> View
+          </button>
+          <button type="button" mat-stroked-button class="ghost-btn"
             (click)="downloadDocument(doc.oId!, doc.fileName!, doc.label)">
-            <mat-icon>download</mat-icon> Download mine
+            <mat-icon>download</mat-icon> Download
           </button>
           }
-          <button type="button" mat-flat-button class="upload-btn" (click)="fileInput.click()">
-            <mat-icon>upload</mat-icon> Upload
+          <button type="button" mat-flat-button class="upload-btn" [disabled]="doc.uploading"
+            (click)="fileInput.click()">
+            @if (doc.uploading) {
+            <mat-progress-spinner mode="indeterminate" diameter="24" strokeWidth="3"></mat-progress-spinner>
+            } @else {
+            <mat-icon>upload</mat-icon>
+            }
+            {{ doc.uploading ? 'Uploading…' : 'Upload' }}
           </button>
-          <input #fileInput type="file" class="hidden-file-input" (change)="handleUpload(doc.kind, doc.label, $event)">
+          <input #fileInput type="file" class="hidden-file-input" [disabled]="doc.uploading"
+            (change)="handleUpload(doc.kind, doc.label, $event)">
         </div>
       </div>
       }
     </div>
   </div>
 </mat-card>
+
+@if (viewing()) {
+<div class="rd-loading-overlay">
+  <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
+</div>
+}

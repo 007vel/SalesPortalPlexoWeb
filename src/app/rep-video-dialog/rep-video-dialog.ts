@@ -5,26 +5,22 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../auth/auth';
 import { Toast } from '../toast/toast';
-import { TrainingResourceStore } from '../training-resource-store/training-resource-store';
-
-type UploadKind = 'video' | 'image' | 'pdf' | 'doc';
-
-const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'webm', 'mkv', 'm4v'];
-const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'];
-
-function detectKind(fileName: string): UploadKind {
-  const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
-  if (VIDEO_EXTENSIONS.includes(extension)) return 'video';
-  if (IMAGE_EXTENSIONS.includes(extension)) return 'image';
-  if (extension === 'pdf') return 'pdf';
-  return 'doc';
-}
+import { TrainingResourceStore, TrainingResourceType, detectFileKind } from '../training-resource-store/training-resource-store';
 
 @Component({
   selector: 'app-rep-video-dialog',
-  imports: [ReactiveFormsModule, MatDialogModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatIconModule],
+  imports: [
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './rep-video-dialog.html',
   styleUrl: './rep-video-dialog.scss',
 })
@@ -41,9 +37,13 @@ export class RepVideoDialog {
   private pendingFile: File | null = null;
 
   readonly pendingFileName = signal<string | null>(null);
-  readonly pendingFileKind = signal<UploadKind | null>(null);
+  readonly pendingFileKind = signal<TrainingResourceType | null>(null);
   readonly isVideo = computed(() => this.pendingFileKind() === 'video');
   readonly submitting = signal(false);
+  readonly uploaded = signal(false);
+
+  /** How long the "Added!" confirmation stays up before the dialog closes. */
+  private static readonly SUCCESS_DELAY_MS = 900;
 
   readonly form = this.fb.nonNullable.group({
     title: [''],
@@ -59,7 +59,7 @@ export class RepVideoDialog {
 
     this.pendingFile = file;
     this.pendingFileName.set(file.name);
-    this.pendingFileKind.set(detectKind(file.name));
+    this.pendingFileKind.set(detectFileKind(file.name));
 
     const titleControl = this.form.controls.title;
     if (!titleControl.value.trim()) {
@@ -115,8 +115,8 @@ export class RepVideoDialog {
       )
       .subscribe({
         next: () => {
-          this.submitting.set(false);
-          this.dialogRef.close(true);
+          this.uploaded.set(true);
+          setTimeout(() => this.dialogRef.close(true), RepVideoDialog.SUCCESS_DELAY_MS);
         },
         error: () => {
           this.submitting.set(false);

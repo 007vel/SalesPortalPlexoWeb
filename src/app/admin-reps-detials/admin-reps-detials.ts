@@ -1,17 +1,20 @@
-import { Component, computed, effect, inject, input } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { RepDirectoryStore, RepStatus, portalLink, repStatusBadge } from '../rep-directory-store/rep-directory-store';
-import { TrainingResourceStore, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { TrainingResource, TrainingResourceStore, detectFileKind, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { Toast } from '../toast/toast';
 
 @Component({
   selector: 'app-admin-reps-detials',
-  imports: [RouterLink, MatButtonModule, MatCardModule, MatIconModule, MatSelectModule, NgTemplateOutlet],
+  imports: [RouterLink, MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatSelectModule, NgTemplateOutlet],
   templateUrl: './admin-reps-detials.html',
   styleUrl: './admin-reps-detials.scss',
 })
@@ -19,7 +22,13 @@ export class AdminRepsDetials {
   private readonly directory = inject(RepDirectoryStore);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
   private readonly toast = inject(Toast);
+  private readonly dialog = inject(MatDialog);
   private loadedForRepId: string | null = null;
+
+  /** Minimum time the view-loading overlay stays up — keeps it from flashing on fast/mocked responses. */
+  private static readonly MIN_VIEWING_MS = 200;
+
+  readonly viewing = signal(false);
 
   readonly repId = input.required<string>();
 
@@ -34,6 +43,8 @@ export class AdminRepsDetials {
   readonly statusBadge = repStatusBadge;
 
   readonly trainingResources = this.trainingResourceStore.resources;
+  readonly adminResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Admin'));
+  readonly ownResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Rep'));
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
 
@@ -47,14 +58,12 @@ export class AdminRepsDetials {
       if (!this.directory.findByRepId(repId)) return;
       this.loadedForRepId = repId;
       this.directory.loadDocuments(repId).subscribe();
-      this.trainingResourceStore.loadForRole(repId).subscribe();
+      this.trainingResourceStore.loadForRoleWithAdmin(repId).subscribe();
     });
   }
 
-  copyLink(): void {
-    const repId = this.repId();
-    const link = portalLink(repId);
-    navigator.clipboard?.writeText(`https://${link}`).catch(() => { });
+  copyLink(link: string): void {
+    navigator.clipboard?.writeText(link).catch(() => { });
     this.toast.show(`Copied ${link}`);
   }
 
@@ -87,5 +96,46 @@ export class AdminRepsDetials {
       },
       error: () => this.toast.show('Failed to update status'),
     });
+  }
+
+  /** Opens an agreement/W-4 document in the in-app viewer instead of forcing a download. */
+  viewDocument(oId: number, fileName: string, label: string): void {
+    this.viewing.set(true);
+    const startedAt = Date.now();
+    this.directory.downloadDocument(oId).subscribe({
+      next: (blob) => this.stopViewing(startedAt, () => this.openViewer({ title: label, type: detectFileKind(fileName), blob, fileName })),
+      error: () => this.stopViewing(startedAt, () => this.toast.show(`Failed to open ${label}`)),
+    });
+  }
+
+  /** Opens a training hub resource in the in-app viewer instead of following its URL directly, which forces a download. */
+  view(resource: TrainingResource): void {
+    this.viewing.set(true);
+    const startedAt = Date.now();
+    this.trainingResourceStore.downloadDocument(resource.oId).subscribe({
+      next: (blob) => this.stopViewing(startedAt, () => this.openViewer({ title: resource.title, type: resource.type, blob, fileName: resource.fileName })),
+      error: () => this.stopViewing(startedAt, () => this.toast.show(`Failed to open ${resource.title}`)),
+    });
+  }
+
+  /** Keeps the loading overlay up for at least MIN_VIEWING_MS so it doesn't flash on fast/mocked responses. */
+  private stopViewing(startedAt: number, after: () => void): void {
+    const remaining = AdminRepsDetials.MIN_VIEWING_MS - (Date.now() - startedAt);
+    setTimeout(() => {
+      this.viewing.set(false);
+      after();
+    }, Math.max(remaining, 0));
+  }
+
+  private openViewer(args: { title: string; type: ReturnType<typeof detectFileKind>; blob: Blob; fileName: string }): void {
+    const url = URL.createObjectURL(args.blob);
+    this.dialog
+      .open(MediaViewerDialog, {
+        data: { title: args.title, type: args.type, url, fileName: args.fileName },
+        maxWidth: '90vw',
+        panelClass: 'media-viewer-panel',
+      })
+      .afterClosed()
+      .subscribe(() => URL.revokeObjectURL(url));
   }
 }

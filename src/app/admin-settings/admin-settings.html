@@ -50,7 +50,7 @@
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let res">
           <div class="row-actions">
-            <button type="button" mat-icon-button class="action-btn" title="View" (click)="viewResource(res.oId)"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="View" (click)="viewResource(res)"><mat-icon>visibility</mat-icon></button>
             <button type="button" mat-icon-button class="action-btn" title="Download" (click)="downloadResource(res.oId, res.fileName)"><mat-icon>download</mat-icon></button>
             <button type="button" mat-icon-button class="action-btn action-danger" title="Delete" (click)="deleteResource(res.id)"><mat-icon>delete</mat-icon></button>
           </div>
@@ -87,7 +87,7 @@
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let doc">
           <div class="row-actions">
-            <button type="button" mat-icon-button class="action-btn" title="View" (click)="viewDocument(doc.oId)"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="View" (click)="viewDocument(doc)"><mat-icon>visibility</mat-icon></button>
             <button type="button" mat-icon-button class="action-btn" title="Download" (click)="downloadDocument(doc.oId, doc.fileName)"><mat-icon>download</mat-icon></button>
           </div>
         </td>
@@ -98,4 +98,8 @@
   }
 </mat-card> -->
 
-
+@if (viewing()) {
+<div class="as-loading-overlay">
+  <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
+</div>
+}

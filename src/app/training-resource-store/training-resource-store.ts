@@ -49,6 +49,8 @@ interface TrainingHubDocumentDto {
 const TYPE_ICON: Record<TrainingResourceType, string> = { video: 'movie', image: 'image', pdf: 'description', doc: 'article', link: 'link' };
 const TYPE_LABEL: Record<TrainingResourceType, string> = { video: 'Video', image: 'Image', pdf: 'PDF', doc: 'Guide', link: 'Link' };
 const FILE_TYPE_TO_RESOURCE_TYPE: Record<string, TrainingResourceType> = { Video: 'video', Image: 'image', Pdf: 'pdf', Document: 'doc' };
+const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'webm', 'mkv', 'm4v'];
+const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'];
 
 export function trainingResourceTypeIcon(type: TrainingResourceType): string {
   return TYPE_ICON[type] ?? 'school';
@@ -56,6 +58,15 @@ export function trainingResourceTypeIcon(type: TrainingResourceType): string {
 
 export function trainingResourceTypeLabel(type: TrainingResourceType): string {
   return TYPE_LABEL[type] ?? 'Open';
+}
+
+/** Guesses a viewer-relevant type from a file's extension — used for plain uploads (agreement/W-4) that don't carry a `TrainingResourceType` from the backend. */
+export function detectFileKind(fileName: string): TrainingResourceType {
+  const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
+  if (VIDEO_EXTENSIONS.includes(extension)) return 'video';
+  if (IMAGE_EXTENSIONS.includes(extension)) return 'image';
+  if (extension === 'pdf') return 'pdf';
+  return 'doc';
 }
 
 /**

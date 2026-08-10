@@ -1,0 +1,29 @@
+<div class="mv-header">
+  <h2 mat-dialog-title>{{ data.title }}</h2>
+  <!-- <button type="button" mat-icon-button title="Close" (click)="close()"><mat-icon>close</mat-icon></button> -->
+</div>
+
+<mat-dialog-content class="mv-content">
+  @switch (data.type) {
+  @case ('image') {
+  <img [src]="data.url" [alt]="data.title" class="mv-image">
+  }
+  @case ('video') {
+  <video [src]="data.url" controls autoplay class="mv-video"></video>
+  }
+  @case ('pdf') {
+  <iframe [src]="safeUrl" class="mv-pdf" title="{{ data.title }}"></iframe>
+  }
+  @default {
+  <div class="mv-unsupported">
+    <mat-icon>description</mat-icon>
+    <p>Preview isn't available for this file type. Download it to view it.</p>
+  </div>
+  }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button type="button" mat-button (click)="download()"><mat-icon>download</mat-icon> Download</button>
+  <button type="button" mat-flat-button (click)="close()">Close</button>
+</mat-dialog-actions>

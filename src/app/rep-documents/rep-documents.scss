@@ -2,6 +2,27 @@
   display: block;
 }
 
+// ---------- full-page loading overlay (shown while opening a document) ----------
+.rd-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(1px);
+
+  mat-progress-spinner {
+    --mdc-circular-progress-active-indicator-color: var(--orange);
+    --mat-progress-spinner-active-indicator-color: var(--orange);
+  }
+
+  ::ng-deep .mat-mdc-progress-spinner circle {
+    stroke: var(--orange) !important;
+  }
+}
+
 // ---------- page header ----------
 .rep-page-head {
   margin-bottom: 22px;
@@ -197,8 +218,25 @@
     margin-right: 4px;
   }
 
-  &:hover {
+  mat-progress-spinner {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+    --mdc-circular-progress-active-indicator-color: var(--white);
+    --mat-progress-spinner-active-indicator-color: var(--white);
+  }
+
+  ::ng-deep .mat-mdc-progress-spinner circle {
+    stroke: var(--white) !important;
+  }
+
+  &:hover:not(:disabled) {
     background: #E37312 !important;
+  }
+
+  &:disabled {
+    background: #F8AC6C !important;
+    cursor: not-allowed;
   }
 }
 

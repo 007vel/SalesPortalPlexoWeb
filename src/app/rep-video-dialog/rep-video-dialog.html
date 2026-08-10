@@ -38,6 +38,19 @@
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Cancel</button>
-  <button mat-flat-button color="primary" [disabled]="submitting()" (click)="submit()">Add to hub</button>
+  <button mat-button [disabled]="submitting()" (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" class="submit-btn" [disabled]="submitting()" (click)="submit()">
+    @if (uploaded()) {
+    <mat-icon>check</mat-icon>
+    } @else if (submitting()) {
+    <mat-progress-spinner mode="indeterminate" diameter="24" strokeWidth="3"></mat-progress-spinner>
+    }
+    @if (uploaded()) {
+    <span>Added</span>
+    } @else if (submitting()) {
+    <span>Adding…</span>
+    } @else {
+    <span>Add to hub</span>
+    }
+  </button>
 </mat-dialog-actions>

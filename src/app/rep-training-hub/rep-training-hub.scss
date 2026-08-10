@@ -2,6 +2,27 @@
   display: block;
 }
 
+// ---------- full-page loading overlay (shown while opening a resource) ----------
+.th-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(1px);
+
+  mat-progress-spinner {
+    --mdc-circular-progress-active-indicator-color: var(--orange);
+    --mat-progress-spinner-active-indicator-color: var(--orange);
+  }
+
+  ::ng-deep .mat-mdc-progress-spinner circle {
+    stroke: var(--orange) !important;
+  }
+}
+
 // ---------- banner ----------
 .th-banner {
   background: linear-gradient(125deg, var(--navy) 0%, #173a63 45%, #0d2440 100%);
