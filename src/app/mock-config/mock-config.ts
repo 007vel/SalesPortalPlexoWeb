@@ -8,7 +8,7 @@ export const MOCK_CONFIG = {
     agreement: 'Plexo_Representative_Agreement_Blank.pdf',
     w4: 'IRS_W4_Blank.pdf',
   }, // document-template-store.ts
-  portalDomain: 'plexopro.com', // rep-directory-store.ts (portalLink)
+  portalDomain: 'plexopro.com', 
   sessionStorageKeys: {
     rep: 'plexo.rep.session',
     admin: 'plexo.admin.session',

@@ -104,7 +104,7 @@
       <div class="section-body">
         <ng-container *ngTemplateOutlet="field; context: {label:'Rep ID', value: rep.repId}"></ng-container>
         <ng-container
-          *ngTemplateOutlet="field; context: {label:'Portal link', value: 'https://' + portalLink(rep.repId), isLink: true}"></ng-container>
+          *ngTemplateOutlet="field; context: {label:'Portal link', value: rep.portalLink, isLink: true}"></ng-container>
         <ng-container *ngTemplateOutlet="field; context: {label:'Created', value: rep.createdAt}"></ng-container>
       </div>
     </mat-card>
