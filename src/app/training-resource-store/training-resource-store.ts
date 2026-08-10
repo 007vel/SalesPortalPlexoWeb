@@ -9,6 +9,8 @@ export interface TrainingResource {
   oId: number;
   /** The RepId of the rep who uploaded this resource. */
   repId: string;
+  /** Who uploaded this — used to separate Admin-shared material from a rep's own uploads in the UI. */
+  uploadedBy: 'Admin' | 'Rep';
   title: string;
   category: string;
   type: TrainingResourceType;
@@ -40,6 +42,7 @@ interface TrainingHubDocumentDto {
   fileType: string;
   fileName: string;
   length: string | null;
+  uploadedBy: string;
   uploadedAt: string;
 }
 
@@ -139,6 +142,7 @@ export class TrainingResourceStore {
       id: `doc-${dto.oId}`,
       oId: dto.oId,
       repId: dto.roleId ?? '',
+      uploadedBy: dto.uploadedBy === 'Admin' ? 'Admin' : 'Rep',
       title: dto.title,
       category: dto.category ?? 'Team Uploads',
       type: FILE_TYPE_TO_RESOURCE_TYPE[dto.fileType] ?? 'doc',

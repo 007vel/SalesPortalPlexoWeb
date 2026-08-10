@@ -42,24 +42,47 @@
 
 <div class="th-upload-note">
   <span>Add your own materials with <b class="hl"><mat-icon>add</mat-icon>Upload</b>, or use the <mat-icon
-      class="inline-ic">close</mat-icon> on a card to remove one from the hub.</span>
+      class="inline-ic">close</mat-icon> on one of your cards to remove it from the hub.</span>
 </div>
 
+<h3 class="th-section-title">Shared by Admin</h3>
 <div class="th-grid">
-  @if (filteredResources().length === 0) {
+  @if (filteredAdminResources().length === 0) {
   <div class="th-empty">
     <mat-icon>school</mat-icon>
-    <div>No resources in this category yet.</div>
+    <div>No materials shared by Admin in this category yet.</div>
   </div>
   } @else {
-  @for (res of filteredResources(); track res.id) {
+  @for (res of filteredAdminResources(); track res.id) {
+  <ng-container *ngTemplateOutlet="card; context: { res: res, removable: false }"></ng-container>
+  }
+  }
+</div>
+
+<h3 class="th-section-title">Your uploads</h3>
+<div class="th-grid">
+  @if (filteredOwnResources().length === 0) {
+  <div class="th-empty">
+    <mat-icon>school</mat-icon>
+    <div>You haven't uploaded anything in this category yet.</div>
+  </div>
+  } @else {
+  @for (res of filteredOwnResources(); track res.id) {
+  <ng-container *ngTemplateOutlet="card; context: { res: res, removable: true }"></ng-container>
+  }
+  }
+</div>
+
+<ng-template #card let-res="res" let-removable="removable">
   <mat-card class="th-card">
     <div class="th-card-top">
       <div class="th-type-ic {{ res.type }}"><mat-icon>{{ typeIcon(res.type) }}</mat-icon></div>
       <div class="th-card-actions">
         @if (res.duration) { <div class="th-duration">{{ res.duration }}</div> }
+        @if (removable) {
         <button type="button" mat-icon-button class="th-remove" title="Remove from hub"
           (click)="askRemove(res)"><mat-icon>close</mat-icon></button>
+        }
       </div>
     </div>
     <div class="th-card-body">
@@ -70,6 +93,4 @@
     <a mat-stroked-button class="open-link-btn" [href]="res.url" target="_blank" rel="noopener">{{ typeLabel(res.type)
       }} · Open <mat-icon>open_in_new</mat-icon></a>
   </mat-card>
-  }
-  }
-</div>
+</ng-template>

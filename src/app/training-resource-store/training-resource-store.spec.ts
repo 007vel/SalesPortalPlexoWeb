@@ -59,10 +59,11 @@ describe('TrainingResourceStore', () => {
       fileType: 'Video',
       fileName: 'renewal-pitch.mp4',
       length: '12 min',
+      uploadedBy: 'Rep',
       uploadedAt: '2026-08-06T00:00:00Z',
     });
 
-    expect(uploaded).toMatchObject({ title: 'Renewal pitch walkthrough', type: 'video', oId: 9, repId: '1001' });
+    expect(uploaded).toMatchObject({ title: 'Renewal pitch walkthrough', type: 'video', oId: 9, repId: '1001', uploadedBy: 'Rep' });
     expect(store.resources().length).toBe(1);
   });
 
@@ -81,12 +82,13 @@ describe('TrainingResourceStore', () => {
         fileType: 'Video',
         fileName: 'a.mp4',
         length: '12 min',
+        uploadedBy: 'Rep',
         uploadedAt: '2026-08-06T00:00:00Z',
       },
     ]);
 
     expect(store.resources().length).toBe(1);
-    expect(store.resources()[0]).toMatchObject({ title: 'Uploaded video', oId: 9, repId: '1001' });
+    expect(store.resources()[0]).toMatchObject({ title: 'Uploaded video', oId: 9, repId: '1001', uploadedBy: 'Rep' });
   });
 
   it('loadAll GETs api/traininghub (unfiltered) and populates the list across every rep', () => {
@@ -95,8 +97,8 @@ describe('TrainingResourceStore', () => {
     const req = httpMock.expectOne(apiUrl('traininghub'));
     expect(req.request.method).toBe('GET');
     req.flush([
-      { oId: 1, roleId: '1001', title: 'A', category: 'X', description: '', fileType: 'Video', fileName: 'a.mp4', length: '', uploadedAt: '2026-08-06T00:00:00Z' },
-      { oId: 2, roleId: '1002', title: 'B', category: 'Y', description: '', fileType: 'Pdf', fileName: 'b.pdf', length: null, uploadedAt: '2026-08-06T00:00:00Z' },
+      { oId: 1, roleId: '1001', title: 'A', category: 'X', description: '', fileType: 'Video', fileName: 'a.mp4', length: '', uploadedBy: 'Rep', uploadedAt: '2026-08-06T00:00:00Z' },
+      { oId: 2, roleId: '1002', title: 'B', category: 'Y', description: '', fileType: 'Pdf', fileName: 'b.pdf', length: null, uploadedBy: 'Rep', uploadedAt: '2026-08-06T00:00:00Z' },
     ]);
 
     expect(store.resources().length).toBe(2);
@@ -110,17 +112,17 @@ describe('TrainingResourceStore', () => {
     expect(req.request.method).toBe('GET');
     expect(req.request.params.get('includeAdmin')).toBe('true');
     req.flush([
-      { oId: 5, roleId: null, title: 'Admin doc', category: 'Policies', description: '', fileType: 'Pdf', fileName: 'policy.pdf', length: null, uploadedAt: '2026-08-06T00:00:00Z' },
+      { oId: 5, roleId: null, title: 'Admin doc', category: 'Policies', description: '', fileType: 'Pdf', fileName: 'policy.pdf', length: null, uploadedBy: 'Admin', uploadedAt: '2026-08-06T00:00:00Z' },
     ]);
 
     expect(store.resources().length).toBe(1);
-    expect(store.resources()[0]).toMatchObject({ title: 'Admin doc', oId: 5, repId: '' });
+    expect(store.resources()[0]).toMatchObject({ title: 'Admin doc', oId: 5, repId: '', uploadedBy: 'Admin' });
   });
 
   it('remove deletes the backend document and drops it from the list', () => {
     store.uploadDocument({ title: 'A', category: 'X', length: '', description: '', roleId: '1001', uploadedBy: 'Rep' }, new File(['a'], 'a.pdf')).subscribe();
     httpMock.expectOne(apiUrl('traininghub')).flush({
-      oId: 3, roleId: '1001', title: 'A', category: 'X', description: '', fileType: 'Pdf', fileName: 'a.pdf', length: null, uploadedAt: '2026-08-06T00:00:00Z',
+      oId: 3, roleId: '1001', title: 'A', category: 'X', description: '', fileType: 'Pdf', fileName: 'a.pdf', length: null, uploadedBy: 'Rep', uploadedAt: '2026-08-06T00:00:00Z',
     });
 
     const id = store.resources()[0].id;

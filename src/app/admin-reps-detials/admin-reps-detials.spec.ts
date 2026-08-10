@@ -73,7 +73,7 @@ describe('AdminRepsDetials', () => {
     const trainingReq = httpMock.expectOne(apiUrl('traininghub/role/1001'));
     expect(trainingReq.request.method).toBe('GET');
     trainingReq.flush([
-      { oId: 9, roleId: '1001', title: 'Renewal pitch', category: 'Team Uploads', description: '', fileType: 'Video', fileName: 'a.mp4', length: '12 min', uploadedAt: '2026-08-06T00:00:00Z' },
+      { oId: 9, roleId: '1001', title: 'Renewal pitch', category: 'Team Uploads', description: '', fileType: 'Video', fileName: 'a.mp4', length: '12 min', uploadedBy: 'Rep', uploadedAt: '2026-08-06T00:00:00Z' },
     ]);
     await fixture.whenStable();
 

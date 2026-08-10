@@ -27,7 +27,7 @@ describe('AdminSettings', () => {
       },
     ]);
     httpMock.expectOne((r) => r.url === apiUrl('traininghub/filter')).flush([
-      { oId: 9, roleId: null, title: 'Admin upload', category: 'Team Uploads', description: '', fileType: 'Video', fileName: 'a.mp4', length: '12 min', uploadedAt: '2026-08-06T00:00:00Z' },
+      { oId: 9, roleId: null, title: 'Admin upload', category: 'Team Uploads', description: '', fileType: 'Video', fileName: 'a.mp4', length: '12 min', uploadedBy: 'Admin', uploadedAt: '2026-08-06T00:00:00Z' },
     ]);
     httpMock.expectOne(apiUrl('documents')).flush([
       { oId: 5, repId: '1001', kind: 'agreement', fileName: 'signed.pdf', uploadedAt: '2026-08-06T00:00:00Z' },
