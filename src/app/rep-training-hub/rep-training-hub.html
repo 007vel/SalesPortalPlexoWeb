@@ -94,3 +94,9 @@
       }} · Open <mat-icon>open_in_new</mat-icon></button>
   </mat-card>
 </ng-template>
+
+@if (viewing()) {
+<div class="th-loading-overlay">
+  <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
+</div>
+}
