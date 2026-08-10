@@ -30,7 +30,7 @@ export class AdminReps {
   readonly activeCount = computed(() => this.reps().filter((r) => r.status === 'active').length);
   readonly pendingCount = computed(() => this.reps().filter((r) => r.status === 'pending').length);
   readonly docsCompleteCount = computed(() => this.reps().filter(docsComplete).length);
-
+ 
   copyLink(link: string): void {
     navigator.clipboard?.writeText(link).catch(() => { });
     this.toast.show(`Copied ${link}`);
