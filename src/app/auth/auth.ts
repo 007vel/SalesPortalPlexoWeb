@@ -29,8 +29,8 @@ export class Auth {
   readonly session = this.sessionSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.sessionSignal() !== null);
 
-  login(email: string, repId: string): Observable<RepSession> {
-    return this.validateRepLogin(email, repId).pipe(tap((s) => this.setSession(s)));
+  login(email: string, password: string): Observable<RepSession> {
+    return this.validateRepLogin(email, password).pipe(tap((s) => this.setSession(s)));
   }
 
   /** Calls `POST api/users/rep-login-validate` without touching the rep session. */
@@ -48,13 +48,13 @@ export class Auth {
   }
 
   /** Calls `POST api/users/validate` without touching the rep session — used by AdminAuth. */
-  validate(email: string, repId: string): Observable<RepSession> {
+  validate(email: string, password: string): Observable<RepSession> {
     const trimmedEmail = email.trim();
-    const trimmedRepId = repId.trim();
-    return this.api.post<UserValidateResponseDto>('users/validate', { email: trimmedEmail, repId: trimmedRepId }).pipe(
+    const trimmedPassword = password.trim();
+    return this.api.post<UserValidateResponseDto>('users/validate', { email: trimmedEmail, password: trimmedPassword }).pipe(
       map((res) => {
         if (!res.isValid) throw new Error(res.message || 'No matching rep');
-        return { email: trimmedEmail, repId: trimmedRepId };
+        return { email: trimmedEmail, repId: trimmedPassword };
       }),
     );
   }

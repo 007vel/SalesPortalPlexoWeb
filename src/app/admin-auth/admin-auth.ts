@@ -18,8 +18,8 @@ export class AdminAuth {
 
   readonly isSignedIn = this.signedInSignal.asReadonly();
 
-  login(email: string, repId: string): Observable<RepSession> {
-    return this.auth.validate(email, repId).pipe(tap(() => this.setSignedIn(true)));
+  login(email: string, password: string): Observable<RepSession> {
+    return this.auth.validate(email, password).pipe(tap(() => this.setSignedIn(true)));
   }
 
   logout(): void {
