@@ -197,8 +197,25 @@
     margin-right: 4px;
   }
 
-  &:hover {
+  mat-progress-spinner {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+    --mdc-circular-progress-active-indicator-color: var(--white);
+    --mat-progress-spinner-active-indicator-color: var(--white);
+  }
+
+  ::ng-deep .mat-mdc-progress-spinner circle {
+    stroke: var(--white) !important;
+  }
+
+  &:hover:not(:disabled) {
     background: #E37312 !important;
+  }
+
+  &:disabled {
+    background: #F8AC6C !important;
+    cursor: not-allowed;
   }
 }
 
