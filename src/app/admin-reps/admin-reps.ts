@@ -5,7 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { RepDirectoryStore, RepRecord, docsComplete, portalLink, repStatusBadge } from '../rep-directory-store/rep-directory-store';
+import { RepDirectoryStore, RepRecord, docsComplete, repStatusBadge } from '../rep-directory-store/rep-directory-store';
 import { CreateRepDialog } from '../create-rep-dialog/create-rep-dialog';
 import { Toast } from '../toast/toast';
 
@@ -22,7 +22,6 @@ export class AdminReps {
 
   readonly reps = this.directory.reps;
   readonly loading = this.directory.loading;
-  readonly portalLink = portalLink;
   readonly statusBadge = repStatusBadge;
   readonly docsComplete = docsComplete;
   readonly displayedColumns = ['repId', 'name', 'status', 'documents', 'portalLink', 'actions'];
@@ -32,9 +31,8 @@ export class AdminReps {
   readonly pendingCount = computed(() => this.reps().filter((r) => r.status === 'pending').length);
   readonly docsCompleteCount = computed(() => this.reps().filter(docsComplete).length);
 
-  copyLink(repId: string): void {
-    const link = portalLink(repId);
-    navigator.clipboard?.writeText(`https://${link}`).catch(() => { });
+  copyLink(link: string): void {
+    navigator.clipboard?.writeText(link).catch(() => { });
     this.toast.show(`Copied ${link}`);
   }
 
@@ -48,7 +46,7 @@ export class AdminReps {
       .open(CreateRepDialog)
       .afterClosed()
       .subscribe((rep: RepRecord | undefined) => {
-        if (rep) this.toast.show(`Rep ${rep.repId} created — link ${portalLink(rep.repId)}`);
+        if (rep) this.toast.show(`Rep ${rep.repId} created — link ${rep.portalLink}`);
       });
   }
 }
