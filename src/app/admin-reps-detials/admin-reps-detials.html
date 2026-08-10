@@ -12,9 +12,9 @@
     </div>
     <div class="detail-sub">
       <span class="chip-id">{{ rep.repId }}</span>
-      <span class="mono">{{ portalLink(rep.repId) }}</span>
+      <span class="mono">{{ rep.portalLink }}</span>
       <button type="button" mat-icon-button class="copy-btn" title="Copy link"
-        (click)="copyLink()"><mat-icon>content_copy</mat-icon></button>
+        (click)="copyLink(rep.portalLink)"><mat-icon>content_copy</mat-icon></button>
     </div>
   </div>
 

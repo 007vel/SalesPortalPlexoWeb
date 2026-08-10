@@ -51,10 +51,8 @@ export class AdminRepsDetials {
     });
   }
 
-  copyLink(): void {
-    const repId = this.repId();
-    const link = portalLink(repId);
-    navigator.clipboard?.writeText(`https://${link}`).catch(() => { });
+  copyLink(link: string): void {
+    navigator.clipboard?.writeText(link).catch(() => { });
     this.toast.show(`Copied ${link}`);
   }
 
