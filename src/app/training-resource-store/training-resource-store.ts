@@ -9,6 +9,8 @@ export interface TrainingResource {
   oId: number;
   /** The RepId of the rep who uploaded this resource. */
   repId: string;
+  /** Who uploaded this — used to separate Admin-shared material from a rep's own uploads in the UI. */
+  uploadedBy: 'Admin' | 'Rep';
   title: string;
   category: string;
   type: TrainingResourceType;
@@ -24,20 +26,23 @@ export interface NewTrainingHubUpload {
   category: string;
   length: string;
   description: string;
-  /** The uploading rep's RepId — the backend filters retrieval by this same value. */
-  roleId: string;
+  /** The uploading rep's RepId — the backend filters retrieval by this same value. Omitted for Admin uploads, which are stored with a null RoleId. */
+  roleId?: string;
+  /** Who uploaded this — the backend requires it to be 'Rep' or 'Admin'. */
+  uploadedBy: 'Admin' | 'Rep';
 }
 
 /** Shape returned by POST/GET api/traininghub (PlexoRepPortal.Models.TrainingHubDocumentDto). */
 interface TrainingHubDocumentDto {
   oId: number;
-  roleId: string;
+  roleId: string | null;
   title: string;
   category: string | null;
   description: string | null;
   fileType: string;
   fileName: string;
   length: string | null;
+  uploadedBy: string;
   uploadedAt: string;
 }
 
@@ -81,14 +86,33 @@ export class TrainingResourceStore {
     );
   }
 
+  /** Fetches only the documents Admin uploaded (RoleId is null) — used by the Admin Settings training hub. */
+  loadAdminUploads(): Observable<TrainingResource[]> {
+    return this.api.get<TrainingHubDocumentDto[]>('traininghub/filter', { includeAdmin: true }).pipe(
+      map((dtos) => dtos.map((dto) => this.mapDto(dto))),
+      tap((docs) => this.resourcesSignal.set(docs)),
+    );
+  }
+
+  /** Fetches what a given rep sees in their own Training Hub — their uploads plus every Admin upload. */
+  loadForRoleWithAdmin(roleId: string): Observable<TrainingResource[]> {
+    return this.api.get<TrainingHubDocumentDto[]>('traininghub/filter', { roleId, includeAdmin: true }).pipe(
+      map((dtos) => dtos.map((dto) => this.mapDto(dto))),
+      tap((docs) => this.resourcesSignal.set(docs)),
+    );
+  }
+
   /** Uploads a real file (video/image/pdf/etc) to api/traininghub and adds it to the hub. */
   uploadDocument(input: NewTrainingHubUpload, file: File): Observable<TrainingResource> {
     const formData = new FormData();
-    formData.append('roleId', input.roleId);
+    if (input.roleId) {
+      formData.append('roleId', input.roleId);
+    }
     formData.append('title', input.title);
     formData.append('category', input.category);
     formData.append('description', input.description);
     formData.append('length', input.length);
+    formData.append('uploadedBy', input.uploadedBy);
     formData.append('file', file);
 
     return this.api.post<TrainingHubDocumentDto>('traininghub', formData).pipe(
@@ -117,7 +141,8 @@ export class TrainingResourceStore {
     return {
       id: `doc-${dto.oId}`,
       oId: dto.oId,
-      repId: dto.roleId,
+      repId: dto.roleId ?? '',
+      uploadedBy: dto.uploadedBy === 'Admin' ? 'Admin' : 'Rep',
       title: dto.title,
       category: dto.category ?? 'Team Uploads',
       type: FILE_TYPE_TO_RESOURCE_TYPE[dto.fileType] ?? 'doc',

@@ -247,6 +247,18 @@
   }
 }
 
+// ---------- section titles ----------
+.th-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 12px;
+
+  &:not(:first-of-type) {
+    margin-top: 28px;
+  }
+}
+
 // ---------- resource grid ----------
 .th-grid {
   display: grid;

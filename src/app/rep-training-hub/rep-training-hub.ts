@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -12,7 +13,7 @@ import { Auth } from '../auth/auth';
 
 @Component({
   selector: 'app-rep-training-hub',
-  imports: [MatButtonModule, MatCardModule, MatChipsModule, MatIconModule],
+  imports: [MatButtonModule, MatCardModule, MatChipsModule, MatIconModule, NgTemplateOutlet],
   templateUrl: './rep-training-hub.html',
   styleUrl: './rep-training-hub.scss',
 })
@@ -37,10 +38,13 @@ export class RepTrainingHub {
     return category === 'All' ? this.resources() : this.resources().filter((r) => r.category === category);
   });
 
+  readonly filteredAdminResources = computed(() => this.filteredResources().filter((r) => r.uploadedBy === 'Admin'));
+  readonly filteredOwnResources = computed(() => this.filteredResources().filter((r) => r.uploadedBy === 'Rep'));
+
   constructor() {
     const repId = this.auth.session()?.repId;
     if (repId) {
-      this.trainingResourceStore.loadForRole(repId).subscribe();
+      this.trainingResourceStore.loadForRoleWithAdmin(repId).subscribe();
     }
   }
 

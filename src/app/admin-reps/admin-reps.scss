@@ -147,10 +147,27 @@ td.mat-mdc-cell {
     font-weight: 400;
   }
 
+  .em-row {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 2px;
+  }
+
   .em {
     font-size: 12.5px;
     color: #6B84A8;
-    margin-top: 2px;
+  }
+
+  .copy-email-btn {
+    color: var(--faint, #9AA6B8);
+
+    mat-icon {
+      font-size: 14px;
+    }
+
+    &:hover {
+      color: var(--orange);
+    }
   }
 }
 

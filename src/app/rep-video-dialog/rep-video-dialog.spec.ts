@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpTestingController } from '@angular/common/http/testing';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { RepVideoDialog } from './rep-video-dialog';
 import { Auth } from '../auth/auth';
 import { Toast } from '../toast/toast';
@@ -101,7 +101,7 @@ describe('RepVideoDialog', () => {
 
     req.flush({
       oId: 1, roleId: '1001', title: 'renewal-pitch', category: 'Team Uploads', description: '',
-      fileType: 'Video', fileName: 'renewal-pitch.mp4', length: '', uploadedAt: '2026-08-06T00:00:00Z',
+      fileType: 'Video', fileName: 'renewal-pitch.mp4', length: '', uploadedBy: 'Rep', uploadedAt: '2026-08-06T00:00:00Z',
     });
 
     expect(trainingResourceStore.resources().length).toBe(1);
@@ -112,5 +112,53 @@ describe('RepVideoDialog', () => {
   it('cancel() closes with false', () => {
     component.cancel();
     expect(dialogRef.close).toHaveBeenCalledWith(false);
+  });
+});
+
+describe('RepVideoDialog (admin mode)', () => {
+  let component: RepVideoDialog;
+  let fixture: ComponentFixture<RepVideoDialog>;
+  let dialogRef: { close: ReturnType<typeof vi.fn> };
+  let httpMock: HttpTestingController;
+
+  beforeEach(async () => {
+    localStorage.clear();
+    dialogRef = { close: vi.fn() };
+
+    await TestBed.configureTestingModule({
+      imports: [RepVideoDialog],
+      providers: [
+        { provide: MatDialogRef, useValue: dialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: { mode: 'admin' } },
+        provideTestHttp(),
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(RepVideoDialog);
+    component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
+    vi.spyOn(TestBed.inject(Toast), 'show').mockImplementation(() => {});
+    await fixture.whenStable();
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('submit() uploads without a RepId, as Admin, and does not require a signed-in session', () => {
+    component.form.controls.category.setValue('Team Uploads');
+    const file = new File(['contents'], 'onboarding-guide.pdf');
+    component.handleFile({ target: { files: [file], value: '' } } as unknown as Event);
+    component.submit();
+
+    const req = httpMock.expectOne(apiUrl('traininghub'));
+    const body = req.request.body as FormData;
+    expect(body.get('roleId')).toBeNull();
+    expect(body.get('uploadedBy')).toBe('Admin');
+
+    req.flush({
+      oId: 2, roleId: null, title: 'onboarding-guide', category: 'Team Uploads', description: '',
+      fileType: 'Pdf', fileName: 'onboarding-guide.pdf', length: null, uploadedBy: 'Admin', uploadedAt: '2026-08-06T00:00:00Z',
+    });
+
+    expect(dialogRef.close).toHaveBeenCalledWith(true);
   });
 });

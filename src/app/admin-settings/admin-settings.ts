@@ -1,10 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { TrainingResourceStore, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { RepDirectoryStore, RepDocumentRecord } from '../rep-directory-store/rep-directory-store';
+import { RepVideoDialog } from '../rep-video-dialog/rep-video-dialog';
 import { Toast } from '../toast/toast';
 
 const DOC_KIND_LABEL: Record<string, string> = { agreement: 'Representative Agreement', w4: 'W-4 Form' };
@@ -24,6 +26,7 @@ interface DocumentRow {
   styleUrl: './admin-settings.scss',
 })
 export class AdminSettings {
+  private readonly dialog = inject(MatDialog);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
   private readonly directory = inject(RepDirectoryStore);
   private readonly toast = inject(Toast);
@@ -33,7 +36,7 @@ export class AdminSettings {
   readonly resources = this.trainingResourceStore.resources;
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
-  readonly displayedColumns = ['resource', 'category', 'type', 'repId', 'actions'];
+  readonly displayedColumns = ['resource', 'category', 'type', 'actions'];
   readonly documentColumns = ['rep', 'repId', 'document', 'actions'];
 
   readonly documentRows = computed<DocumentRow[]>(() => {
@@ -48,8 +51,17 @@ export class AdminSettings {
   });
 
   constructor() {
-    this.trainingResourceStore.loadAll().subscribe();
+    this.trainingResourceStore.loadAdminUploads().subscribe();
     this.directory.loadAllDocuments().subscribe((docs) => this.documentsSignal.set(docs));
+  }
+
+  openUploadModal(): void {
+    this.dialog
+      .open(RepVideoDialog, { data: { mode: 'admin' } })
+      .afterClosed()
+      .subscribe((added) => {
+        if (added) this.toast.show('Added to the hub');
+      });
   }
 
   // Admins are a more trusted actor than reps — delete here is immediate,

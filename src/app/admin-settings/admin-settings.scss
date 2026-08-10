@@ -62,6 +62,36 @@
   }
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+
+  .section-title {
+    margin: 0 0 12px;
+  }
+}
+
+.upload-btn {
+  background: var(--orange) !important;
+  color: #fff !important;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 13.5px;
+  height: 40px;
+  padding: 0 18px;
+  margin-bottom: 12px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-right: 2px;
+  }
+}
+
 // ---------- table card ----------
 .table-card {
   padding: 0 !important;
@@ -257,7 +287,6 @@ td.mat-mdc-cell {
     grid-template-areas:
       "resource resource"
       "category type"
-      "repId    repId"
       "actions  actions";
   }
 

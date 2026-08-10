@@ -281,6 +281,26 @@
   overflow: visible;
 }
 
+.lg-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+
+  mat-progress-spinner {
+    --mdc-circular-progress-active-indicator-color: var(--orange);
+    --mat-progress-spinner-active-indicator-color: var(--orange);
+  }
+
+  ::ng-deep .mat-mdc-progress-spinner circle {
+    stroke: var(--orange) !important;
+  }
+}
+
 @keyframes lgRise {
   from {
     opacity: 0;
