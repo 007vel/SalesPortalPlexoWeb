@@ -37,6 +37,8 @@ export class AdminRepsDetials {
   readonly statusBadge = repStatusBadge;
 
   readonly trainingResources = this.trainingResourceStore.resources;
+  readonly adminResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Admin'));
+  readonly ownResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Rep'));
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
 
@@ -50,7 +52,7 @@ export class AdminRepsDetials {
       if (!this.directory.findByRepId(repId)) return;
       this.loadedForRepId = repId;
       this.directory.loadDocuments(repId).subscribe();
-      this.trainingResourceStore.loadForRole(repId).subscribe();
+      this.trainingResourceStore.loadForRoleWithAdmin(repId).subscribe();
     });
   }
 

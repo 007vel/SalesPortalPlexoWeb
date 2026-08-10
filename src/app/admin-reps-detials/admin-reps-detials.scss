@@ -372,6 +372,19 @@
   margin-bottom: 0;
 }
 
+.hub-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--navy, #1b2a4a);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 20px 0 12px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
 .hub-empty {
   padding: 24px 0;
   text-align: center;

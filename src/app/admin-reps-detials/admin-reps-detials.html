@@ -118,30 +118,32 @@
 <mat-card class="section training-section">
   <div class="section-head">
     <div class="eyebrow">Training hub</div>
-    <h2>What {{ rep.name || 'this rep' }} sees</h2>
   </div>
   <div class="section-body">
-    @if (trainingResources().length === 0) {
+    <h3 class="hub-section-title">Shared by Admin</h3>
+    @if (adminResources().length === 0) {
     <div class="hub-empty">
       <mat-icon>school</mat-icon>
-      <div>No training hub activity yet.</div>
+      <div>No materials shared by Admin yet.</div>
     </div>
     } @else {
     <div class="hub-grid">
-      @for (res of trainingResources(); track res.id) {
-      <div class="hub-card">
-        <div class="hub-card-top">
-          <div class="hub-type-ic {{ res.type }}"><mat-icon>{{ typeIcon(res.type) }}</mat-icon></div>
-          @if (res.duration) { <div class="hub-duration">{{ res.duration }}</div> }
-        </div>
-        <div class="hub-card-body">
-          <div class="hub-cat">{{ res.category }}</div>
-          <h4>{{ res.title }}</h4>
-          <p>{{ res.description }}</p>
-        </div>
-        <button type="button" mat-stroked-button class="hub-open-btn" (click)="view(res)">{{ typeLabel(res.type)
-          }} &middot; Open <mat-icon>open_in_new</mat-icon></button>
-      </div>
+      @for (res of adminResources(); track res.id) {
+      <ng-container *ngTemplateOutlet="hubCard; context: { res: res }"></ng-container>
+      }
+    </div>
+    }
+
+    <h3 class="hub-section-title">{{ rep.name || 'This rep' }}'s uploads</h3>
+    @if (ownResources().length === 0) {
+    <div class="hub-empty">
+      <mat-icon>school</mat-icon>
+      <div>{{ rep.name || 'This rep' }} hasn't uploaded anything yet.</div>
+    </div>
+    } @else {
+    <div class="hub-grid">
+      @for (res of ownResources(); track res.id) {
+      <ng-container *ngTemplateOutlet="hubCard; context: { res: res }"></ng-container>
       }
     </div>
     }
@@ -150,6 +152,22 @@
 } @else {
 <p class="not-found">Rep not found.</p>
 }
+
+<ng-template #hubCard let-res="res">
+  <div class="hub-card">
+    <div class="hub-card-top">
+      <div class="hub-type-ic {{ res.type }}"><mat-icon>{{ typeIcon(res.type) }}</mat-icon></div>
+      @if (res.duration) { <div class="hub-duration">{{ res.duration }}</div> }
+    </div>
+    <div class="hub-card-body">
+      <div class="hub-cat">{{ res.category }}</div>
+      <h4>{{ res.title }}</h4>
+      <p>{{ res.description }}</p>
+    </div>
+    <button type="button" mat-stroked-button class="hub-open-btn" (click)="view(res)">{{ typeLabel(res.type)
+      }} &middot; Open <mat-icon>open_in_new</mat-icon></button>
+  </div>
+</ng-template>
 
 <ng-template #field let-label="label" let-value="value" let-isLink="isLink" let-isEmail="isEmail">
   <div class="readonly-field">
