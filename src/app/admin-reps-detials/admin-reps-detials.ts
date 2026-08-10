@@ -50,6 +50,13 @@ export class AdminRepsDetials {
     this.toast.show(`Copied ${link}`);
   }
 
+  copyEmail(): void {
+    const email = this.rep()?.email;
+    if (!email) return;
+    navigator.clipboard?.writeText(email).catch(() => { });
+    this.toast.show(`Copied ${email}`);
+  }
+
   updateStatus(status: RepStatus): void {
     this.directory.updateStatus(this.repId(), status).subscribe({
       next: () => this.toast.show(`Status updated to ${status}`),

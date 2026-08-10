@@ -53,7 +53,11 @@
           } @else {
           <span class="nm unnamed">Unnamed rep</span>
           }
-          <span class="em">{{ rep.email }}</span>
+          <span class="em-row">
+            <span class="em">{{ rep.email }}</span>
+            <button type="button" mat-icon-button class="copy-email-btn" title="Copy email"
+              (click)="$event.stopPropagation(); copyEmail(rep.email)"><mat-icon>content_copy</mat-icon></button>
+          </span>
         </div>
       </td>
     </ng-container>

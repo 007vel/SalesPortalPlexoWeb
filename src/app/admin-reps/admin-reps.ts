@@ -38,6 +38,11 @@ export class AdminReps {
     this.toast.show(`Copied ${link}`);
   }
 
+  copyEmail(email: string): void {
+    navigator.clipboard?.writeText(email).catch(() => { });
+    this.toast.show(`Copied ${email}`);
+  }
+
   openCreateModal(): void {
     this.dialog
       .open(CreateRepDialog)

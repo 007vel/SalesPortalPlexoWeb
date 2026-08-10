@@ -47,6 +47,12 @@
 <div class="lg-panel">
   <div class="lg-card">
 
+    @if (submitting() || adminSubmitting()) {
+    <div class="lg-loading-overlay">
+      <mat-progress-spinner mode="indeterminate" diameter="48" strokeWidth="4"></mat-progress-spinner>
+    </div>
+    }
+
     <div class="lg-mobile-logo">
       <span class="mark">P</span>
       <span class="wordmark">plexo<span class="dot">.</span></span>

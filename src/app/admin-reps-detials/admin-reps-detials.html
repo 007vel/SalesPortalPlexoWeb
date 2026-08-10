@@ -38,7 +38,7 @@
         <ng-container *ngTemplateOutlet="field; context: {label:'Full name', value: rep.name}"></ng-container>
         <ng-container *ngTemplateOutlet="field; context: {label:'Address', value: fullAddress()}"></ng-container>
         <ng-container *ngTemplateOutlet="field; context: {label:'Phone', value: rep.phone}"></ng-container>
-        <ng-container *ngTemplateOutlet="field; context: {label:'Email', value: rep.email}"></ng-container>
+        <ng-container *ngTemplateOutlet="field; context: {label:'Email', value: rep.email, isEmail: true}"></ng-container>
       </div>
     </mat-card>
 
@@ -114,13 +114,19 @@
 <p class="not-found">Rep not found.</p>
 }
 
-<ng-template #field let-label="label" let-value="value" let-isLink="isLink">
+<ng-template #field let-label="label" let-value="value" let-isLink="isLink" let-isEmail="isEmail">
   <div class="readonly-field">
     <div class="rl">{{ label }}</div>
     @if (!value) {
     <div class="rv empty">Not provided</div>
     } @else if (isLink) {
     <div class="rv"><a [href]="value" target="_blank">{{ value }}</a></div>
+    } @else if (isEmail) {
+    <div class="rv email-rv">
+      <span>{{ value }}</span>
+      <button type="button" mat-icon-button class="copy-btn" title="Copy email"
+        (click)="copyEmail()"><mat-icon>content_copy</mat-icon></button>
+    </div>
     } @else {
     <div class="rv">{{ value }}</div>
     }

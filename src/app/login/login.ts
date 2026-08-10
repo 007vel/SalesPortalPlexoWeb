@@ -5,15 +5,23 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { finalize } from 'rxjs';
 import { Auth } from '../auth/auth';
 import { AdminAuth } from '../admin-auth/admin-auth';
-import { MOCK_CONFIG } from '../mock-config/mock-config';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatTabsModule],
+  imports: [
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+    MatTabsModule,
+  ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -38,8 +46,8 @@ export class Login {
   });
 
   readonly adminForm = this.fb.nonNullable.group({
-    email: [MOCK_CONFIG.demoLoginCredentials.email, [Validators.required, Validators.email]],
-    repId: [MOCK_CONFIG.demoLoginCredentials.repId, [Validators.required]],
+    email: ['', [Validators.required, Validators.email]],
+    repId: ['', [Validators.required]],
   });
 
   submit(): void {

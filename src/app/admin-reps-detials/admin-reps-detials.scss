@@ -276,6 +276,18 @@
         color: var(--orange);
       }
     }
+
+    &.email-rv {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 6px 6px 13px;
+
+      span {
+        overflow-wrap: anywhere;
+      }
+    }
   }
 }
 
