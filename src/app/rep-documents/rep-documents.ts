@@ -1,12 +1,15 @@
 import { Component, computed, effect, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Auth } from '../auth/auth';
 import { RepDirectoryStore } from '../rep-directory-store/rep-directory-store';
 import { RepProfileStore } from '../rep-profile-store/rep-profile-store';
 import { DocumentTemplateStore, DocTemplateKind } from '../document-template-store/document-template-store';
 import { Toast } from '../toast/toast';
+import { detectFileKind } from '../training-resource-store/training-resource-store';
+import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 
 interface DocDef {
   kind: DocTemplateKind;
@@ -38,6 +41,7 @@ export class RepDocuments {
   private readonly repProfileStore = inject(RepProfileStore);
   private readonly documentTemplateStore = inject(DocumentTemplateStore);
   private readonly toast = inject(Toast);
+  private readonly dialog = inject(MatDialog);
   private loadedForRepId: string | null = null;
 
   readonly docCards = computed<DocCardView[]>(() => {
@@ -97,26 +101,21 @@ export class RepDocuments {
     });
   }
 
-  downloadTemplate(label: string, templateFilename: string): void {
-    const filename = templateFilename.replace(/\.pdf$/, '.txt');
-    const text = `PLEXO — ${label} (blank template)
-------------------------------------------------
-This is a prototype placeholder file standing in for:
-${templateFilename}
-
-In production this would be the real fillable PDF
-uploaded by an admin under Settings → Blank document templates.`;
-
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
-
-    this.toast.show('Download started');
+  /** Opens the document in the in-app viewer instead of forcing a download. */
+  viewDocument(oId: number, fileName: string, label: string): void {
+    this.directory.downloadDocument(oId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.dialog
+          .open(MediaViewerDialog, {
+            data: { title: label, type: detectFileKind(fileName), url, fileName },
+            maxWidth: '90vw',
+            panelClass: 'media-viewer-panel',
+          })
+          .afterClosed()
+          .subscribe(() => URL.revokeObjectURL(url));
+      },
+      error: () => this.toast.show(`Failed to open ${label}`),
+    });
   }
 }

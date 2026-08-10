@@ -24,14 +24,14 @@
         </div>
 
         <div class="rp-doc-actions">
-          <button type="button" mat-stroked-button class="ghost-btn"
-            (click)="downloadTemplate(doc.label, doc.templateFilename)">
-            <mat-icon>description</mat-icon> Blank copy
-          </button>
           @if (doc.filled) {
           <button type="button" mat-stroked-button class="ghost-btn"
+            (click)="viewDocument(doc.oId!, doc.fileName!, doc.label)">
+            <mat-icon>visibility</mat-icon> View
+          </button>
+          <button type="button" mat-stroked-button class="ghost-btn"
             (click)="downloadDocument(doc.oId!, doc.fileName!, doc.label)">
-            <mat-icon>download</mat-icon> Download mine
+            <mat-icon>download</mat-icon> Download
           </button>
           }
           <button type="button" mat-flat-button class="upload-btn" (click)="fileInput.click()">

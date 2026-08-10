@@ -3,10 +3,12 @@ import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { RepDirectoryStore, RepStatus, portalLink, repStatusBadge } from '../rep-directory-store/rep-directory-store';
-import { TrainingResourceStore, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { TrainingResource, TrainingResourceStore, detectFileKind, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { Toast } from '../toast/toast';
 
 @Component({
@@ -19,6 +21,7 @@ export class AdminRepsDetials {
   private readonly directory = inject(RepDirectoryStore);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
   private readonly toast = inject(Toast);
+  private readonly dialog = inject(MatDialog);
   private loadedForRepId: string | null = null;
 
   readonly repId = input.required<string>();
@@ -85,5 +88,33 @@ export class AdminRepsDetials {
       },
       error: () => this.toast.show('Failed to update status'),
     });
+  }
+
+  /** Opens an agreement/W-4 document in the in-app viewer instead of forcing a download. */
+  viewDocument(oId: number, fileName: string, label: string): void {
+    this.directory.downloadDocument(oId).subscribe({
+      next: (blob) => this.openViewer({ title: label, type: detectFileKind(fileName), blob, fileName }),
+      error: () => this.toast.show(`Failed to open ${label}`),
+    });
+  }
+
+  /** Opens a training hub resource in the in-app viewer instead of following its URL directly, which forces a download. */
+  view(resource: TrainingResource): void {
+    this.trainingResourceStore.downloadDocument(resource.oId).subscribe({
+      next: (blob) => this.openViewer({ title: resource.title, type: resource.type, blob, fileName: resource.fileName }),
+      error: () => this.toast.show(`Failed to open ${resource.title}`),
+    });
+  }
+
+  private openViewer(args: { title: string; type: ReturnType<typeof detectFileKind>; blob: Blob; fileName: string }): void {
+    const url = URL.createObjectURL(args.blob);
+    this.dialog
+      .open(MediaViewerDialog, {
+        data: { title: args.title, type: args.type, url, fileName: args.fileName },
+        maxWidth: '90vw',
+        panelClass: 'media-viewer-panel',
+      })
+      .afterClosed()
+      .subscribe(() => URL.revokeObjectURL(url));
   }
 }

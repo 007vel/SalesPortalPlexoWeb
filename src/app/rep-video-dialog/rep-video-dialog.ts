@@ -7,20 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Auth } from '../auth/auth';
 import { Toast } from '../toast/toast';
-import { TrainingResourceStore } from '../training-resource-store/training-resource-store';
-
-type UploadKind = 'video' | 'image' | 'pdf' | 'doc';
-
-const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'webm', 'mkv', 'm4v'];
-const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'];
-
-function detectKind(fileName: string): UploadKind {
-  const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
-  if (VIDEO_EXTENSIONS.includes(extension)) return 'video';
-  if (IMAGE_EXTENSIONS.includes(extension)) return 'image';
-  if (extension === 'pdf') return 'pdf';
-  return 'doc';
-}
+import { TrainingResourceStore, TrainingResourceType, detectFileKind } from '../training-resource-store/training-resource-store';
 
 @Component({
   selector: 'app-rep-video-dialog',
@@ -41,7 +28,7 @@ export class RepVideoDialog {
   private pendingFile: File | null = null;
 
   readonly pendingFileName = signal<string | null>(null);
-  readonly pendingFileKind = signal<UploadKind | null>(null);
+  readonly pendingFileKind = signal<TrainingResourceType | null>(null);
   readonly isVideo = computed(() => this.pendingFileKind() === 'video');
   readonly submitting = signal(false);
 
@@ -59,7 +46,7 @@ export class RepVideoDialog {
 
     this.pendingFile = file;
     this.pendingFileName.set(file.name);
-    this.pendingFileKind.set(detectKind(file.name));
+    this.pendingFileKind.set(detectFileKind(file.name));
 
     const titleControl = this.form.controls.title;
     if (!titleControl.value.trim()) {

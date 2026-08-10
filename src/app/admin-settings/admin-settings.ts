@@ -4,9 +4,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { TrainingResourceStore, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { TrainingResource, TrainingResourceStore, detectFileKind, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { RepDirectoryStore, RepDocumentRecord } from '../rep-directory-store/rep-directory-store';
 import { RepVideoDialog } from '../rep-video-dialog/rep-video-dialog';
+import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { Toast } from '../toast/toast';
 
 const DOC_KIND_LABEL: Record<string, string> = { agreement: 'Representative Agreement', w4: 'W-4 Form' };
@@ -70,9 +71,9 @@ export class AdminSettings {
     this.trainingResourceStore.remove(id).subscribe(() => this.toast.show('Resource removed'));
   }
 
-  viewResource(oId: number): void {
-    this.trainingResourceStore.downloadDocument(oId).subscribe({
-      next: (blob) => this.openBlob(blob),
+  viewResource(resource: TrainingResource): void {
+    this.trainingResourceStore.downloadDocument(resource.oId).subscribe({
+      next: (blob) => this.openViewer(blob, resource.title, resource.type, resource.fileName),
       error: () => this.toast.show('Failed to open resource'),
     });
   }
@@ -84,9 +85,9 @@ export class AdminSettings {
     });
   }
 
-  viewDocument(oId: number): void {
-    this.directory.downloadDocument(oId).subscribe({
-      next: (blob) => this.openBlob(blob),
+  viewDocument(doc: DocumentRow): void {
+    this.directory.downloadDocument(doc.oId).subscribe({
+      next: (blob) => this.openViewer(blob, doc.label, detectFileKind(doc.fileName), doc.fileName),
       error: () => this.toast.show('Failed to open document'),
     });
   }
@@ -98,10 +99,17 @@ export class AdminSettings {
     });
   }
 
-  private openBlob(blob: Blob): void {
+  /** Opens the file in the in-app media viewer instead of a new browser tab — the file endpoint forces a download rather than letting the browser render it. */
+  private openViewer(blob: Blob, title: string, type: TrainingResource['type'], fileName: string): void {
     const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    this.dialog
+      .open(MediaViewerDialog, {
+        data: { title, type, url, fileName },
+        maxWidth: '90vw',
+        panelClass: 'media-viewer-panel',
+      })
+      .afterClosed()
+      .subscribe(() => URL.revokeObjectURL(url));
   }
 
   private triggerDownload(blob: Blob, fileName: string): void {

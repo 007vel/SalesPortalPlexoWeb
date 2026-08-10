@@ -9,6 +9,7 @@ import { TrainingResource, TrainingResourceStore, trainingResourceTypeIcon, trai
 import { Toast } from '../toast/toast';
 import { RepVideoDialog } from '../rep-video-dialog/rep-video-dialog';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
+import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { Auth } from '../auth/auth';
 
 @Component({
@@ -55,6 +56,28 @@ export class RepTrainingHub {
   openAddVideoModal(): void {
     this.dialog.open(RepVideoDialog).afterClosed().subscribe((added) => {
       if (added) this.toast.show('Added to the hub');
+    });
+  }
+
+  /**
+   * Opens the file in the in-app media viewer instead of following `res.url` directly —
+   * that endpoint forces a download rather than letting the browser render it. Fetching the
+   * bytes as a blob and feeding them to an <img>/<video>/<iframe> renders inline regardless.
+   */
+  view(resource: TrainingResource): void {
+    this.trainingResourceStore.downloadDocument(resource.oId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.dialog
+          .open(MediaViewerDialog, {
+            data: { title: resource.title, type: resource.type, url, fileName: resource.fileName },
+            maxWidth: '90vw',
+            panelClass: 'media-viewer-panel',
+          })
+          .afterClosed()
+          .subscribe(() => URL.revokeObjectURL(url));
+      },
+      error: () => this.toast.show(`Failed to open ${resource.title}`),
     });
   }
 

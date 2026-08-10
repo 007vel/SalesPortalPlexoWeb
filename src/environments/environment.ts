@@ -7,5 +7,5 @@
  */
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://apisales.plexopro.com/api',
+  apiBaseUrl: 'https://localhost:44372/api',
 };

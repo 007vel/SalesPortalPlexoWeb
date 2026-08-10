@@ -74,6 +74,8 @@
             </div>
           </div>
           @if (rep.docs.agreement; as doc) {
+          <button type="button" mat-icon-button class="action-btn" title="View"
+            (click)="viewDocument(doc.oId, doc.name, 'Representative Agreement')"><mat-icon>visibility</mat-icon></button>
           <button type="button" mat-icon-button class="action-btn" title="Download"
             (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
           }
@@ -89,6 +91,8 @@
             </div>
           </div>
           @if (rep.docs.w4; as doc) {
+          <button type="button" mat-icon-button class="action-btn" title="View"
+            (click)="viewDocument(doc.oId, doc.name, 'W-4 Form')"><mat-icon>visibility</mat-icon></button>
           <button type="button" mat-icon-button class="action-btn" title="Download"
             (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
           }
@@ -135,8 +139,8 @@
           <h4>{{ res.title }}</h4>
           <p>{{ res.description }}</p>
         </div>
-        <a mat-stroked-button class="hub-open-btn" [href]="res.url" target="_blank" rel="noopener">{{ typeLabel(res.type)
-          }} &middot; Open <mat-icon>open_in_new</mat-icon></a>
+        <button type="button" mat-stroked-button class="hub-open-btn" (click)="view(res)">{{ typeLabel(res.type)
+          }} &middot; Open <mat-icon>open_in_new</mat-icon></button>
       </div>
       }
     </div>

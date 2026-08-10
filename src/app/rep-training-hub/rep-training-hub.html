@@ -29,7 +29,7 @@
     <h3>{{ feat.title }}</h3>
     <p>{{ feat.description }}</p>
   </div>
-  <a mat-flat-button class="open-btn" [href]="feat.url" target="_blank" rel="noopener">Open</a>
+  <button type="button" mat-flat-button class="open-btn" (click)="view(feat)">Open</button>
 </div>
 }
 
@@ -90,7 +90,7 @@
       <h4>{{ res.title }}</h4>
       <p>{{ res.description }}</p>
     </div>
-    <a mat-stroked-button class="open-link-btn" [href]="res.url" target="_blank" rel="noopener">{{ typeLabel(res.type)
-      }} · Open <mat-icon>open_in_new</mat-icon></a>
+    <button type="button" mat-stroked-button class="open-link-btn" (click)="view(res)">{{ typeLabel(res.type)
+      }} · Open <mat-icon>open_in_new</mat-icon></button>
   </mat-card>
 </ng-template>
