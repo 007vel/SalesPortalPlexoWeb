@@ -42,6 +42,7 @@ export interface RepRecord {
   zip: string;
   googleLink: string;
   resourceLink: string;
+  portalLink: string;
   status: RepStatus;
   docs: RepDocs;
   commissions: CommissionDay[];
@@ -72,6 +73,7 @@ interface RepDto {
   zip: string | null;
   googleLink: string | null;
   resourceLink: string | null;
+  portalLink: string | null;
   status: number;
   createdAt: string;
   updatedAt: string;
@@ -303,6 +305,7 @@ export class RepDirectoryStore {
       zip: dto.zip ?? '',
       googleLink: dto.googleLink ?? '',
       resourceLink: dto.resourceLink ?? '',
+      portalLink: dto.portalLink ?? '',
       status: STATUS_FROM_API[dto.status] ?? 'pending',
       docs: existing?.docs ?? { agreement: null, w4: null },
       commissions: existing?.commissions ?? emptyCommissionHistory(14),
