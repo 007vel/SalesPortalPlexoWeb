@@ -1,8 +1,10 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize } from 'rxjs';
 import { Auth } from '../auth/auth';
 import { RepDirectoryStore } from '../rep-directory-store/rep-directory-store';
 import { RepProfileStore } from '../rep-profile-store/rep-profile-store';
@@ -22,6 +24,7 @@ interface DocCardView extends DocDef {
   statusText: string;
   oId: number | null;
   fileName: string | null;
+  uploading: boolean;
 }
 
 const DOC_DEFS: DocDef[] = [
@@ -31,7 +34,7 @@ const DOC_DEFS: DocDef[] = [
 
 @Component({
   selector: 'app-rep-documents',
-  imports: [MatButtonModule, MatCardModule, MatIconModule],
+  imports: [MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './rep-documents.html',
   styleUrl: './rep-documents.scss',
 })
@@ -44,9 +47,12 @@ export class RepDocuments {
   private readonly dialog = inject(MatDialog);
   private loadedForRepId: string | null = null;
 
+  private readonly uploadingKinds = signal<ReadonlySet<DocTemplateKind>>(new Set());
+
   readonly docCards = computed<DocCardView[]>(() => {
     const docs = this.repProfileStore.profile().docs;
     const templates = this.documentTemplateStore.templates();
+    const uploading = this.uploadingKinds();
     return DOC_DEFS.map((def) => {
       const record = docs[def.kind];
       return {
@@ -56,6 +62,7 @@ export class RepDocuments {
         statusText: record ? `Uploaded — ${record.name} · ${record.uploadedAt}` : 'Not uploaded yet',
         oId: record?.oId ?? null,
         fileName: record?.name ?? null,
+        uploading: uploading.has(def.kind),
       };
     });
   });
@@ -77,11 +84,24 @@ export class RepDocuments {
     const file = input.files?.[0];
     if (!file) return;
 
-    this.repProfileStore.setDocument(kind, file).subscribe({
-      next: () => this.toast.show(`${label} uploaded`),
-      error: () => this.toast.show(`Failed to upload ${label}`),
-    });
+    this.setUploading(kind, true);
+    this.repProfileStore
+      .setDocument(kind, file)
+      .pipe(finalize(() => this.setUploading(kind, false)))
+      .subscribe({
+        next: () => this.toast.show(`${label} uploaded`),
+        error: () => this.toast.show(`Failed to upload ${label}`),
+      });
     input.value = '';
+  }
+
+  private setUploading(kind: DocTemplateKind, uploading: boolean): void {
+    this.uploadingKinds.update((kinds) => {
+      const next = new Set(kinds);
+      if (uploading) next.add(kind);
+      else next.delete(kind);
+      return next;
+    });
   }
 
   downloadDocument(oId: number, fileName: string, label: string): void {

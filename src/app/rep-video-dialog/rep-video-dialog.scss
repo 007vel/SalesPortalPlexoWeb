@@ -40,6 +40,18 @@
 .hidden-file-input {
   display: none;
 }
+.submit-btn ::ng-deep .mdc-button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.submit-btn mat-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: var(--orange);
+  --mat-progress-spinner-active-indicator-color: var(--orange);
+}
+.submit-btn ::ng-deep .mat-mdc-progress-spinner circle {
+  stroke: var(--orange) !important;
+}
 
 @media (max-width: 520px) {
   .field-row {
