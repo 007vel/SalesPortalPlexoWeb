@@ -40,7 +40,7 @@ export class RepTrainingHub {
   constructor() {
     const repId = this.auth.session()?.repId;
     if (repId) {
-      this.trainingResourceStore.loadForRole(repId).subscribe();
+      this.trainingResourceStore.loadForRoleWithAdmin(repId).subscribe();
     }
   }
 

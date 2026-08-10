@@ -110,6 +110,39 @@
     </mat-card>
   </div>
 </div>
+
+<mat-card class="section training-section">
+  <div class="section-head">
+    <div class="eyebrow">Training hub</div>
+    <h2>What {{ rep.name || 'this rep' }} sees</h2>
+  </div>
+  <div class="section-body">
+    @if (trainingResources().length === 0) {
+    <div class="hub-empty">
+      <mat-icon>school</mat-icon>
+      <div>No training hub activity yet.</div>
+    </div>
+    } @else {
+    <div class="hub-grid">
+      @for (res of trainingResources(); track res.id) {
+      <div class="hub-card">
+        <div class="hub-card-top">
+          <div class="hub-type-ic {{ res.type }}"><mat-icon>{{ typeIcon(res.type) }}</mat-icon></div>
+          @if (res.duration) { <div class="hub-duration">{{ res.duration }}</div> }
+        </div>
+        <div class="hub-card-body">
+          <div class="hub-cat">{{ res.category }}</div>
+          <h4>{{ res.title }}</h4>
+          <p>{{ res.description }}</p>
+        </div>
+        <a mat-stroked-button class="hub-open-btn" [href]="res.url" target="_blank" rel="noopener">{{ typeLabel(res.type)
+          }} &middot; Open <mat-icon>open_in_new</mat-icon></a>
+      </div>
+      }
+    </div>
+    }
+  </div>
+</mat-card>
 } @else {
 <p class="not-found">Rep not found.</p>
 }

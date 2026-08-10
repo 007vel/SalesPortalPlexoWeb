@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -34,6 +34,9 @@ export class RepVideoDialog {
   private readonly toast = inject(Toast);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
   private readonly dialogRef = inject(MatDialogRef<RepVideoDialog, boolean>);
+  private readonly data = inject<{ mode?: 'admin' } | null>(MAT_DIALOG_DATA, { optional: true });
+
+  readonly isAdminUpload = this.data?.mode === 'admin';
 
   private pendingFile: File | null = null;
 
@@ -87,10 +90,14 @@ export class RepVideoDialog {
       this.toast.show('Choose a file to upload');
       return;
     }
-    const repId = this.auth.session()?.repId;
-    if (!repId) {
-      this.toast.show('You must be signed in to upload');
-      return;
+
+    let roleId: string | undefined;
+    if (!this.isAdminUpload) {
+      roleId = this.auth.session()?.repId;
+      if (!roleId) {
+        this.toast.show('You must be signed in to upload');
+        return;
+      }
     }
 
     this.submitting.set(true);
@@ -101,7 +108,8 @@ export class RepVideoDialog {
           category: trimmedCategory,
           length: this.isVideo() ? duration.trim() : '',
           description: description.trim() || `Uploaded file: ${file.name}`,
-          roleId: repId,
+          roleId,
+          uploadedBy: this.isAdminUpload ? 'Admin' : 'Rep',
         },
         file,
       )

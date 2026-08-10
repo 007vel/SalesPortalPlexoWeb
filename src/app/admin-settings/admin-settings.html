@@ -10,13 +10,17 @@
     <div class="num">{{ resources().length }}</div>
     <div class="lbl">Training resources</div>
   </mat-card>
-  <mat-card class="stat-card">
+  <!-- <mat-card class="stat-card">
     <div class="num">{{ documentRows().length }}</div>
     <div class="lbl">Documents</div>
-  </mat-card>
+  </mat-card> -->
 </div>
 
-<h3 class="section-title">Training &amp; resource hub</h3>
+<div class="section-header">
+  <h3 class="section-title">Training &amp; resource hub</h3>
+  <button type="button" mat-flat-button color="primary" class="upload-btn"
+    (click)="openUploadModal()"><mat-icon>add</mat-icon> Upload</button>
+</div>
 <mat-card class="table-card">
   @if (resources().length === 0) {
     <div class="empty-state">
@@ -42,17 +46,13 @@
         <th mat-header-cell *matHeaderCellDef>Type</th>
         <td mat-cell *matCellDef="let res" class="muted-cell" data-label="Type">{{ typeLabel(res.type) }}</td>
       </ng-container>
-      <ng-container matColumnDef="repId">
-        <th mat-header-cell *matHeaderCellDef>Rep Id</th>
-        <td mat-cell *matCellDef="let res" data-label="Rep Id"><span class="chip-id">{{ res.repId }}</span></td>
-      </ng-container>
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let res">
           <div class="row-actions">
             <button type="button" mat-icon-button class="action-btn" title="View" (click)="viewResource(res.oId)"><mat-icon>visibility</mat-icon></button>
             <button type="button" mat-icon-button class="action-btn" title="Download" (click)="downloadResource(res.oId, res.fileName)"><mat-icon>download</mat-icon></button>
-            <!-- <button type="button" mat-icon-button class="action-btn action-danger" title="Delete" (click)="deleteResource(res.id)"><mat-icon>delete</mat-icon></button> -->
+            <button type="button" mat-icon-button class="action-btn action-danger" title="Delete" (click)="deleteResource(res.id)"><mat-icon>delete</mat-icon></button>
           </div>
         </td>
       </ng-container>
@@ -62,7 +62,7 @@
   }
 </mat-card>
 
-<h3 class="section-title">Documents</h3>
+<!-- <h3 class="section-title">Documents</h3>
 <mat-card class="table-card">
   @if (documentRows().length === 0) {
     <div class="empty-state">
@@ -96,4 +96,6 @@
       <tr mat-row *matRowDef="let row; columns: documentColumns;" class="resource-row"></tr>
     </table>
   }
-</mat-card>
+</mat-card> -->
+
+

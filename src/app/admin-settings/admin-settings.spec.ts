@@ -26,8 +26,8 @@ describe('AdminSettings', () => {
         createdAt: '2026-08-05T00:00:00Z', updatedAt: '2026-08-05T00:00:00Z',
       },
     ]);
-    httpMock.expectOne(apiUrl('traininghub')).flush([
-      { oId: 9, roleId: '1001', title: 'Renewal pitch', category: 'Team Uploads', description: '', fileType: 'Video', fileName: 'a.mp4', length: '12 min', uploadedAt: '2026-08-06T00:00:00Z' },
+    httpMock.expectOne((r) => r.url === apiUrl('traininghub/filter')).flush([
+      { oId: 9, roleId: null, title: 'Admin upload', category: 'Team Uploads', description: '', fileType: 'Video', fileName: 'a.mp4', length: '12 min', uploadedAt: '2026-08-06T00:00:00Z' },
     ]);
     httpMock.expectOne(apiUrl('documents')).flush([
       { oId: 5, repId: '1001', kind: 'agreement', fileName: 'signed.pdf', uploadedAt: '2026-08-06T00:00:00Z' },
@@ -42,9 +42,9 @@ describe('AdminSettings', () => {
     expect(component).toBeTruthy();
   });
 
-  it('loads every rep\'s training hub uploads', () => {
+  it('loads Admin\'s training hub uploads', () => {
     expect(component.resources().length).toBe(1);
-    expect(component.resources()[0]).toMatchObject({ title: 'Renewal pitch', repId: '1001' });
+    expect(component.resources()[0]).toMatchObject({ title: 'Admin upload', repId: '' });
   });
 
   it('joins documents with the rep directory to resolve the uploader\'s name', () => {

@@ -35,6 +35,7 @@ describe('TrainingResourceStore', () => {
           length: '12 min',
           description: 'A live call example.',
           roleId: '1001',
+          uploadedBy: 'Rep',
         },
         file,
       )
@@ -45,6 +46,7 @@ describe('TrainingResourceStore', () => {
     expect(req.request.body instanceof FormData).toBe(true);
     const body = req.request.body as FormData;
     expect(body.get('roleId')).toBe('1001');
+    expect(body.get('uploadedBy')).toBe('Rep');
     expect(body.get('title')).toBe('Renewal pitch walkthrough');
     expect(body.get('file')).toBe(file);
 
@@ -101,8 +103,22 @@ describe('TrainingResourceStore', () => {
     expect(store.resources().map((r) => r.repId).sort()).toEqual(['1001', '1002']);
   });
 
+  it('loadAdminUploads GETs api/traininghub/filter?includeAdmin=true and populates the list with Admin-only docs', () => {
+    store.loadAdminUploads().subscribe();
+
+    const req = httpMock.expectOne((r) => r.url === apiUrl('traininghub/filter'));
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('includeAdmin')).toBe('true');
+    req.flush([
+      { oId: 5, roleId: null, title: 'Admin doc', category: 'Policies', description: '', fileType: 'Pdf', fileName: 'policy.pdf', length: null, uploadedAt: '2026-08-06T00:00:00Z' },
+    ]);
+
+    expect(store.resources().length).toBe(1);
+    expect(store.resources()[0]).toMatchObject({ title: 'Admin doc', oId: 5, repId: '' });
+  });
+
   it('remove deletes the backend document and drops it from the list', () => {
-    store.uploadDocument({ title: 'A', category: 'X', length: '', description: '', roleId: '1001' }, new File(['a'], 'a.pdf')).subscribe();
+    store.uploadDocument({ title: 'A', category: 'X', length: '', description: '', roleId: '1001', uploadedBy: 'Rep' }, new File(['a'], 'a.pdf')).subscribe();
     httpMock.expectOne(apiUrl('traininghub')).flush({
       oId: 3, roleId: '1001', title: 'A', category: 'X', description: '', fileType: 'Pdf', fileName: 'a.pdf', length: null, uploadedAt: '2026-08-06T00:00:00Z',
     });

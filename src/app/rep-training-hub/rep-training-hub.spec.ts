@@ -39,8 +39,10 @@ describe('RepTrainingHub', () => {
     component = fixture.componentInstance;
     await fixture.whenStable();
 
-    const req = httpMock.expectOne(apiUrl('traininghub/role/1001'));
+    const req = httpMock.expectOne((r) => r.url === apiUrl('traininghub/filter'));
     expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('roleId')).toBe('1001');
+    expect(req.request.params.get('includeAdmin')).toBe('true');
     req.flush([]);
   });
 });

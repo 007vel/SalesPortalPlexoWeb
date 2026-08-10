@@ -6,6 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { RepDirectoryStore, RepStatus, portalLink, repStatusBadge } from '../rep-directory-store/rep-directory-store';
+import { TrainingResourceStore, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { Toast } from '../toast/toast';
 
 @Component({
@@ -16,6 +17,7 @@ import { Toast } from '../toast/toast';
 })
 export class AdminRepsDetials {
   private readonly directory = inject(RepDirectoryStore);
+  private readonly trainingResourceStore = inject(TrainingResourceStore);
   private readonly toast = inject(Toast);
   private loadedForRepId: string | null = null;
 
@@ -31,15 +33,21 @@ export class AdminRepsDetials {
   readonly portalLink = portalLink;
   readonly statusBadge = repStatusBadge;
 
+  readonly trainingResources = this.trainingResourceStore.resources;
+  readonly typeIcon = trainingResourceTypeIcon;
+  readonly typeLabel = trainingResourceTypeLabel;
+
   constructor() {
-    // Docs live in RepDirectoryStore's in-memory list — fetch this rep's once it's actually
-    // present there, and again whenever admin navigates to a different rep's detail page.
+    // Docs (and this rep's Training Hub view) live in shared in-memory stores — fetch them once
+    // this rep is actually present in the directory, and again whenever admin navigates to a
+    // different rep's detail page.
     effect(() => {
       const repId = this.repId();
       if (repId === this.loadedForRepId) return;
       if (!this.directory.findByRepId(repId)) return;
       this.loadedForRepId = repId;
       this.directory.loadDocuments(repId).subscribe();
+      this.trainingResourceStore.loadForRole(repId).subscribe();
     });
   }
 
