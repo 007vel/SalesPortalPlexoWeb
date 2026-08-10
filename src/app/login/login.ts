@@ -1,6 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,8 +8,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { finalize } from 'rxjs';
+import { Api } from '../api/api';
 import { Auth } from '../auth/auth';
 import { AdminAuth } from '../admin-auth/admin-auth';
+
+interface RepValidateResponseDto {
+  repId: string;
+  email: string;
+}
 
 @Component({
   selector: 'app-login',
@@ -25,11 +31,13 @@ import { AdminAuth } from '../admin-auth/admin-auth';
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login {
+export class Login implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(Auth);
   private readonly adminAuth = inject(AdminAuth);
+  private readonly api = inject(Api);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly activeTabIndex = signal(0);
 
@@ -49,6 +57,24 @@ export class Login {
     email: ['', [Validators.required, Validators.email]],
     repId: ['', [Validators.required]],
   });
+
+  ngOnInit(): void {
+    const portalRepId = this.route.snapshot.paramMap.get('portalRepId');
+    if (!portalRepId) return;
+
+    this.submitting.set(true);
+    this.api.get<RepValidateResponseDto>(`reps/validate/${portalRepId}`).subscribe({
+      next: (rep) => {
+        this.form.patchValue({ email: rep.email, repId: rep.repId });
+        this.submitting.set(false);
+        this.submit();
+      },
+      error: () => {
+        this.submitting.set(false);
+        this.loginFailed.set(true);
+      },
+    });
+  }
 
   submit(): void {
     if (this.form.invalid || this.submitting()) {

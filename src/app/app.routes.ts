@@ -43,5 +43,6 @@ export const routes: Routes = [
       { path: 'settings', component: AdminSettings },
     ],
   },
+  { path: ':portalRepId', component: Login },
   { path: '**', redirectTo: 'login' },
 ];
