@@ -98,4 +98,8 @@
   }
 </mat-card> -->
 
-
+@if (viewing()) {
+<div class="as-loading-overlay">
+  <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
+</div>
+}

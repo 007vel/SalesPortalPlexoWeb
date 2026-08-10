@@ -3,6 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { TrainingResource, TrainingResourceStore, detectFileKind, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { RepDirectoryStore, RepDocumentRecord } from '../rep-directory-store/rep-directory-store';
@@ -22,7 +23,7 @@ interface DocumentRow {
 
 @Component({
   selector: 'app-admin-settings',
-  imports: [MatButtonModule, MatCardModule, MatIconModule, MatTableModule],
+  imports: [MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatTableModule],
   templateUrl: './admin-settings.html',
   styleUrl: './admin-settings.scss',
 })
@@ -33,6 +34,11 @@ export class AdminSettings {
   private readonly toast = inject(Toast);
 
   private readonly documentsSignal = signal<RepDocumentRecord[]>([]);
+
+  /** Minimum time the view-loading overlay stays up — keeps it from flashing on fast/mocked responses. */
+  private static readonly MIN_VIEWING_MS = 200;
+
+  readonly viewing = signal(false);
 
   readonly resources = this.trainingResourceStore.resources;
   readonly typeIcon = trainingResourceTypeIcon;
@@ -72,10 +78,21 @@ export class AdminSettings {
   }
 
   viewResource(resource: TrainingResource): void {
+    this.viewing.set(true);
+    const startedAt = Date.now();
     this.trainingResourceStore.downloadDocument(resource.oId).subscribe({
-      next: (blob) => this.openViewer(blob, resource.title, resource.type, resource.fileName),
-      error: () => this.toast.show('Failed to open resource'),
+      next: (blob) => this.stopViewing(startedAt, () => this.openViewer(blob, resource.title, resource.type, resource.fileName)),
+      error: () => this.stopViewing(startedAt, () => this.toast.show('Failed to open resource')),
     });
+  }
+
+  /** Keeps the loading overlay up for at least MIN_VIEWING_MS so it doesn't flash on fast/mocked responses. */
+  private stopViewing(startedAt: number, after: () => void): void {
+    const remaining = AdminSettings.MIN_VIEWING_MS - (Date.now() - startedAt);
+    setTimeout(() => {
+      this.viewing.set(false);
+      after();
+    }, Math.max(remaining, 0));
   }
 
   downloadResource(oId: number, fileName: string): void {

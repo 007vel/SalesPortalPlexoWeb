@@ -153,6 +153,12 @@
 <p class="not-found">Rep not found.</p>
 }
 
+@if (viewing()) {
+<div class="ard-loading-overlay">
+  <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
+</div>
+}
+
 <ng-template #hubCard let-res="res">
   <div class="hub-card">
     <div class="hub-card-top">
