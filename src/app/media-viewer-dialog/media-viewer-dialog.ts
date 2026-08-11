@@ -8,7 +8,11 @@ import { TrainingResourceType } from '../training-resource-store/training-resour
 export interface MediaViewerDialogData {
   title: string;
   type: TrainingResourceType;
-  /** Object URL (`URL.createObjectURL`) for the fetched blob — owned by the caller, which revokes it once this dialog closes. */
+  /**
+   * Either a blob object URL (`URL.createObjectURL`, owned by the caller, which revokes it once this
+   * dialog closes) or, for videos, the raw range-enabled streaming URL — used directly as the <video>
+   * src so playback can start without waiting for the whole file to download.
+   */
   url: string;
   fileName: string;
 }
@@ -31,12 +35,23 @@ export class MediaViewerDialog {
     this.dialogRef.close();
   }
 
+  /**
+   * Fetches to a blob before saving rather than setting `<a download>` on `data.url` directly —
+   * for video that url is a cross-origin stream URL, and the `download` attribute is ignored by
+   * browsers on cross-origin links, so it wouldn't reliably force a save.
+   */
   download(): void {
-    const a = document.createElement('a');
-    a.href = this.data.url;
-    a.download = this.data.fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    fetch(this.data.url)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = this.data.fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      });
   }
 }

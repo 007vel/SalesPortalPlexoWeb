@@ -65,11 +65,21 @@ export class RepTrainingHub {
   }
 
   /**
-   * Opens the file in the in-app media viewer instead of following `res.url` directly —
-   * that endpoint forces a download rather than letting the browser render it. Fetching the
-   * bytes as a blob and feeding them to an <img>/<video>/<iframe> renders inline regardless.
+   * Opens the file in the in-app media viewer. Images/PDFs are fetched as a blob first since
+   * the backend renders them inline regardless. Videos instead get the raw streaming URL —
+   * the backend serves those with range support, so the <video> element can start playing and
+   * seek without waiting for the whole file to download first.
    */
   view(resource: TrainingResource): void {
+    if (resource.type === 'video') {
+      this.dialog.open(MediaViewerDialog, {
+        data: { title: resource.title, type: resource.type, url: resource.url, fileName: resource.fileName },
+        maxWidth: '90vw',
+        panelClass: 'media-viewer-panel',
+      });
+      return;
+    }
+
     this.viewing.set(true);
     const startedAt = Date.now();
     this.trainingResourceStore.downloadDocument(resource.oId).subscribe({
