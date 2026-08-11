@@ -98,10 +98,11 @@ describe('RepVideoDialog', () => {
     expect(body.get('file')).toBe(file);
     expect(body.get('roleId')).toBe('1001');
     expect(body.get('category')).toBe('Team Uploads');
+    expect(body.get('language')).toBe('English');
 
     req.flush({
       oId: 1, roleId: '1001', title: 'renewal-pitch', category: 'Team Uploads', description: '',
-      fileType: 'Video', fileName: 'renewal-pitch.mp4', length: '', uploadedBy: 'Rep', uploadedAt: '2026-08-06T00:00:00Z',
+      fileType: 'Video', fileName: 'renewal-pitch.mp4', length: '', uploadedBy: 'Rep', uploadedAt: '2026-08-06T00:00:00Z', language: 'English',
     });
 
     expect(trainingResourceStore.resources().length).toBe(1);
@@ -156,7 +157,7 @@ describe('RepVideoDialog (admin mode)', () => {
 
     req.flush({
       oId: 2, roleId: null, title: 'onboarding-guide', category: 'Team Uploads', description: '',
-      fileType: 'Pdf', fileName: 'onboarding-guide.pdf', length: null, uploadedBy: 'Admin', uploadedAt: '2026-08-06T00:00:00Z',
+      fileType: 'Pdf', fileName: 'onboarding-guide.pdf', length: null, uploadedBy: 'Admin', uploadedAt: '2026-08-06T00:00:00Z', language: 'English',
     });
 
     expect(dialogRef.close).toHaveBeenCalledWith(true);

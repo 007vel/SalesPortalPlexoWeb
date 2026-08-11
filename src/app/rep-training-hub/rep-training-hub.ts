@@ -47,6 +47,11 @@ export class RepTrainingHub {
   readonly filteredAdminResources = computed(() => this.filteredResources().filter((r) => r.uploadedBy === 'Admin'));
   readonly filteredOwnResources = computed(() => this.filteredResources().filter((r) => r.uploadedBy === 'Rep'));
 
+  readonly filteredAdminResourcesEnglish = computed(() => this.filteredAdminResources().filter((r) => r.language === 'English'));
+  readonly filteredAdminResourcesSpanish = computed(() => this.filteredAdminResources().filter((r) => r.language === 'Spanish'));
+  readonly filteredOwnResourcesEnglish = computed(() => this.filteredOwnResources().filter((r) => r.language === 'English'));
+  readonly filteredOwnResourcesSpanish = computed(() => this.filteredOwnResources().filter((r) => r.language === 'Spanish'));
+
   constructor() {
     const repId = this.auth.session()?.repId;
     if (repId) {

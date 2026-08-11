@@ -1,11 +1,31 @@
+:host ::ng-deep .mat-mdc-dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.title-ic {
+  color: var(--orange);
+}
+
 .sub {
   color: var(--muted);
   font-size: 13px;
-  margin: 0 0 16px;
+  margin: 0 0 18px;
 }
+
 .full-width {
   width: 100%;
 }
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--faint);
+  margin: 4px 0 12px;
+}
+
 .field-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -14,32 +34,172 @@
 .field-row.single {
   grid-template-columns: 1fr;
 }
-.file-pick {
+
+mat-form-field mat-icon[matPrefix] {
+  color: var(--faint);
+  margin-right: 8px;
+  font-size: 19px;
+  width: 19px;
+  height: 19px;
+}
+
+// ---------- dropzone ----------
+.dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  padding: 22px 16px;
+  border: 1.5px dashed var(--border);
+  border-radius: 14px;
+  background: #FAFBFD;
+  cursor: pointer;
+  margin-bottom: 18px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    border-color: var(--orange);
+    background: #FFF8F1;
+  }
+
+  &.drag-active {
+    border-color: var(--orange);
+    border-style: solid;
+    background: #FFF3E8;
+  }
+
+  &.has-file {
+    padding: 12px 14px;
+    cursor: default;
+  }
+}
+
+.dz-ic {
+  color: var(--orange);
+  font-size: 30px;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 4px;
+}
+.dz-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.dz-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.dz-file {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 12px 14px;
-  border: 1.5px dashed var(--border);
-  border-radius: 10px;
-  background: #FAFBFD;
-  margin-bottom: 16px;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
 }
-.file-pick .fp-txt {
+.dz-file-ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #EEF3F9;
+  color: var(--navy);
+
+  &.video {
+    background: #FCEEED;
+    color: #D64545;
+  }
+  &.image {
+    background: #F1ECFB;
+    color: #6E4FC9;
+  }
+  &.pdf {
+    background: #EEF3F9;
+    color: var(--navy);
+  }
+  &.doc {
+    background: #E5F5EC;
+    color: #1A8A5F;
+  }
+}
+.dz-file-txt {
   flex: 1;
   min-width: 0;
-  font-size: 12.5px;
-  color: var(--muted);
-  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+
+  b {
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  span {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
 }
-.file-pick .fp-txt b {
-  display: block;
-  font-size: 13px;
-  color: var(--text);
-  margin-bottom: 1px;
+.dz-remove {
+  flex-shrink: 0;
+  color: var(--faint);
+
+  &:hover {
+    color: var(--text);
+  }
 }
 .hidden-file-input {
   display: none;
 }
+
+// ---------- language toggle ----------
+.language-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.language-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+
+  mat-icon {
+    color: var(--faint);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+.language-row ::ng-deep mat-button-toggle-group {
+  border-radius: 999px;
+  border-color: var(--border);
+  overflow: hidden;
+}
+.language-row ::ng-deep .mat-button-toggle {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.language-row ::ng-deep .mat-button-toggle-checked {
+  background: var(--orange);
+  color: #fff;
+}
+
+// ---------- actions ----------
 .submit-btn ::ng-deep .mdc-button__label {
   display: inline-flex;
   align-items: center;
@@ -56,5 +216,10 @@
 @media (max-width: 520px) {
   .field-row {
     grid-template-columns: 1fr;
+  }
+  .language-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
 }

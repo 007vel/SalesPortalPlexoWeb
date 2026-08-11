@@ -43,7 +43,7 @@ export class AdminSettings {
   readonly resources = this.trainingResourceStore.resources;
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
-  readonly displayedColumns = ['resource', 'category', 'type', 'actions'];
+  readonly displayedColumns = ['resource', 'category', 'language', 'type', 'actions'];
   readonly documentColumns = ['rep', 'repId', 'document', 'actions'];
 
   readonly documentRows = computed<DocumentRow[]>(() => {

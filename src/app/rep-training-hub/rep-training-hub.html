@@ -46,38 +46,38 @@
 </div>
 
 <h3 class="th-section-title">Shared by Admin</h3>
-<div class="th-grid">
-  @if (filteredAdminResources().length === 0) {
-  <div class="th-empty">
-    <mat-icon>school</mat-icon>
-    <div>No materials shared by Admin in this category yet.</div>
-  </div>
-  } @else {
-  @for (res of filteredAdminResources(); track res.id) {
-  <ng-container *ngTemplateOutlet="card; context: { res: res, removable: false }"></ng-container>
-  }
-  }
-</div>
+<h4 class="th-lang-subtitle">English</h4>
+<ng-container *ngTemplateOutlet="langGrid; context: { list: filteredAdminResourcesEnglish(), removable: false, emptyMsg: 'No English materials shared by Admin in this category yet.' }"></ng-container>
+<h4 class="th-lang-subtitle">Spanish</h4>
+<ng-container *ngTemplateOutlet="langGrid; context: { list: filteredAdminResourcesSpanish(), removable: false, emptyMsg: 'No Spanish materials shared by Admin in this category yet.' }"></ng-container>
 
 <h3 class="th-section-title">Your uploads</h3>
-<div class="th-grid">
-  @if (filteredOwnResources().length === 0) {
-  <div class="th-empty">
-    <mat-icon>school</mat-icon>
-    <div>You haven't uploaded anything in this category yet.</div>
+<h4 class="th-lang-subtitle">English</h4>
+<ng-container *ngTemplateOutlet="langGrid; context: { list: filteredOwnResourcesEnglish(), removable: true, emptyMsg: 'You have not uploaded anything in English in this category yet.' }"></ng-container>
+<h4 class="th-lang-subtitle">Spanish</h4>
+<ng-container *ngTemplateOutlet="langGrid; context: { list: filteredOwnResourcesSpanish(), removable: true, emptyMsg: 'You have not uploaded anything in Spanish in this category yet.' }"></ng-container>
+
+<ng-template #langGrid let-list="list" let-removable="removable" let-emptyMsg="emptyMsg">
+  <div class="th-grid">
+    @if (list.length === 0) {
+    <div class="th-empty">
+      <mat-icon>school</mat-icon>
+      <div>{{ emptyMsg }}</div>
+    </div>
+    } @else {
+    @for (res of list; track res.id) {
+    <ng-container *ngTemplateOutlet="card; context: { res: res, removable: removable }"></ng-container>
+    }
+    }
   </div>
-  } @else {
-  @for (res of filteredOwnResources(); track res.id) {
-  <ng-container *ngTemplateOutlet="card; context: { res: res, removable: true }"></ng-container>
-  }
-  }
-</div>
+</ng-template>
 
 <ng-template #card let-res="res" let-removable="removable">
   <mat-card class="th-card">
     <div class="th-card-top">
       <div class="th-type-ic {{ res.type }}"><mat-icon>{{ typeIcon(res.type) }}</mat-icon></div>
       <div class="th-card-actions">
+        <div class="th-lang-badge">{{ res.language }}</div>
         @if (res.duration) { <div class="th-duration">{{ res.duration }}</div> }
         @if (removable) {
         <button type="button" mat-icon-button class="th-remove" title="Remove from hub"

@@ -45,6 +45,11 @@ export class AdminRepsDetials {
   readonly trainingResources = this.trainingResourceStore.resources;
   readonly adminResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Admin'));
   readonly ownResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Rep'));
+
+  readonly adminResourcesEnglish = computed(() => this.adminResources().filter((r) => r.language === 'English'));
+  readonly adminResourcesSpanish = computed(() => this.adminResources().filter((r) => r.language === 'Spanish'));
+  readonly ownResourcesEnglish = computed(() => this.ownResources().filter((r) => r.language === 'English'));
+  readonly ownResourcesSpanish = computed(() => this.ownResources().filter((r) => r.language === 'Spanish'));
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
 

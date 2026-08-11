@@ -121,34 +121,33 @@
   </div>
   <div class="section-body">
     <h3 class="hub-section-title">Shared by Admin</h3>
-    @if (adminResources().length === 0) {
-    <div class="hub-empty">
-      <mat-icon>school</mat-icon>
-      <div>No materials shared by Admin yet.</div>
-    </div>
-    } @else {
-    <div class="hub-grid">
-      @for (res of adminResources(); track res.id) {
-      <ng-container *ngTemplateOutlet="hubCard; context: { res: res }"></ng-container>
-      }
-    </div>
-    }
+    <h4 class="hub-lang-subtitle">English</h4>
+    <ng-container *ngTemplateOutlet="hubLangGrid; context: { list: adminResourcesEnglish(), emptyMsg: 'No English materials shared by Admin yet.' }"></ng-container>
+    <h4 class="hub-lang-subtitle">Spanish</h4>
+    <ng-container *ngTemplateOutlet="hubLangGrid; context: { list: adminResourcesSpanish(), emptyMsg: 'No Spanish materials shared by Admin yet.' }"></ng-container>
 
     <h3 class="hub-section-title">{{ rep.name || 'This rep' }}'s uploads</h3>
-    @if (ownResources().length === 0) {
-    <div class="hub-empty">
-      <mat-icon>school</mat-icon>
-      <div>{{ rep.name || 'This rep' }} hasn't uploaded anything yet.</div>
-    </div>
-    } @else {
-    <div class="hub-grid">
-      @for (res of ownResources(); track res.id) {
-      <ng-container *ngTemplateOutlet="hubCard; context: { res: res }"></ng-container>
-      }
-    </div>
-    }
+    <h4 class="hub-lang-subtitle">English</h4>
+    <ng-container *ngTemplateOutlet="hubLangGrid; context: { list: ownResourcesEnglish(), emptyMsg: (rep.name || 'This rep') + ' has not uploaded anything in English yet.' }"></ng-container>
+    <h4 class="hub-lang-subtitle">Spanish</h4>
+    <ng-container *ngTemplateOutlet="hubLangGrid; context: { list: ownResourcesSpanish(), emptyMsg: (rep.name || 'This rep') + ' has not uploaded anything in Spanish yet.' }"></ng-container>
   </div>
 </mat-card>
+
+<ng-template #hubLangGrid let-list="list" let-emptyMsg="emptyMsg">
+  @if (list.length === 0) {
+  <div class="hub-empty">
+    <mat-icon>school</mat-icon>
+    <div>{{ emptyMsg }}</div>
+  </div>
+  } @else {
+  <div class="hub-grid">
+    @for (res of list; track res.id) {
+    <ng-container *ngTemplateOutlet="hubCard; context: { res: res }"></ng-container>
+    }
+  </div>
+  }
+</ng-template>
 } @else {
 <p class="not-found">Rep not found.</p>
 }
@@ -163,7 +162,10 @@
   <div class="hub-card">
     <div class="hub-card-top">
       <div class="hub-type-ic {{ res.type }}"><mat-icon>{{ typeIcon(res.type) }}</mat-icon></div>
-      @if (res.duration) { <div class="hub-duration">{{ res.duration }}</div> }
+      <div class="hub-card-actions">
+        <div class="hub-lang-badge">{{ res.language }}</div>
+        @if (res.duration) { <div class="hub-duration">{{ res.duration }}</div> }
+      </div>
     </div>
     <div class="hub-card-body">
       <div class="hub-cat">{{ res.category }}</div>
