@@ -14,6 +14,7 @@ export interface RepDocRecord {
 export interface RepDocs {
   agreement: RepDocRecord | null;
   w4: RepDocRecord | null;
+  certification: RepDocRecord | null;
 }
 
 /** A single document row across every rep — used by admin oversight views. */
@@ -44,6 +45,9 @@ export interface RepRecord {
   resourceLink: string;
   portalLink: string;
   status: RepStatus;
+  passedCertification: boolean;
+  businessCardsSent: boolean;
+  consultantFeePaid: boolean;
   docs: RepDocs;
   commissions: CommissionDay[];
   createdAt: string;
@@ -58,6 +62,15 @@ export interface NewRepInput {
   state: string;
   zip: string;
   status: RepStatus;
+  passedCertification: boolean;
+  businessCardsSent: boolean;
+  consultantFeePaid: boolean;
+}
+
+export interface NewRepBankDetails {
+  bankName: string;
+  routingNumber: string;
+  accountNumber: string;
 }
 
 /** Shape returned by GET/POST/PUT api/reps (PlexoRepPortal.Models.RepDto). */
@@ -75,6 +88,9 @@ interface RepDto {
   resourceLink: string | null;
   portalLink: string | null;
   status: number;
+  passedCertification: boolean;
+  businessCardsSent: boolean;
+  consultantFeePaid: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -91,6 +107,17 @@ interface RepWriteDto {
   googleLink: string;
   resourceLink: string;
   status: number;
+  passedCertification: boolean;
+  businessCardsSent: boolean;
+  consultantFeePaid: boolean;
+}
+
+/** Body shape for POST api/repbankdetails (RepBankDetailsRequest). */
+interface RepBankDetailsWriteDto {
+  repId: string;
+  bankName: string;
+  routingNumber: string;
+  accountNumber: string;
 }
 
 /** Body shape for PUT api/reps/{oId} (RepUpdateRequest) — the whole record, RepId included. */
@@ -197,11 +224,25 @@ export class RepDirectoryStore {
       googleLink: '',
       resourceLink: '',
       status: STATUS_TO_API[input.status],
+      passedCertification: input.passedCertification,
+      businessCardsSent: input.businessCardsSent,
+      consultantFeePaid: input.consultantFeePaid,
     };
     return this.api.post<RepDto>('reps', body).pipe(
       map((dto) => this.mergeDto(dto)),
       tap((rep) => this.repsSignal.update((list) => [rep, ...list])),
     );
+  }
+
+  /** Encrypts and saves (or replaces) the one bank-details record on file for a rep — see api/repbankdetails. */
+  setBankDetails(repId: string, details: NewRepBankDetails): Observable<void> {
+    const body: RepBankDetailsWriteDto = {
+      repId,
+      bankName: details.bankName,
+      routingNumber: details.routingNumber,
+      accountNumber: details.accountNumber,
+    };
+    return this.api.post('repbankdetails', body).pipe(map(() => undefined));
   }
 
   updateStatus(repId: string, status: RepStatus): Observable<RepRecord> {
@@ -243,9 +284,9 @@ export class RepDirectoryStore {
   loadDocuments(repId: string): Observable<RepDocs> {
     return this.api.get<RepDocumentDto[]>(`documents/rep/${repId}`).pipe(
       map((dtos): RepDocs => {
-        const docs: RepDocs = { agreement: null, w4: null };
+        const docs: RepDocs = { agreement: null, w4: null, certification: null };
         for (const dto of dtos) {
-          if (dto.kind === 'agreement' || dto.kind === 'w4') {
+          if (dto.kind === 'agreement' || dto.kind === 'w4' || dto.kind === 'certification') {
             docs[dto.kind] = { oId: dto.oId, name: dto.fileName, uploadedAt: dto.uploadedAt.slice(0, 10) };
           }
         }
@@ -283,6 +324,9 @@ export class RepDirectoryStore {
       googleLink: merged.googleLink,
       resourceLink: merged.resourceLink,
       status: STATUS_TO_API[merged.status],
+      passedCertification: merged.passedCertification,
+      businessCardsSent: merged.businessCardsSent,
+      consultantFeePaid: merged.consultantFeePaid,
     };
     return this.api.put<RepDto>(`reps/${rep.oId}`, body).pipe(
       map((dto) => this.mergeDto(dto)),
@@ -307,7 +351,10 @@ export class RepDirectoryStore {
       resourceLink: dto.resourceLink ?? '',
       portalLink: dto.portalLink ?? '',
       status: STATUS_FROM_API[dto.status] ?? 'pending',
-      docs: existing?.docs ?? { agreement: null, w4: null },
+      passedCertification: dto.passedCertification,
+      businessCardsSent: dto.businessCardsSent,
+      consultantFeePaid: dto.consultantFeePaid,
+      docs: existing?.docs ?? { agreement: null, w4: null, certification: null },
       commissions: existing?.commissions ?? emptyCommissionHistory(14),
       createdAt: dto.createdAt.slice(0, 10),
     };

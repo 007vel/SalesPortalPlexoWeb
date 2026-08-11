@@ -1,64 +1,164 @@
 <h2 mat-dialog-title>Create new rep</h2>
 <mat-dialog-content>
-  <p class="sub">Fill in the rep's contact record — they'll see it on their profile page. A Rep ID and portal link are generated automatically.</p>
+  <mat-stepper #stepper class="crd-stepper" [linear]="false">
 
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Full name</mat-label>
-      <input matInput formControlName="name">
-      @if (missingRequiredFields.name) { <mat-error>Name is required</mat-error> }
-    </mat-form-field>
+    <mat-step [stepControl]="infoForm" label="Profile">
+      <p class="sub">Fill in the rep's contact record — they'll see it on their profile page. A Rep ID and portal link are generated automatically.</p>
 
-    <div class="field-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Email address</mat-label>
-        <input matInput type="email" formControlName="email" >
-        @if (missingRequiredFields.email) { <mat-error>Email is required</mat-error> }
-        @else if (invalidEmail()) { <mat-error>Enter a valid email address</mat-error> }
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Phone</mat-label>
-        <input matInput type="tel" formControlName="phone" >
-      </mat-form-field>
-    </div>
+      <form [formGroup]="infoForm">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Full name</mat-label>
+          <input matInput formControlName="name">
+          @if (missingRequiredFields.name) { <mat-error>Name is required</mat-error> }
+        </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Address</mat-label>
-      <input matInput formControlName="address" >
-    </mat-form-field>
+        <div class="field-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Email address</mat-label>
+            <input matInput type="email" formControlName="email">
+            @if (missingRequiredFields.email) { <mat-error>Email is required</mat-error> }
+            @else if (invalidEmail()) { <mat-error>Enter a valid email address</mat-error> }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Phone</mat-label>
+            <input matInput type="tel" formControlName="phone">
+          </mat-form-field>
+        </div>
 
-    <div class="field-row">
-      <mat-form-field appearance="outline">
-        <mat-label>City</mat-label>
-        <input matInput formControlName="city" >
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>State</mat-label>
-        <input matInput formControlName="state">
-      </mat-form-field>
-    </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Address</mat-label>
+          <input matInput formControlName="address">
+        </mat-form-field>
 
-    <div class="field-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Zip</mat-label>
-        <input matInput formControlName="zip" >
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Status</mat-label>
-        <mat-select formControlName="status">
-          <mat-option value="pending">Pending</mat-option>
-          <mat-option value="active">Active</mat-option>
-          <mat-option value="inactive">Inactive</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
+        <div class="field-row">
+          <mat-form-field appearance="outline">
+            <mat-label>City</mat-label>
+            <input matInput formControlName="city">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>State</mat-label>
+            <input matInput formControlName="state">
+          </mat-form-field>
+        </div>
 
-    @if (submitFailed()) { <p class="error">Couldn't create the rep. Please try again.</p> }
-  </form>
+        <div class="field-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Zip</mat-label>
+            <input matInput formControlName="zip">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="pending">Pending</mat-option>
+              <mat-option value="active">Active</mat-option>
+              <mat-option value="inactive">Inactive</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </form>
+
+      <div class="step-actions">
+        <button mat-button type="button" [disabled]="submitting()" (click)="cancel()">Cancel</button>
+        <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep2(stepper)">
+          Next <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </mat-step>
+
+    <mat-step [stepControl]="certForm" label="Certification">
+      <p class="sub">Track where this rep stands on onboarding requirements.</p>
+
+      <form [formGroup]="certForm">
+        <div class="toggle-row">
+          <div class="toggle-label">
+            <b>Passed certification</b>
+            <span>Has this rep passed the required certification?</span>
+          </div>
+          <div class="toggle-control">
+            <span class="toggle-state">{{ certForm.controls.passedCertification.value ? 'Yes' : 'No' }}</span>
+            <mat-slide-toggle formControlName="passedCertification" color="primary"></mat-slide-toggle>
+          </div>
+        </div>
+
+        @if (certForm.controls.passedCertification.value) {
+        <div class="file-pick">
+          <mat-icon>upload_file</mat-icon>
+          <div class="fp-txt">
+            <b>Passed certificate</b>
+            <span>{{ certificateFileName() ?? 'No file chosen yet.' }}</span>
+          </div>
+          <button type="button" mat-stroked-button (click)="certFileInput.click()">Choose file</button>
+          <input #certFileInput type="file" accept=".pdf,image/*" class="hidden-file-input" (change)="handleCertificateFile($event)">
+        </div>
+        @if (missingCertificateFile()) { <p class="error">Upload the passed certificate, or turn the toggle off.</p> }
+        }
+
+        <div class="toggle-row">
+          <div class="toggle-label">
+            <b>Business cards sent</b>
+            <span>Have business cards been sent to this rep?</span>
+          </div>
+          <div class="toggle-control">
+            <span class="toggle-state">{{ certForm.controls.businessCardsSent.value ? 'Yes' : 'No' }}</span>
+            <mat-slide-toggle formControlName="businessCardsSent" color="primary"></mat-slide-toggle>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <div class="toggle-label">
+            <b>Consultant fee paid</b>
+            <span>Has the consultant fee been paid?</span>
+          </div>
+          <div class="toggle-control">
+            <span class="toggle-state">{{ certForm.controls.consultantFeePaid.value ? 'Yes' : 'No' }}</span>
+            <mat-slide-toggle formControlName="consultantFeePaid" color="primary"></mat-slide-toggle>
+          </div>
+        </div>
+      </form>
+
+      <div class="step-actions">
+        <button mat-button type="button" matStepperPrevious [disabled]="submitting()">Back</button>
+        <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep3(stepper)">
+          Next <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </mat-step>
+
+    <mat-step [stepControl]="bankForm" label="Bank details">
+      <p class="sub">Where this rep's payouts are sent.</p>
+
+      <form [formGroup]="bankForm">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Bank name</mat-label>
+          <input matInput formControlName="bankName">
+          @if (missingBankFields.bankName) { <mat-error>Bank name is required</mat-error> }
+        </mat-form-field>
+
+        <div class="field-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Routing number</mat-label>
+            <input matInput formControlName="routingNumber" inputmode="numeric" autocomplete="off">
+            @if (missingBankFields.routingNumber) { <mat-error>Routing number is required</mat-error> }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Account number</mat-label>
+            <input matInput type="password" formControlName="accountNumber" inputmode="numeric" autocomplete="off">
+            @if (missingBankFields.accountNumber) { <mat-error>Account number is required</mat-error> }
+          </mat-form-field>
+        </div>
+
+        <p class="encrypt-note"><mat-icon>lock</mat-icon> Bank details are encrypted before they're stored.</p>
+
+        @if (submitFailed()) { <p class="error">Couldn't create the rep. Please try again.</p> }
+      </form>
+
+      <div class="step-actions">
+        <button mat-button type="button" matStepperPrevious [disabled]="submitting()">Back</button>
+        <button mat-flat-button class="create-btn" [disabled]="submitting()" (click)="submit()">
+          {{ submitting() ? 'Creating…' : 'Create rep' }}
+        </button>
+      </div>
+    </mat-step>
+
+  </mat-stepper>
 </mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button color="primary" [disabled]="submitting()" (click)="cancel()">Cancel</button>
-  <button mat-flat-button style="color: white; background-color: #F4801B;" [disabled]="submitting()" (click)="submit()">
-    {{ submitting() ? 'Creating…' : 'Create rep' }}
-  </button>
-</mat-dialog-actions>
