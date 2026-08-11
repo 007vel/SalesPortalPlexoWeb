@@ -45,6 +45,11 @@ export class AdminRepsDetials {
   readonly trainingResources = this.trainingResourceStore.resources;
   readonly adminResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Admin'));
   readonly ownResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Rep'));
+
+  readonly adminResourcesEnglish = computed(() => this.adminResources().filter((r) => r.language === 'English'));
+  readonly adminResourcesSpanish = computed(() => this.adminResources().filter((r) => r.language === 'Spanish'));
+  readonly ownResourcesEnglish = computed(() => this.ownResources().filter((r) => r.language === 'English'));
+  readonly ownResourcesSpanish = computed(() => this.ownResources().filter((r) => r.language === 'Spanish'));
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
 
@@ -58,6 +63,7 @@ export class AdminRepsDetials {
       if (!this.directory.findByRepId(repId)) return;
       this.loadedForRepId = repId;
       this.directory.loadDocuments(repId).subscribe();
+      this.directory.loadBankDetails(repId).subscribe();
       this.trainingResourceStore.loadForRoleWithAdmin(repId).subscribe();
     });
   }
@@ -108,8 +114,22 @@ export class AdminRepsDetials {
     });
   }
 
-  /** Opens a training hub resource in the in-app viewer instead of following its URL directly, which forces a download. */
+  /**
+   * Opens a training hub resource in the in-app viewer. Videos get the raw streaming URL directly —
+   * the backend serves those with range support, so the <video> element can start playing and seek
+   * without waiting for the whole file to download first. Other types still fetch as a blob first,
+   * since following the URL directly would otherwise force a download.
+   */
   view(resource: TrainingResource): void {
+    if (resource.type === 'video') {
+      this.dialog.open(MediaViewerDialog, {
+        data: { title: resource.title, type: resource.type, url: resource.url, fileName: resource.fileName },
+        maxWidth: '90vw',
+        panelClass: 'media-viewer-panel',
+      });
+      return;
+    }
+
     this.viewing.set(true);
     const startedAt = Date.now();
     this.trainingResourceStore.downloadDocument(resource.oId).subscribe({

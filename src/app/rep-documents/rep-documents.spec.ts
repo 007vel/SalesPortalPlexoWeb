@@ -58,7 +58,7 @@ describe('RepDocuments', () => {
     flushInitialReps();
 
     directory
-      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending' })
+      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false })
       .subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 

@@ -26,7 +26,7 @@ function emptyRepProfile(): RepProfileData {
     zip: '',
     googleLink: '',
     resourceLink: '',
-    docs: { agreement: null, w4: null },
+    docs: { agreement: null, w4: null, certification: null },
     commissions: [],
   };
 }

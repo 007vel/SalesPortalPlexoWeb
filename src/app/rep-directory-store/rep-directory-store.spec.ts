@@ -17,6 +17,9 @@ function repDto(overrides: Partial<Record<string, unknown>> = {}) {
     googleLink: null,
     resourceLink: null,
     status: 1,
+    passedCertification: false,
+    businessCardsSent: false,
+    consultantFeePaid: false,
     createdAt: '2026-08-05T00:00:00Z',
     updatedAt: '2026-08-05T00:00:00Z',
     ...overrides,
@@ -47,7 +50,7 @@ describe('RepDirectoryStore', () => {
   it('createRep posts to the API and adds the returned rep with sensible defaults', () => {
     let created: ReturnType<typeof store.findByRepId>;
     store
-      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending' })
+      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false })
       .subscribe((r) => (created = r));
 
     const req = httpMock.expectOne(apiUrl('reps'));
@@ -58,13 +61,13 @@ describe('RepDirectoryStore', () => {
     req.flush(repDto());
 
     expect(created?.repId).toBe('1001');
-    expect(created?.docs).toEqual({ agreement: null, w4: null });
+    expect(created?.docs).toEqual({ agreement: null, w4: null, certification: null });
     expect(created?.commissions.length).toBe(14);
     expect(store.reps().length).toBe(1);
   });
 
   it('updateStatus PUTs the full record (status translated to its API enum) and updates the matching rep', () => {
-    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending' }).subscribe();
+    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false }).subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
     let updatedStatus: string | undefined;
@@ -80,7 +83,7 @@ describe('RepDirectoryStore', () => {
   });
 
   it('updateLinksByRepId POSTs just the link fields to api/reps/link, identifying the rep by its plain RepId', () => {
-    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending' }).subscribe();
+    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false }).subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
     store.updateLinksByRepId(1001, 'https://maps.google.com/x', 'https://hub.example.com/y').subscribe();
@@ -94,7 +97,7 @@ describe('RepDirectoryStore', () => {
   });
 
   it('setDocument uploads the file and records it under the given slot, leaving the other slot untouched', () => {
-    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending' }).subscribe();
+    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false }).subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
     const file = new File(['contents'], 'signed.pdf');
@@ -114,7 +117,7 @@ describe('RepDirectoryStore', () => {
   });
 
   it('loadDocuments GETs api/documents/rep/{repId} and fills in the agreement/w4 slots by kind', () => {
-    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending' }).subscribe();
+    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false }).subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
     store.loadDocuments('1001').subscribe();
@@ -132,7 +135,7 @@ describe('RepDirectoryStore', () => {
   });
 
   it('setDocument deletes the previously uploaded file for that slot', () => {
-    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending' }).subscribe();
+    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false }).subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
     store.setDocument('1001', 'agreement', new File(['a'], 'first.pdf')).subscribe();
@@ -155,10 +158,16 @@ describe('RepDirectoryStore', () => {
   });
 
   it('docsComplete is true only when both docs are present', () => {
-    expect(docsComplete({ docs: { agreement: null, w4: null } })).toBe(false);
-    expect(docsComplete({ docs: { agreement: { oId: 1, name: 'a', uploadedAt: '2026-08-05' }, w4: null } })).toBe(false);
+    expect(docsComplete({ docs: { agreement: null, w4: null, certification: null } })).toBe(false);
+    expect(docsComplete({ docs: { agreement: { oId: 1, name: 'a', uploadedAt: '2026-08-05' }, w4: null, certification: null } })).toBe(false);
     expect(
-      docsComplete({ docs: { agreement: { oId: 1, name: 'a', uploadedAt: '2026-08-05' }, w4: { oId: 2, name: 'b', uploadedAt: '2026-08-05' } } }),
+      docsComplete({
+        docs: {
+          agreement: { oId: 1, name: 'a', uploadedAt: '2026-08-05' },
+          w4: { oId: 2, name: 'b', uploadedAt: '2026-08-05' },
+          certification: null,
+        },
+      }),
     ).toBe(true);
   });
 

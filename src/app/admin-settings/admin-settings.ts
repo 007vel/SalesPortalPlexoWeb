@@ -43,7 +43,7 @@ export class AdminSettings {
   readonly resources = this.trainingResourceStore.resources;
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
-  readonly displayedColumns = ['resource', 'category', 'type', 'actions'];
+  readonly displayedColumns = ['resource', 'category', 'language', 'type', 'actions'];
   readonly documentColumns = ['rep', 'repId', 'document', 'actions'];
 
   readonly documentRows = computed<DocumentRow[]>(() => {
@@ -77,7 +77,21 @@ export class AdminSettings {
     this.trainingResourceStore.remove(id).subscribe(() => this.toast.show('Resource removed'));
   }
 
+  /**
+   * Videos get the raw streaming URL directly — the backend serves those with range support, so
+   * the <video> element can start playing and seek without waiting for the whole file to download
+   * first. Other types still fetch as a blob first, since the file endpoint otherwise forces a download.
+   */
   viewResource(resource: TrainingResource): void {
+    if (resource.type === 'video') {
+      this.dialog.open(MediaViewerDialog, {
+        data: { title: resource.title, type: resource.type, url: resource.url, fileName: resource.fileName },
+        maxWidth: '90vw',
+        panelClass: 'media-viewer-panel',
+      });
+      return;
+    }
+
     this.viewing.set(true);
     const startedAt = Date.now();
     this.trainingResourceStore.downloadDocument(resource.oId).subscribe({

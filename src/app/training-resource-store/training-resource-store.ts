@@ -3,6 +3,7 @@ import { Observable, map, of, tap } from 'rxjs';
 import { Api } from '../api/api';
 
 export type TrainingResourceType = 'video' | 'image' | 'pdf' | 'doc' | 'link';
+export type TrainingResourceLanguage = 'English' | 'Spanish';
 
 export interface TrainingResource {
   id: string;
@@ -19,6 +20,7 @@ export interface TrainingResource {
   description: string;
   url: string;
   fileName: string;
+  language: TrainingResourceLanguage;
 }
 
 export interface NewTrainingHubUpload {
@@ -30,6 +32,7 @@ export interface NewTrainingHubUpload {
   roleId?: string;
   /** Who uploaded this — the backend requires it to be 'Rep' or 'Admin'. */
   uploadedBy: 'Admin' | 'Rep';
+  language: TrainingResourceLanguage;
 }
 
 /** Shape returned by POST/GET api/traininghub (PlexoRepPortal.Models.TrainingHubDocumentDto). */
@@ -44,6 +47,7 @@ interface TrainingHubDocumentDto {
   length: string | null;
   uploadedBy: string;
   uploadedAt: string;
+  language: string;
 }
 
 const TYPE_ICON: Record<TrainingResourceType, string> = { video: 'movie', image: 'image', pdf: 'description', doc: 'article', link: 'link' };
@@ -124,6 +128,7 @@ export class TrainingResourceStore {
     formData.append('description', input.description);
     formData.append('length', input.length);
     formData.append('uploadedBy', input.uploadedBy);
+    formData.append('language', input.language);
     formData.append('file', file);
 
     return this.api.post<TrainingHubDocumentDto>('traininghub', formData).pipe(
@@ -162,6 +167,7 @@ export class TrainingResourceStore {
       description: dto.description ?? '',
       url: this.api.fileUrl(`traininghub/${dto.oId}`),
       fileName: dto.fileName,
+      language: dto.language === 'Spanish' ? 'Spanish' : 'English',
     };
   }
 }
