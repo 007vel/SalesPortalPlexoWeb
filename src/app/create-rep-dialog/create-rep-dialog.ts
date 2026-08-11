@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,6 +8,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
 import { RepDirectoryStore, RepRecord, RepStatus } from '../rep-directory-store/rep-directory-store';
+import { Toast } from '../toast/toast';
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 @Component({
   selector: 'app-create-rep-dialog',
@@ -18,6 +22,7 @@ export class CreateRepDialog {
   private readonly fb = inject(FormBuilder);
   private readonly directory = inject(RepDirectoryStore);
   private readonly dialogRef = inject(MatDialogRef<CreateRepDialog, RepRecord | undefined>);
+  private readonly toast = inject(Toast);
 
   readonly form = this.fb.nonNullable.group({
     name: [''],
@@ -31,6 +36,7 @@ export class CreateRepDialog {
   });
 
   readonly missingRequiredFields = { name: false, email: false };
+  readonly invalidEmail = signal(false);
   readonly submitting = signal(false);
   readonly submitFailed = signal(false);
 
@@ -46,7 +52,16 @@ export class CreateRepDialog {
     const email = v.email.trim();
     this.missingRequiredFields.name = !name;
     this.missingRequiredFields.email = !email;
-    if (!name || !email) return;
+    this.invalidEmail.set(!!email && !EMAIL_PATTERN.test(email));
+
+    if (!name || !email) {
+      this.toast.show('Name and email are required.');
+      return;
+    }
+    if (this.invalidEmail()) {
+      this.toast.show('Enter a valid email address.');
+      return;
+    }
 
     this.submitFailed.set(false);
     this.submitting.set(true);
@@ -64,7 +79,13 @@ export class CreateRepDialog {
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
         next: (rep) => this.dialogRef.close(rep),
-        error: () => this.submitFailed.set(true),
+        error: (err: HttpErrorResponse) => {
+          if (err.status === 409) {
+            this.toast.show(typeof err.error === 'string' ? err.error : `Email '${email}' is already in use.`);
+            return;
+          }
+          this.submitFailed.set(true);
+        },
       });
   }
 }
