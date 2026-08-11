@@ -38,7 +38,8 @@
         <ng-container *ngTemplateOutlet="field; context: {label:'Full name', value: rep.name}"></ng-container>
         <ng-container *ngTemplateOutlet="field; context: {label:'Address', value: fullAddress()}"></ng-container>
         <ng-container *ngTemplateOutlet="field; context: {label:'Phone', value: rep.phone}"></ng-container>
-        <ng-container *ngTemplateOutlet="field; context: {label:'Email', value: rep.email, isEmail: true}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Email', value: rep.email, isEmail: true}"></ng-container>
       </div>
     </mat-card>
 
@@ -52,6 +53,19 @@
           *ngTemplateOutlet="field; context: {label:'Google link', value: rep.googleLink, isLink: true}"></ng-container>
         <ng-container
           *ngTemplateOutlet="field; context: {label:'Resource link', value: rep.resourceLink, isLink: true}"></ng-container>
+      </div>
+    </mat-card>
+
+    <mat-card class="section">
+      <div class="section-head">
+        <div class="eyebrow">Meta</div>
+        <h2>Rep record</h2>
+      </div>
+      <div class="section-body">
+        <ng-container *ngTemplateOutlet="field; context: {label:'Rep ID', value: rep.repId}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Portal link', value: rep.portalLink, isLink: true}"></ng-container>
+        <ng-container *ngTemplateOutlet="field; context: {label:'Created', value: rep.createdAt}"></ng-container>
       </div>
     </mat-card>
   </div>
@@ -73,12 +87,14 @@
                 (rep.docs.agreement.name + ' · ' + rep.docs.agreement.uploadedAt) : 'Not uploaded' }}</div>
             </div>
           </div>
-          @if (rep.docs.agreement; as doc) {
-          <button type="button" mat-icon-button class="action-btn" title="View"
-            (click)="viewDocument(doc.oId, doc.name, 'Representative Agreement')"><mat-icon>visibility</mat-icon></button>
-          <button type="button" mat-icon-button class="action-btn" title="Download"
-            (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
-          }
+          <div style="display: flex; align-items: center; gap: 10px;">
+            @if (rep.docs.agreement; as doc) {
+            <button type="button" mat-icon-button class="action-btn" title="View"
+              (click)="viewDocument(doc.oId, doc.name, 'Representative Agreement')"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download"
+              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+            }
+          </div>
         </div>
         <div class="doc-row">
           <div class="doc-info">
@@ -90,28 +106,89 @@
                 rep.docs.w4.uploadedAt) : 'Not uploaded' }}</div>
             </div>
           </div>
-          @if (rep.docs.w4; as doc) {
-          <button type="button" mat-icon-button class="action-btn" title="View"
-            (click)="viewDocument(doc.oId, doc.name, 'W-4 Form')"><mat-icon>visibility</mat-icon></button>
-          <button type="button" mat-icon-button class="action-btn" title="Download"
-            (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
-          }
+          <div style="display: flex; align-items: center; gap: 10px;">
+            @if (rep.docs.w4; as doc) {
+            <button type="button" mat-icon-button class="action-btn" title="View"
+              (click)="viewDocument(doc.oId, doc.name, 'W-4 Form')"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download"
+              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+            }
+          </div>
+        </div>
+        @if (rep.passedCertification || rep.docs.certification) {
+        <div class="doc-row">
+          <div class="doc-info">
+            <div class="doc-icon" [class.filled]="!!rep.docs.certification"><mat-icon>{{ rep.docs.certification ?
+                'check' : 'description' }}</mat-icon></div>
+            <div>
+              <div class="doc-name">Passed Certificate</div>
+              <div class="doc-status" [class.filled]="!!rep.docs.certification">{{ rep.docs.certification ?
+                (rep.docs.certification.name + ' · ' + rep.docs.certification.uploadedAt) : 'Not uploaded' }}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            @if (rep.docs.certification; as doc) {
+            <button type="button" mat-icon-button class="action-btn" title="View"
+              (click)="viewDocument(doc.oId, doc.name, 'Passed Certificate')"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download"
+              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+            }
+          </div>
+        </div>
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="section">
+      <div class="section-head">
+        <div class="eyebrow">Onboarding</div>
+        <h2>Certification</h2>
+      </div>
+      <div class="section-body cert-body">
+        <div class="cert-row">
+          <span>Passed certification</span>
+          <span class="badge" [class]="rep.passedCertification ? 'badge-active' : 'badge-inactive'">
+            <span class="badge-dot"></span>{{ rep.passedCertification ? 'Yes' : 'No' }}
+          </span>
+        </div>
+        <div class="cert-row">
+          <span>Business cards sent</span>
+          <span class="badge" [class]="rep.businessCardsSent ? 'badge-active' : 'badge-inactive'">
+            <span class="badge-dot"></span>{{ rep.businessCardsSent ? 'Yes' : 'No' }}
+          </span>
+        </div>
+        <div class="cert-row">
+          <span>Consultant fee paid</span>
+          <span class="badge" [class]="rep.consultantFeePaid ? 'badge-active' : 'badge-inactive'">
+            <span class="badge-dot"></span>{{ rep.consultantFeePaid ? 'Yes' : 'No' }}
+          </span>
         </div>
       </div>
     </mat-card>
 
     <mat-card class="section">
       <div class="section-head">
-        <div class="eyebrow">Meta</div>
-        <h2>Rep record</h2>
+        <div class="eyebrow">Payouts</div>
+        <h2>Bank details</h2>
       </div>
       <div class="section-body">
-        <ng-container *ngTemplateOutlet="field; context: {label:'Rep ID', value: rep.repId}"></ng-container>
+        @if (rep.bankDetails; as bank) {
+        <ng-container *ngTemplateOutlet="field; context: {label:'Bank name', value: bank.bankName}"></ng-container>
         <ng-container
-          *ngTemplateOutlet="field; context: {label:'Portal link', value: rep.portalLink, isLink: true}"></ng-container>
-        <ng-container *ngTemplateOutlet="field; context: {label:'Created', value: rep.createdAt}"></ng-container>
+          *ngTemplateOutlet="field; context: {label:'Routing number', value: bank.routingNumber}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Account number', value: bank.accountNumber}"></ng-container>
+        <ng-container *ngTemplateOutlet="field; context: {label:'Last updated', value: bank.updatedAt}"></ng-container>
+        } @else {
+        <div class="hub-empty">
+          <mat-icon>account_balance</mat-icon>
+          <div>No bank details on file yet.</div>
+        </div>
+        }
       </div>
     </mat-card>
+
+
   </div>
 </div>
 
@@ -122,15 +199,19 @@
   <div class="section-body">
     <h3 class="hub-section-title">Shared by Admin</h3>
     <h4 class="hub-lang-subtitle">English</h4>
-    <ng-container *ngTemplateOutlet="hubLangGrid; context: { list: adminResourcesEnglish(), emptyMsg: 'No English materials shared by Admin yet.' }"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="hubLangGrid; context: { list: adminResourcesEnglish(), emptyMsg: 'No English materials shared by Admin yet.' }"></ng-container>
     <h4 class="hub-lang-subtitle">Spanish</h4>
-    <ng-container *ngTemplateOutlet="hubLangGrid; context: { list: adminResourcesSpanish(), emptyMsg: 'No Spanish materials shared by Admin yet.' }"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="hubLangGrid; context: { list: adminResourcesSpanish(), emptyMsg: 'No Spanish materials shared by Admin yet.' }"></ng-container>
 
     <h3 class="hub-section-title">{{ rep.name || 'This rep' }}'s uploads</h3>
     <h4 class="hub-lang-subtitle">English</h4>
-    <ng-container *ngTemplateOutlet="hubLangGrid; context: { list: ownResourcesEnglish(), emptyMsg: (rep.name || 'This rep') + ' has not uploaded anything in English yet.' }"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="hubLangGrid; context: { list: ownResourcesEnglish(), emptyMsg: (rep.name || 'This rep') + ' has not uploaded anything in English yet.' }"></ng-container>
     <h4 class="hub-lang-subtitle">Spanish</h4>
-    <ng-container *ngTemplateOutlet="hubLangGrid; context: { list: ownResourcesSpanish(), emptyMsg: (rep.name || 'This rep') + ' has not uploaded anything in Spanish yet.' }"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="hubLangGrid; context: { list: ownResourcesSpanish(), emptyMsg: (rep.name || 'This rep') + ' has not uploaded anything in Spanish yet.' }"></ng-container>
   </div>
 </mat-card>
 

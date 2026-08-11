@@ -63,6 +63,7 @@ export class AdminRepsDetials {
       if (!this.directory.findByRepId(repId)) return;
       this.loadedForRepId = repId;
       this.directory.loadDocuments(repId).subscribe();
+      this.directory.loadBankDetails(repId).subscribe();
       this.trainingResourceStore.loadForRoleWithAdmin(repId).subscribe();
     });
   }

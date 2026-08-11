@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Component, computed, inject, signal } from '@angular/core';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,6 +14,13 @@ import { RepDirectoryStore, RepRecord, RepStatus } from '../rep-directory-store/
 import { Toast } from '../toast/toast';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** certForm-level validator: a passed-certification claim needs the certificate file attached. */
+function certificateRequiredWhenPassedValidator(group: AbstractControl): ValidationErrors | null {
+  const passed = group.get('passedCertification')?.value;
+  const file = group.get('certificateFile')?.value;
+  return passed && !file ? { certificateRequired: true } : null;
+}
 
 @Component({
   selector: 'app-create-rep-dialog',
@@ -38,9 +45,11 @@ export class CreateRepDialog {
   private readonly toast = inject(Toast);
 
   // ----- step 1: profile -----
+  // name/email carry real Validators so `stepControl.invalid` is accurate — the linear
+  // stepper relies on that to block a direct header-click into a later, incomplete step.
   readonly infoForm = this.fb.nonNullable.group({
-    name: [''],
-    email: [''],
+    name: ['', Validators.required],
+    email: ['', [Validators.required, Validators.pattern(EMAIL_PATTERN)]],
     phone: [''],
     address: [''],
     city: [''],
@@ -53,21 +62,40 @@ export class CreateRepDialog {
   readonly invalidEmail = signal(false);
 
   // ----- step 2: certification -----
-  readonly certForm = this.fb.nonNullable.group({
-    passedCertification: [false],
-    businessCardsSent: [false],
-    consultantFeePaid: [false],
+  // certificateFile lives on the form (not a plain class field) so the group's own validity
+  // — and therefore the linear stepper's header-click guard — reacts to it being set/cleared.
+  readonly certForm = this.fb.nonNullable.group(
+    {
+      passedCertification: [false],
+      businessCardsSent: [false],
+      consultantFeePaid: [false],
+      certificateFile: [null as File | null],
+    },
+    { validators: certificateRequiredWhenPassedValidator },
+  );
+
+  readonly certificateFileName = signal<string | null>(null);
+  readonly certificateFileSize = signal<number | null>(null);
+  readonly missingCertificateFile = signal(false);
+  readonly certDragActive = signal(false);
+
+  readonly certificateFileIcon = computed(() => {
+    const name = this.certificateFileName();
+    return name?.toLowerCase().endsWith('.pdf') ? 'picture_as_pdf' : 'image';
   });
 
-  private certificateFile: File | null = null;
-  readonly certificateFileName = signal<string | null>(null);
-  readonly missingCertificateFile = signal(false);
+  readonly certificateFileSizeLabel = computed(() => {
+    const bytes = this.certificateFileSize();
+    if (bytes === null) return '';
+    if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  });
 
   // ----- step 3: bank details -----
   readonly bankForm = this.fb.nonNullable.group({
-    bankName: [''],
-    routingNumber: [''],
-    accountNumber: [''],
+    bankName: ['', Validators.required],
+    routingNumber: ['', Validators.required],
+    accountNumber: ['', Validators.required],
   });
 
   readonly missingBankFields = { bankName: false, routingNumber: false, accountNumber: false };
@@ -101,17 +129,43 @@ export class CreateRepDialog {
   handleCertificateFile(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (!file) return;
-
-    this.certificateFile = file;
-    this.certificateFileName.set(file.name);
-    this.missingCertificateFile.set(false);
+    if (file) this.setCertificateFile(file);
     input.value = '';
+  }
+
+  onCertDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.certDragActive.set(true);
+  }
+
+  onCertDragLeave(): void {
+    this.certDragActive.set(false);
+  }
+
+  onCertDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.certDragActive.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file) this.setCertificateFile(file);
+  }
+
+  clearCertificateFile(event: Event): void {
+    event.stopPropagation();
+    this.certForm.controls.certificateFile.setValue(null);
+    this.certificateFileName.set(null);
+    this.certificateFileSize.set(null);
+  }
+
+  private setCertificateFile(file: File): void {
+    this.certForm.controls.certificateFile.setValue(file);
+    this.certificateFileName.set(file.name);
+    this.certificateFileSize.set(file.size);
+    this.missingCertificateFile.set(false);
   }
 
   goToStep3(stepper: MatStepper): void {
     const passedCertification = this.certForm.controls.passedCertification.value;
-    if (passedCertification && !this.certificateFile) {
+    if (passedCertification && !this.certForm.controls.certificateFile.value) {
       this.missingCertificateFile.set(true);
       this.toast.show('Upload the passed certificate, or turn the toggle off.');
       return;
@@ -137,7 +191,7 @@ export class CreateRepDialog {
 
     const info = this.infoForm.getRawValue();
     const cert = this.certForm.getRawValue();
-    const certificateFile = this.certificateFile;
+    const certificateFile = cert.certificateFile;
 
     this.submitFailed.set(false);
     this.submitting.set(true);

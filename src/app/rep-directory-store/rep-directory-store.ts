@@ -1,5 +1,6 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, map, tap, throwError } from 'rxjs';
+import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { Api } from '../api/api';
 import { MOCK_CONFIG } from '../mock-config/mock-config';
 
@@ -49,6 +50,7 @@ export interface RepRecord {
   businessCardsSent: boolean;
   consultantFeePaid: boolean;
   docs: RepDocs;
+  bankDetails: RepBankDetails | null;
   commissions: CommissionDay[];
   createdAt: string;
 }
@@ -71,6 +73,14 @@ export interface NewRepBankDetails {
   bankName: string;
   routingNumber: string;
   accountNumber: string;
+}
+
+/** Bank details as returned for display — routing/account numbers are the full decrypted values, by explicit product decision. */
+export interface RepBankDetails {
+  bankName: string;
+  routingNumber: string;
+  accountNumber: string;
+  updatedAt: string;
 }
 
 /** Shape returned by GET/POST/PUT api/reps (PlexoRepPortal.Models.RepDto). */
@@ -118,6 +128,16 @@ interface RepBankDetailsWriteDto {
   bankName: string;
   routingNumber: string;
   accountNumber: string;
+}
+
+/** Shape returned by GET api/repbankdetails/rep/{repId} (RepBankDetailsDto) — full decrypted routing/account numbers. */
+interface RepBankDetailsDto {
+  oId: number;
+  repId: string;
+  bankName: string;
+  routingNumber: string;
+  accountNumber: string;
+  updatedAt: string;
 }
 
 /** Body shape for PUT api/reps/{oId} (RepUpdateRequest) — the whole record, RepId included. */
@@ -245,6 +265,22 @@ export class RepDirectoryStore {
     return this.api.post('repbankdetails', body).pipe(map(() => undefined));
   }
 
+  /** Fetches the bank details on file for a rep, if any — via `api/repbankdetails/rep/{repId}`. Resolves `null` rather than erroring when the rep has none on file yet. */
+  loadBankDetails(repId: string): Observable<RepBankDetails | null> {
+    return this.api.get<RepBankDetailsDto>(`repbankdetails/rep/${repId}`).pipe(
+      map(
+        (dto): RepBankDetails => ({
+          bankName: dto.bankName,
+          routingNumber: dto.routingNumber,
+          accountNumber: dto.accountNumber,
+          updatedAt: dto.updatedAt.slice(0, 10),
+        }),
+      ),
+      catchError((err: HttpErrorResponse) => (err.status === 404 ? of(null) : throwError(() => err))),
+      tap((bankDetails) => this.repsSignal.update((list) => list.map((r) => (r.repId === repId ? { ...r, bankDetails } : r)))),
+    );
+  }
+
   updateStatus(repId: string, status: RepStatus): Observable<RepRecord> {
     return this.putRep(repId, { status });
   }
@@ -355,6 +391,7 @@ export class RepDirectoryStore {
       businessCardsSent: dto.businessCardsSent,
       consultantFeePaid: dto.consultantFeePaid,
       docs: existing?.docs ?? { agreement: null, w4: null, certification: null },
+      bankDetails: existing?.bankDetails ?? null,
       commissions: existing?.commissions ?? emptyCommissionHistory(14),
       createdAt: dto.createdAt.slice(0, 10),
     };

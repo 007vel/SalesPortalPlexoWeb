@@ -254,6 +254,22 @@
   }
 }
 
+// ---------- certification status ----------
+.cert-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cert-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13.5px;
+  color: var(--text);
+}
+
 // ---------- readonly field ----------
 .readonly-field {
   margin-bottom: 18px;
