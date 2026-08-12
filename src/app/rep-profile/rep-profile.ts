@@ -11,6 +11,12 @@ interface ProfileRow {
   wide: boolean;
 }
 
+interface CertificationRow {
+  key: string;
+  label: string;
+  passed: boolean;
+}
+
 @Component({
   selector: 'app-rep-profile',
   imports: [MatCardModule, MatIconModule],
@@ -32,6 +38,15 @@ export class RepProfile {
       { key: 'city', label: 'City', value: p.city, wide: false },
       { key: 'state', label: 'State', value: p.state, wide: false },
       { key: 'zip', label: 'Zip', value: p.zip, wide: false },
+    ];
+  });
+
+  readonly certificationRows = computed<CertificationRow[]>(() => {
+    const p = this.repProfileStore.profile();
+    return [
+      { key: 'passedCertification', label: 'Passed certification', passed: p.passedCertification },
+      { key: 'businessCardsSent', label: 'Business cards sent', passed: p.businessCardsSent },
+      { key: 'consultantFeePaid', label: 'Consultant fee paid', passed: p.consultantFeePaid },
     ];
   });
 }

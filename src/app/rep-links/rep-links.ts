@@ -49,6 +49,8 @@ export class RepLinks {
   readonly form = this.fb.nonNullable.group({
     googleLink: [''],
     resourceLink: [''],
+    pricingSheetLink: [''],
+    powerPointLink: [''],
   });
 
   readonly linkRows = computed<LinkRow[]>(() => {
@@ -56,6 +58,8 @@ export class RepLinks {
     return [
       { key: 'googleLink', label: 'Google link', value: profile.googleLink },
       { key: 'resourceLink', label: 'Resource link', value: profile.resourceLink },
+      { key: 'pricingSheetLink', label: 'Pricing sheet link', value: profile.pricingSheetLink },
+      { key: 'powerPointLink', label: 'PowerPoint link', value: profile.powerPointLink },
     ].map((row) => ({ ...row, href: this.toHref(row.value) }));
   });
 
@@ -63,7 +67,15 @@ export class RepLinks {
     effect(() => {
       const profile = this.repProfileStore.profile();
       if (this.form.pristine) {
-        this.form.patchValue({ googleLink: profile.googleLink, resourceLink: profile.resourceLink }, { emitEvent: false });
+        this.form.patchValue(
+          {
+            googleLink: profile.googleLink,
+            resourceLink: profile.resourceLink,
+            pricingSheetLink: profile.pricingSheetLink,
+            powerPointLink: profile.powerPointLink,
+          },
+          { emitEvent: false },
+        );
         this.cdr.detectChanges();
       }
     });
@@ -75,14 +87,17 @@ export class RepLinks {
 
   cancelEdit(): void {
     const profile = this.repProfileStore.profile();
-    this.form.reset({ googleLink: profile.googleLink, resourceLink: profile.resourceLink });
+    this.form.reset({
+      googleLink: profile.googleLink,
+      resourceLink: profile.resourceLink,
+      pricingSheetLink: profile.pricingSheetLink,
+      powerPointLink: profile.powerPointLink,
+    });
     this.editing.set(false);
   }
 
   save(): void {
-    const { googleLink, resourceLink } = this.form.getRawValue();
-    const trimmedGoogleLink = googleLink.trim();
-    const trimmedResourceLink = resourceLink.trim();
+    const { googleLink, resourceLink, pricingSheetLink, powerPointLink } = this.form.getRawValue();
 
     const repId = Number(this.auth.session()?.repId);
     if (!repId) {
@@ -92,18 +107,25 @@ export class RepLinks {
 
     this.saving.set(true);
     const startedAt = Date.now();
-    this.directory.updateLinksByRepId(repId, trimmedGoogleLink, trimmedResourceLink).subscribe({
-      next: () => {
-        this.finishSaving(startedAt, () => {
-          this.form.markAsPristine();
-          this.editing.set(false);
-          this.toast.show('Links saved');
-        });
-      },
-      error: () => {
-        this.finishSaving(startedAt, () => this.toast.show('Failed to save links'));
-      },
-    });
+    this.directory
+      .updateLinksByRepId(repId, {
+        googleLink: googleLink.trim(),
+        resourceLink: resourceLink.trim(),
+        pricingSheetLink: pricingSheetLink.trim(),
+        powerPointLink: powerPointLink.trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.finishSaving(startedAt, () => {
+            this.form.markAsPristine();
+            this.editing.set(false);
+            this.toast.show('Links saved');
+          });
+        },
+        error: () => {
+          this.finishSaving(startedAt, () => this.toast.show('Failed to save links'));
+        },
+      });
   }
 
   private finishSaving(startedAt: number, after: () => void): void {

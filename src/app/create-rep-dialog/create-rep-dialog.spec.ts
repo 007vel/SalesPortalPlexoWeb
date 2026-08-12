@@ -67,12 +67,20 @@ describe('CreateRepDialog', () => {
     expect(stepper.next).toHaveBeenCalled();
   });
 
-  it('submit() flags errors and does nothing when bank fields are blank', () => {
-    component.submit();
-    expect(dialogRef.close).not.toHaveBeenCalled();
+  it('goToStep4() flags errors and does not advance when bank fields are blank', () => {
+    const stepper = stubStepper();
+    component.goToStep4(stepper);
+    expect(stepper.next).not.toHaveBeenCalled();
     expect(component.missingBankFields.bankName).toBe(true);
     expect(component.missingBankFields.routingNumber).toBe(true);
     expect(component.missingBankFields.accountNumber).toBe(true);
+  });
+
+  it('goToStep4() advances once bank fields are valid', () => {
+    component.bankForm.setValue({ bankName: 'First Bank', routingNumber: '111000025', accountNumber: '123456789' });
+    const stepper = stubStepper();
+    component.goToStep4(stepper);
+    expect(stepper.next).toHaveBeenCalled();
   });
 
   it('submit() creates the rep, saves bank details, and closes the dialog with the created rep', () => {

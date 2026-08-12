@@ -116,6 +116,62 @@
   padding: 24px 26px 28px;
 }
 
+// ---------- certification card ----------
+.cert-chip {
+  background: #E4F7EE;
+
+  mat-icon {
+    color: #1A8A5F;
+  }
+}
+
+.rp-cert-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rp-cert-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.cert-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+
+  &.yes {
+    color: #1A8A5F;
+    background: #E4F7EE;
+
+    .cert-dot { background: #1A8A5F; }
+  }
+
+  &.no {
+    color: var(--muted);
+    background: #EEF1F5;
+
+    .cert-dot { background: #9AA6B8; }
+  }
+}
+
+.cert-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
 // ---------- locked note ----------
 .rp-locked-note {
   display: flex;

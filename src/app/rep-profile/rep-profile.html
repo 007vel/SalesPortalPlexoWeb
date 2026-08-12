@@ -34,3 +34,29 @@
     </div>
   </div>
 </mat-card>
+
+<mat-card class="rp-profile-card">
+  <div class="head-row">
+    <div class="head-title">
+      <div class="eyebrow">Onboarding</div>
+      <div class="title-line">
+        <span class="icon-chip cert-chip"><mat-icon>verified</mat-icon></span>
+        <h2>Certification</h2>
+      </div>
+    </div>
+    <span class="ro-badge"><span class="ro-dot"></span>Read only</span>
+  </div>
+
+  <div class="rp-card-body">
+    <div class="rp-cert-rows">
+      @for (row of certificationRows(); track row.key) {
+      <div class="rp-cert-row">
+        <span>{{ row.label }}</span>
+        <span class="cert-pill" [class.yes]="row.passed" [class.no]="!row.passed">
+          <span class="cert-dot"></span>{{ row.passed ? 'Yes' : 'No' }}
+        </span>
+      </div>
+      }
+    </div>
+  </div>
+</mat-card>

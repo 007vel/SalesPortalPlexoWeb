@@ -61,7 +61,7 @@ describe('RepDirectoryStore', () => {
     req.flush(repDto());
 
     expect(created?.repId).toBe('1001');
-    expect(created?.docs).toEqual({ agreement: null, w4: null, certification: null });
+    expect(created?.docs).toEqual({ agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null });
     expect(created?.commissions.length).toBe(14);
     expect(store.reps().length).toBe(1);
   });
@@ -86,11 +86,24 @@ describe('RepDirectoryStore', () => {
     store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false }).subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
-    store.updateLinksByRepId(1001, 'https://maps.google.com/x', 'https://hub.example.com/y').subscribe();
+    store
+      .updateLinksByRepId(1001, {
+        googleLink: 'https://maps.google.com/x',
+        resourceLink: 'https://hub.example.com/y',
+        pricingSheetLink: '',
+        powerPointLink: '',
+      })
+      .subscribe();
 
     const req = httpMock.expectOne(apiUrl('reps/link'));
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ repsId: 1001, googleLink: 'https://maps.google.com/x', resourceLink: 'https://hub.example.com/y' });
+    expect(req.request.body).toEqual({
+      repsId: 1001,
+      googleLink: 'https://maps.google.com/x',
+      resourceLink: 'https://hub.example.com/y',
+      pricingSheetLink: '',
+      powerPointLink: '',
+    });
     req.flush(repDto({ googleLink: 'https://maps.google.com/x', resourceLink: 'https://hub.example.com/y' }));
 
     expect(store.findByRepId('1001')?.googleLink).toBe('https://maps.google.com/x');
@@ -158,14 +171,16 @@ describe('RepDirectoryStore', () => {
   });
 
   it('docsComplete is true only when both docs are present', () => {
-    expect(docsComplete({ docs: { agreement: null, w4: null, certification: null } })).toBe(false);
-    expect(docsComplete({ docs: { agreement: { oId: 1, name: 'a', uploadedAt: '2026-08-05' }, w4: null, certification: null } })).toBe(false);
+    expect(docsComplete({ docs: { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null } })).toBe(false);
+    expect(docsComplete({ docs: { agreement: { oId: 1, name: 'a', uploadedAt: '2026-08-05' }, w4: null, certification: null, pricingSheet: null, powerPoint: null } })).toBe(false);
     expect(
       docsComplete({
         docs: {
           agreement: { oId: 1, name: 'a', uploadedAt: '2026-08-05' },
           w4: { oId: 2, name: 'b', uploadedAt: '2026-08-05' },
           certification: null,
+          pricingSheet: null,
+          powerPoint: null,
         },
       }),
     ).toBe(true);

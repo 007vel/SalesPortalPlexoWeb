@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 import { Auth } from '../auth/auth';
-import { RepDirectoryStore } from '../rep-directory-store/rep-directory-store';
+import { RepDirectoryStore, RepDocs } from '../rep-directory-store/rep-directory-store';
 import { RepProfileStore } from '../rep-profile-store/rep-profile-store';
 import { DocumentTemplateStore, DocTemplateKind } from '../document-template-store/document-template-store';
 import { Toast } from '../toast/toast';
@@ -14,12 +14,13 @@ import { detectFileKind } from '../training-resource-store/training-resource-sto
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 
 interface DocDef {
-  kind: DocTemplateKind;
+  kind: keyof RepDocs;
   label: string;
 }
 
 interface DocCardView extends DocDef {
-  templateFilename: string;
+  /** Blank template to fill out first — only agreement/W-4 have one; general uploads (pricing sheet, PowerPoint) don't. */
+  templateFilename: string | null;
   filled: boolean;
   statusText: string;
   oId: number | null;
@@ -30,7 +31,13 @@ interface DocCardView extends DocDef {
 const DOC_DEFS: DocDef[] = [
   { kind: 'agreement', label: 'Representative Agreement' },
   { kind: 'w4', label: 'W-4 Form' },
+  { kind: 'pricingSheet', label: 'Pricing Sheet' },
+  { kind: 'powerPoint', label: 'PowerPoint' },
 ];
+
+function isTemplateKind(kind: keyof RepDocs): kind is DocTemplateKind {
+  return kind === 'agreement' || kind === 'w4';
+}
 
 @Component({
   selector: 'app-rep-documents',
@@ -50,7 +57,7 @@ export class RepDocuments {
   /** Minimum time the view-loading overlay stays up — keeps it from flashing on fast/mocked responses. */
   private static readonly MIN_VIEWING_MS = 200;
 
-  private readonly uploadingKinds = signal<ReadonlySet<DocTemplateKind>>(new Set());
+  private readonly uploadingKinds = signal<ReadonlySet<keyof RepDocs>>(new Set());
 
   readonly viewing = signal(false);
 
@@ -62,7 +69,7 @@ export class RepDocuments {
       const record = docs[def.kind];
       return {
         ...def,
-        templateFilename: templates[def.kind].name,
+        templateFilename: isTemplateKind(def.kind) ? templates[def.kind].name : null,
         filled: !!record,
         statusText: record ? `Uploaded — ${record.name} · ${record.uploadedAt}` : 'Not uploaded yet',
         oId: record?.oId ?? null,
@@ -84,7 +91,7 @@ export class RepDocuments {
     });
   }
 
-  handleUpload(kind: DocTemplateKind, label: string, event: Event): void {
+  handleUpload(kind: keyof RepDocs, label: string, event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
@@ -100,7 +107,7 @@ export class RepDocuments {
     input.value = '';
   }
 
-  private setUploading(kind: DocTemplateKind, uploading: boolean): void {
+  private setUploading(kind: keyof RepDocs, uploading: boolean): void {
     this.uploadingKinds.update((kinds) => {
       const next = new Set(kinds);
       if (uploading) next.add(kind);
