@@ -12,6 +12,9 @@ export interface RepProfileData {
   zip: string;
   googleLink: string;
   resourceLink: string;
+  passedCertification: boolean;
+  businessCardsSent: boolean;
+  consultantFeePaid: boolean;
   docs: RepDocs;
   commissions: CommissionDay[];
 }
@@ -26,6 +29,9 @@ function emptyRepProfile(): RepProfileData {
     zip: '',
     googleLink: '',
     resourceLink: '',
+    passedCertification: false,
+    businessCardsSent: false,
+    consultantFeePaid: false,
     docs: { agreement: null, w4: null, certification: null },
     commissions: [],
   };
@@ -42,6 +48,9 @@ function toProfileData(rep: RepRecord | undefined): RepProfileData {
     zip: rep.zip,
     googleLink: rep.googleLink,
     resourceLink: rep.resourceLink,
+    passedCertification: rep.passedCertification,
+    businessCardsSent: rep.businessCardsSent,
+    consultantFeePaid: rep.consultantFeePaid,
     docs: rep.docs,
     commissions: rep.commissions,
   };
