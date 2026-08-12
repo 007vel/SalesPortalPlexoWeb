@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, WritableSignal, computed, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -14,6 +14,25 @@ import { RepDirectoryStore, RepRecord, RepStatus } from '../rep-directory-store/
 import { Toast } from '../toast/toast';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type DocSlotKind = 'pricingSheet' | 'powerPoint';
+
+interface DocSlot {
+  file: WritableSignal<File | null>;
+  name: WritableSignal<string | null>;
+  size: WritableSignal<number | null>;
+  drag: WritableSignal<boolean>;
+}
+
+function fileSizeLabel(bytes: number | null): string {
+  if (bytes === null) return '';
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function fileKindIcon(name: string | null): string {
+  return name?.toLowerCase().endsWith('.pdf') ? 'picture_as_pdf' : 'image';
+}
 
 /** certForm-level validator: a passed-certification claim needs the certificate file attached. */
 function certificateRequiredWhenPassedValidator(group: AbstractControl): ValidationErrors | null {
@@ -60,8 +79,8 @@ export class CreateRepDialog {
 
   // Labels for the mobile compact step indicator — order matches the mat-step
   // sequence in the template, since a narrow screen has no room for the
-  // full horizontal stepper header (3 icon+label pairs).
-  readonly stepTitles = ['Profile', 'Certification', 'Bank details'];
+  // full horizontal stepper header (4 icon+label pairs).
+  readonly stepTitles = ['Profile', 'Certification', 'Bank details', 'Links & Documents'];
 
   readonly missingRequiredFields = { name: false, email: false };
   readonly invalidEmail = signal(false);
@@ -84,17 +103,8 @@ export class CreateRepDialog {
   readonly missingCertificateFile = signal(false);
   readonly certDragActive = signal(false);
 
-  readonly certificateFileIcon = computed(() => {
-    const name = this.certificateFileName();
-    return name?.toLowerCase().endsWith('.pdf') ? 'picture_as_pdf' : 'image';
-  });
-
-  readonly certificateFileSizeLabel = computed(() => {
-    const bytes = this.certificateFileSize();
-    if (bytes === null) return '';
-    if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  });
+  readonly certificateFileIcon = computed(() => fileKindIcon(this.certificateFileName()));
+  readonly certificateFileSizeLabel = computed(() => fileSizeLabel(this.certificateFileSize()));
 
   // ----- step 3: bank details -----
   readonly bankForm = this.fb.nonNullable.group({
@@ -104,6 +114,34 @@ export class CreateRepDialog {
   });
 
   readonly missingBankFields = { bankName: false, routingNumber: false, accountNumber: false };
+  readonly accountNumberVisible = signal(false);
+
+  toggleAccountNumberVisibility(): void {
+    this.accountNumberVisible.update((visible) => !visible);
+  }
+
+  // ----- step 4: links & documents (all optional — admin can fill these in later via the rep's own Links/Documents pages) -----
+  readonly linksForm = this.fb.nonNullable.group({
+    googleLink: [''],
+    resourceLink: [''],
+    pricingSheetLink: [''],
+    powerPointLink: [''],
+  });
+
+  private readonly docSlots: Record<DocSlotKind, DocSlot> = {
+    pricingSheet: { file: signal(null), name: signal(null), size: signal(null), drag: signal(false) },
+    powerPoint: { file: signal(null), name: signal(null), size: signal(null), drag: signal(false) },
+  };
+
+  readonly pricingSheetFileName = this.docSlots.pricingSheet.name.asReadonly();
+  readonly pricingSheetDragActive = this.docSlots.pricingSheet.drag.asReadonly();
+  readonly pricingSheetFileIcon = computed(() => fileKindIcon(this.pricingSheetFileName()));
+  readonly pricingSheetFileSizeLabel = computed(() => fileSizeLabel(this.docSlots.pricingSheet.size()));
+
+  readonly powerPointFileName = this.docSlots.powerPoint.name.asReadonly();
+  readonly powerPointDragActive = this.docSlots.powerPoint.drag.asReadonly();
+  readonly powerPointFileIcon = computed(() => fileKindIcon(this.powerPointFileName()));
+  readonly powerPointFileSizeLabel = computed(() => fileSizeLabel(this.docSlots.powerPoint.size()));
 
   readonly submitting = signal(false);
   readonly submitFailed = signal(false);
@@ -113,6 +151,7 @@ export class CreateRepDialog {
   }
 
   goToStep2(stepper: MatStepper): void {
+    this.infoForm.markAllAsTouched();
     const v = this.infoForm.getRawValue();
     const name = v.name.trim();
     const email = v.email.trim();
@@ -178,9 +217,8 @@ export class CreateRepDialog {
     stepper.next();
   }
 
-  submit(): void {
-    if (this.submitting()) return;
-
+  goToStep4(stepper: MatStepper): void {
+    this.bankForm.markAllAsTouched();
     const bank = this.bankForm.getRawValue();
     const bankName = bank.bankName.trim();
     const routingNumber = bank.routingNumber.trim();
@@ -193,10 +231,59 @@ export class CreateRepDialog {
       this.toast.show('Bank name, routing number, and account number are required.');
       return;
     }
+    stepper.next();
+  }
+
+  handleDocFile(kind: DocSlotKind, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) this.setDocFile(kind, file);
+    input.value = '';
+  }
+
+  onDocDragOver(kind: DocSlotKind, event: DragEvent): void {
+    event.preventDefault();
+    this.docSlots[kind].drag.set(true);
+  }
+
+  onDocDragLeave(kind: DocSlotKind): void {
+    this.docSlots[kind].drag.set(false);
+  }
+
+  onDocDrop(kind: DocSlotKind, event: DragEvent): void {
+    event.preventDefault();
+    this.docSlots[kind].drag.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file) this.setDocFile(kind, file);
+  }
+
+  clearDocFile(kind: DocSlotKind, event: Event): void {
+    event.stopPropagation();
+    this.docSlots[kind].file.set(null);
+    this.docSlots[kind].name.set(null);
+    this.docSlots[kind].size.set(null);
+  }
+
+  private setDocFile(kind: DocSlotKind, file: File): void {
+    this.docSlots[kind].file.set(file);
+    this.docSlots[kind].name.set(file.name);
+    this.docSlots[kind].size.set(file.size);
+  }
+
+  submit(): void {
+    if (this.submitting()) return;
+
+    const bank = this.bankForm.getRawValue();
+    const bankName = bank.bankName.trim();
+    const routingNumber = bank.routingNumber.trim();
+    const accountNumber = bank.accountNumber.trim();
 
     const info = this.infoForm.getRawValue();
     const cert = this.certForm.getRawValue();
     const certificateFile = cert.certificateFile;
+    const links = this.linksForm.getRawValue();
+    const pricingSheetFile = this.docSlots.pricingSheet.file();
+    const powerPointFile = this.docSlots.powerPoint.file();
 
     this.submitFailed.set(false);
     this.submitting.set(true);
@@ -214,6 +301,10 @@ export class CreateRepDialog {
         passedCertification: cert.passedCertification,
         businessCardsSent: cert.businessCardsSent,
         consultantFeePaid: cert.consultantFeePaid,
+        googleLink: links.googleLink.trim(),
+        resourceLink: links.resourceLink.trim(),
+        pricingSheetLink: links.pricingSheetLink.trim(),
+        powerPointLink: links.powerPointLink.trim(),
       })
       .pipe(
         switchMap((rep) => {
@@ -223,10 +314,16 @@ export class CreateRepDialog {
           if (cert.passedCertification && certificateFile) {
             followUps.push(this.directory.setDocument(rep.repId, 'certification', certificateFile));
           }
+          if (pricingSheetFile) {
+            followUps.push(this.directory.setDocument(rep.repId, 'pricingSheet', pricingSheetFile));
+          }
+          if (powerPointFile) {
+            followUps.push(this.directory.setDocument(rep.repId, 'powerPoint', powerPointFile));
+          }
           return forkJoin(followUps).pipe(
             map(() => rep),
             catchError(() => {
-              this.toast.show(`Rep ${rep.repId} was created, but saving bank details/certificate failed — edit the rep to retry.`);
+              this.toast.show(`Rep ${rep.repId} was created, but saving some follow-up details failed — edit the rep to retry.`);
               return of(rep);
             }),
           );

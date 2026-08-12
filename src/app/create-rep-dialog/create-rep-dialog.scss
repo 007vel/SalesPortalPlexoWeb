@@ -15,16 +15,26 @@
   .mat-mdc-dialog-surface {
     overflow: hidden !important;
     max-height: 90vh !important;
+    display: flex;
+    flex-direction: column;
   }
 
+  // A step's content (the Links & Documents step especially — 4 fields plus 2
+  // dropzones) can be taller than the 90vh surface budget on a short viewport.
+  // This is the one true scroll container: it can grow the surface up to its
+  // max-height and then scroll internally, rather than silently clipping
+  // whatever doesn't fit (which `overflow: hidden` here used to do).
   .mat-mdc-dialog-content {
+    flex: 1;
+    min-height: 0;
     max-height: none !important;
-    overflow: hidden !important;
+    overflow-y: auto !important;
     overflow-x: hidden !important;
-    overflow-y: hidden !important;
   }
 
-  /* Prevent stepper itself from creating a scrollbar */
+  /* These wrapper elements' own overflow:hidden is part of how Material hides
+     the inactive steps during a horizontal transition — leave that alone.
+     Only strip the horizontal padding so the dialog's own padding is what governs spacing. */
   .mat-horizontal-content-container {
     overflow: hidden !important;
     padding-left: 0;
@@ -69,6 +79,15 @@ mat-form-field mat-icon[matPrefix] {
   height: 19px;
 }
 
+mat-form-field button[matSuffix] {
+  color: var(--faint);
+  margin-right: -8px;
+
+  &:hover {
+    color: var(--muted);
+  }
+}
+
 .error {
   font-size: 13px;
   color: var(--danger);
@@ -96,8 +115,24 @@ mat-form-field mat-icon[matPrefix] {
     color: #fff;
   }
 
+  // Material shrinks each step header to fit and ellipsis-truncates the label
+  // by default ("Certific…", "Bank de…") — with 4 steps that kicks in even at
+  // a generous dialog width. Let the label wrap onto a second line instead of
+  // truncating, and don't let the header shrink the icon below its own size.
+  ::ng-deep .mat-step-header {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  ::ng-deep .mat-step-header .mat-step-icon {
+    flex-shrink: 0;
+  }
+
   ::ng-deep .mat-step-header .mat-step-label {
     color: var(--muted);
+    max-width: none;
+    white-space: normal;
+    line-height: 1.25;
   }
 
   ::ng-deep .mat-step-header .mat-step-label.mat-step-label-active {
@@ -313,12 +348,6 @@ mat-form-field mat-icon[matPrefix] {
   display: none;
 }
 
-@media (max-width: 520px) {
-  .field-row {
-    grid-template-columns: 1fr;
-  }
-}
-
 // =====================================================
 // ---------- mobile: full-screen wizard sheet ----------
 // =====================================================
@@ -393,6 +422,7 @@ mat-form-field mat-icon[matPrefix] {
   }
 
   .field-row {
+    grid-template-columns: 1fr;
     gap: 10px;
   }
 

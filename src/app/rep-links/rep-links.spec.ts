@@ -79,12 +79,23 @@ describe('RepLinks', () => {
     component = fixture.componentInstance;
     await fixture.whenStable();
 
-    component.form.setValue({ googleLink: 'https://maps.google.com/x', resourceLink: 'https://hub.example.com/y' });
+    component.form.setValue({
+      googleLink: 'https://maps.google.com/x',
+      resourceLink: 'https://hub.example.com/y',
+      pricingSheetLink: '',
+      powerPointLink: '',
+    });
     component.save();
 
     const req = httpMock.expectOne(apiUrl('reps/link'));
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ repsId: 1001, googleLink: 'https://maps.google.com/x', resourceLink: 'https://hub.example.com/y' });
+    expect(req.request.body).toEqual({
+      repsId: 1001,
+      googleLink: 'https://maps.google.com/x',
+      resourceLink: 'https://hub.example.com/y',
+      pricingSheetLink: '',
+      powerPointLink: '',
+    });
     req.flush(repDto({ googleLink: 'https://maps.google.com/x', resourceLink: 'https://hub.example.com/y' }));
   });
 
@@ -123,7 +134,14 @@ describe('RepLinks', () => {
     component.form.controls.googleLink.markAsDirty();
 
     const directory = TestBed.inject(RepDirectoryStore);
-    directory.updateLinksByRepId(1001, 'https://server-side-change.example.com', '').subscribe();
+    directory
+      .updateLinksByRepId(1001, {
+        googleLink: 'https://server-side-change.example.com',
+        resourceLink: '',
+        pricingSheetLink: '',
+        powerPointLink: '',
+      })
+      .subscribe();
     httpMock.expectOne(apiUrl('reps/link')).flush(repDto({ googleLink: 'https://server-side-change.example.com' }));
     await fixture.whenStable();
 

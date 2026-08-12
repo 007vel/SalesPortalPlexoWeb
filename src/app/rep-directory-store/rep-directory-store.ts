@@ -16,6 +16,8 @@ export interface RepDocs {
   agreement: RepDocRecord | null;
   w4: RepDocRecord | null;
   certification: RepDocRecord | null;
+  pricingSheet: RepDocRecord | null;
+  powerPoint: RepDocRecord | null;
 }
 
 /** A single document row across every rep — used by admin oversight views. */
@@ -44,6 +46,8 @@ export interface RepRecord {
   zip: string;
   googleLink: string;
   resourceLink: string;
+  pricingSheetLink: string;
+  powerPointLink: string;
   portalLink: string;
   status: RepStatus;
   passedCertification: boolean;
@@ -67,6 +71,10 @@ export interface NewRepInput {
   passedCertification: boolean;
   businessCardsSent: boolean;
   consultantFeePaid: boolean;
+  googleLink?: string;
+  resourceLink?: string;
+  pricingSheetLink?: string;
+  powerPointLink?: string;
 }
 
 export interface NewRepBankDetails {
@@ -96,6 +104,8 @@ interface RepDto {
   zip: string | null;
   googleLink: string | null;
   resourceLink: string | null;
+  pricingSheetLink: string | null;
+  powerPointLink: string | null;
   portalLink: string | null;
   status: number;
   passedCertification: boolean;
@@ -116,6 +126,8 @@ interface RepWriteDto {
   zip: string;
   googleLink: string;
   resourceLink: string;
+  pricingSheetLink: string;
+  powerPointLink: string;
   status: number;
   passedCertification: boolean;
   businessCardsSent: boolean;
@@ -150,6 +162,15 @@ interface RepLinkUpdateDto {
   repsId: number;
   googleLink: string;
   resourceLink: string;
+  pricingSheetLink: string;
+  powerPointLink: string;
+}
+
+export interface RepLinks {
+  googleLink: string;
+  resourceLink: string;
+  pricingSheetLink: string;
+  powerPointLink: string;
 }
 
 /** Shape returned by POST/GET api/documents (RepDocumentDto). */
@@ -241,8 +262,10 @@ export class RepDirectoryStore {
       city: input.city,
       state: input.state,
       zip: input.zip,
-      googleLink: '',
-      resourceLink: '',
+      googleLink: input.googleLink ?? '',
+      resourceLink: input.resourceLink ?? '',
+      pricingSheetLink: input.pricingSheetLink ?? '',
+      powerPointLink: input.powerPointLink ?? '',
       status: STATUS_TO_API[input.status],
       passedCertification: input.passedCertification,
       businessCardsSent: input.businessCardsSent,
@@ -285,9 +308,9 @@ export class RepDirectoryStore {
     return this.putRep(repId, { status });
   }
 
-  /** POSTs just the two link fields via api/reps/link, identifying the rep by its plain RepId rather than the full record PUT requires. */
-  updateLinksByRepId(repId: number, googleLink: string, resourceLink: string): Observable<RepRecord> {
-    const body: RepLinkUpdateDto = { repsId: repId, googleLink, resourceLink };
+  /** POSTs just the link fields via api/reps/link, identifying the rep by its plain RepId rather than the full record PUT requires. */
+  updateLinksByRepId(repId: number, links: RepLinks): Observable<RepRecord> {
+    const body: RepLinkUpdateDto = { repsId: repId, ...links };
     return this.api.post<RepDto>('reps/link', body).pipe(
       map((dto) => this.mergeDto(dto)),
       tap((updated) => this.repsSignal.update((list) => list.map((r) => (r.oId === updated.oId ? updated : r)))),
@@ -320,9 +343,9 @@ export class RepDirectoryStore {
   loadDocuments(repId: string): Observable<RepDocs> {
     return this.api.get<RepDocumentDto[]>(`documents/rep/${repId}`).pipe(
       map((dtos): RepDocs => {
-        const docs: RepDocs = { agreement: null, w4: null, certification: null };
+        const docs: RepDocs = { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null };
         for (const dto of dtos) {
-          if (dto.kind === 'agreement' || dto.kind === 'w4' || dto.kind === 'certification') {
+          if (dto.kind === 'agreement' || dto.kind === 'w4' || dto.kind === 'certification' || dto.kind === 'pricingSheet' || dto.kind === 'powerPoint') {
             docs[dto.kind] = { oId: dto.oId, name: dto.fileName, uploadedAt: dto.uploadedAt.slice(0, 10) };
           }
         }
@@ -343,7 +366,7 @@ export class RepDirectoryStore {
     );
   }
 
-  private putRep(repId: string, changes: Partial<Pick<RepRecord, 'status' | 'googleLink' | 'resourceLink'>>): Observable<RepRecord> {
+  private putRep(repId: string, changes: Partial<Pick<RepRecord, 'status' | 'googleLink' | 'resourceLink' | 'pricingSheetLink' | 'powerPointLink'>>): Observable<RepRecord> {
     const rep = this.findByRepId(repId);
     if (!rep) return throwError(() => new Error('Rep not found'));
 
@@ -359,6 +382,8 @@ export class RepDirectoryStore {
       zip: merged.zip,
       googleLink: merged.googleLink,
       resourceLink: merged.resourceLink,
+      pricingSheetLink: merged.pricingSheetLink,
+      powerPointLink: merged.powerPointLink,
       status: STATUS_TO_API[merged.status],
       passedCertification: merged.passedCertification,
       businessCardsSent: merged.businessCardsSent,
@@ -385,12 +410,14 @@ export class RepDirectoryStore {
       zip: dto.zip ?? '',
       googleLink: dto.googleLink ?? '',
       resourceLink: dto.resourceLink ?? '',
+      pricingSheetLink: dto.pricingSheetLink ?? '',
+      powerPointLink: dto.powerPointLink ?? '',
       portalLink: dto.portalLink ?? '',
       status: STATUS_FROM_API[dto.status] ?? 'pending',
       passedCertification: dto.passedCertification,
       businessCardsSent: dto.businessCardsSent,
       consultantFeePaid: dto.consultantFeePaid,
-      docs: existing?.docs ?? { agreement: null, w4: null, certification: null },
+      docs: existing?.docs ?? { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null },
       bankDetails: existing?.bankDetails ?? null,
       commissions: existing?.commissions ?? emptyCommissionHistory(14),
       createdAt: dto.createdAt.slice(0, 10),

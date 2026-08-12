@@ -53,6 +53,10 @@
           *ngTemplateOutlet="field; context: {label:'Google link', value: rep.googleLink, isLink: true}"></ng-container>
         <ng-container
           *ngTemplateOutlet="field; context: {label:'Resource link', value: rep.resourceLink, isLink: true}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Pricing sheet link', value: rep.pricingSheetLink, isLink: true}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'PowerPoint link', value: rep.powerPointLink, isLink: true}"></ng-container>
       </div>
     </mat-card>
 
@@ -136,6 +140,44 @@
           </div>
         </div>
         }
+        <div class="doc-row">
+          <div class="doc-info">
+            <div class="doc-icon" [class.filled]="!!rep.docs.pricingSheet"><mat-icon>{{ rep.docs.pricingSheet ?
+                'check' : 'description' }}</mat-icon></div>
+            <div>
+              <div class="doc-name">Pricing Sheet</div>
+              <div class="doc-status" [class.filled]="!!rep.docs.pricingSheet">{{ rep.docs.pricingSheet ?
+                (rep.docs.pricingSheet.name + ' · ' + rep.docs.pricingSheet.uploadedAt) : 'Not uploaded' }}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            @if (rep.docs.pricingSheet; as doc) {
+            <button type="button" mat-icon-button class="action-btn" title="View"
+              (click)="viewDocument(doc.oId, doc.name, 'Pricing Sheet')"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download"
+              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+            }
+          </div>
+        </div>
+        <div class="doc-row">
+          <div class="doc-info">
+            <div class="doc-icon" [class.filled]="!!rep.docs.powerPoint"><mat-icon>{{ rep.docs.powerPoint ? 'check' :
+                'description' }}</mat-icon></div>
+            <div>
+              <div class="doc-name">PowerPoint</div>
+              <div class="doc-status" [class.filled]="!!rep.docs.powerPoint">{{ rep.docs.powerPoint ?
+                (rep.docs.powerPoint.name + ' · ' + rep.docs.powerPoint.uploadedAt) : 'Not uploaded' }}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            @if (rep.docs.powerPoint; as doc) {
+            <button type="button" mat-icon-button class="action-btn" title="View"
+              (click)="viewDocument(doc.oId, doc.name, 'PowerPoint')"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download"
+              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+            }
+          </div>
+        </div>
       </div>
     </mat-card>
 

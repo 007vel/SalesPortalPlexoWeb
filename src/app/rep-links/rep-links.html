@@ -34,8 +34,7 @@
       <div class="field-block">
         <label class="fl">Google link</label>
         <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
-          <input matInput type="url" formControlName="googleLink"
-            placeholder="Enter Google link">
+          <input matInput type="url" formControlName="googleLink">
         </mat-form-field>
         <p class="fh">Your Google Business, Maps, or Drive link — whatever's most useful for admin to have on file.</p>
       </div>
@@ -43,11 +42,26 @@
       <div class="field-block">
         <label class="fl">Resource link</label>
         <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
-          <input matInput type="url" formControlName="resourceLink"
-            placeholder="Enter Resource link">
+          <input matInput type="url" formControlName="resourceLink">
         </mat-form-field>
         <p class="fh">A personal doc link, e.g. your BitDocs share link. (The team-wide Training &amp; Resource Hub
           lives in its own tab.)</p>
+      </div>
+
+      <div class="field-block">
+        <label class="fl">Pricing sheet link</label>
+        <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
+          <input matInput type="url" formControlName="pricingSheetLink">
+        </mat-form-field>
+        <p class="fh">A shareable link to your current pricing sheet.</p>
+      </div>
+
+      <div class="field-block">
+        <label class="fl">PowerPoint link</label>
+        <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
+          <input matInput type="url" formControlName="powerPointLink">
+        </mat-form-field>
+        <p class="fh">A shareable link to your sales deck or PowerPoint presentation.</p>
       </div>
     </form>
     } @else {
