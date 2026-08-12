@@ -1,6 +1,41 @@
 :host {
   display: block;
-  width: min(560px, 90vw);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Create Rep Dialog */
+::ng-deep .crd-dialog-panel {
+  .mat-mdc-dialog-container {
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-dialog-surface {
+    overflow: hidden !important;
+    max-height: 90vh !important;
+  }
+
+  .mat-mdc-dialog-content {
+    max-height: none !important;
+    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+  }
+
+  /* Prevent stepper itself from creating a scrollbar */
+  .mat-horizontal-content-container {
+    overflow: hidden !important;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .mat-stepper-horizontal,
+  .mat-horizontal-stepper-content,
+  .mat-horizontal-stepper-wrapper {
+    overflow: hidden !important;
+  }
 }
 
 .sub {
@@ -13,9 +48,11 @@
   width: 100%;
 }
 
+// subscriptSizing="dynamic" already collapses the reserved hint/error space
+// when a field has nothing to show, so fields only need a small gap here.
 mat-form-field.full-width,
 .field-row mat-form-field {
-  margin-bottom: -6px;
+  margin-top: 10px;
 }
 
 .field-row {
@@ -77,7 +114,6 @@ mat-form-field mat-icon[matPrefix] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 22px;
   padding-top: 16px;
   border-top: 1px solid #EEF1F6;
 
@@ -271,10 +307,6 @@ mat-form-field mat-icon[matPrefix] {
 }
 
 @media (max-width: 520px) {
-  :host {
-    width: min(420px, 92vw);
-  }
-
   .field-row {
     grid-template-columns: 1fr;
   }

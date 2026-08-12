@@ -43,7 +43,13 @@ export class AdminReps {
 
   openCreateModal(): void {
     this.dialog
-      .open(CreateRepDialog)
+      .open(CreateRepDialog, {
+        width: 'min(640px, 94vw)',
+        maxWidth: '94vw',
+        maxHeight: 'none',
+        autoFocus: false,
+        panelClass: 'crd-dialog-panel',
+      })
       .afterClosed()
       .subscribe((rep: RepRecord | undefined) => {
         if (rep) this.toast.show(`Rep ${rep.repId} created — link ${rep.portalLink}`);

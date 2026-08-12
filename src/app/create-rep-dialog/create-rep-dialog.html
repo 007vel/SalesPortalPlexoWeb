@@ -7,7 +7,7 @@
         are generated automatically.</p>
 
       <form [formGroup]="infoForm">
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
           <mat-label>Full name</mat-label>
           <mat-icon matPrefix>person</mat-icon>
           <input matInput formControlName="name">
@@ -15,33 +15,33 @@
         </mat-form-field>
 
         <div class="field-row">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Email address</mat-label>
             <mat-icon matPrefix>mail</mat-icon>
             <input matInput type="email" formControlName="email">
             @if (missingRequiredFields.email) { <mat-error>Email is required</mat-error> }
             @else if (invalidEmail()) { <mat-error>Enter a valid email address</mat-error> }
           </mat-form-field>
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Phone</mat-label>
             <mat-icon matPrefix>call</mat-icon>
             <input matInput type="tel" formControlName="phone">
           </mat-form-field>
         </div>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
           <mat-label>Address</mat-label>
           <mat-icon matPrefix>home</mat-icon>
           <input matInput formControlName="address">
         </mat-form-field>
 
         <div class="field-row">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>City</mat-label>
             <mat-icon matPrefix>location_city</mat-icon>
             <input matInput formControlName="city">
           </mat-form-field>
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>State</mat-label>
             <mat-icon matPrefix>map</mat-icon>
             <input matInput formControlName="state">
@@ -49,12 +49,12 @@
         </div>
 
         <div class="field-row">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Zip</mat-label>
             <mat-icon matPrefix>pin_drop</mat-icon>
             <input matInput formControlName="zip">
           </mat-form-field>
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Status</mat-label>
             <mat-select formControlName="status">
               <mat-option value="pending">Pending</mat-option>
@@ -151,7 +151,7 @@
       <p class="sub">Where this rep's payouts are sent.</p>
 
       <form [formGroup]="bankForm">
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
           <mat-label>Bank name</mat-label>
           <mat-icon matPrefix>account_balance</mat-icon>
           <input matInput formControlName="bankName">
@@ -159,13 +159,13 @@
         </mat-form-field>
 
         <div class="field-row">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Routing number</mat-label>
             <mat-icon matPrefix>tag</mat-icon>
             <input matInput formControlName="routingNumber" inputmode="numeric" autocomplete="off">
             @if (missingBankFields.routingNumber) { <mat-error>Routing number is required</mat-error> }
           </mat-form-field>
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Account number</mat-label>
             <mat-icon matPrefix>lock</mat-icon>
             <input matInput type="password" formControlName="accountNumber" inputmode="numeric" autocomplete="off">
