@@ -1,4 +1,16 @@
 <h2 mat-dialog-title>Create new rep</h2>
+
+<!-- Mobile-only compact stand-in for the horizontal stepper header, which has
+     no room for 3 icon+label steps on a phone width. Hidden on desktop. -->
+<div class="crd-mobile-progress">
+  <span class="crd-mobile-progress-label">Step {{ stepper.selectedIndex + 1 }} of {{ stepTitles.length }} &middot;
+    {{ stepTitles[stepper.selectedIndex] }}</span>
+  <div class="crd-mobile-progress-track">
+    <div class="crd-mobile-progress-fill"
+      [style.width.%]="((stepper.selectedIndex + 1) / stepTitles.length) * 100"></div>
+  </div>
+</div>
+
 <mat-dialog-content>
   <mat-stepper #stepper class="crd-stepper" [linear]="true">
 

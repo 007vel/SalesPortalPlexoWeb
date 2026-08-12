@@ -306,8 +306,108 @@ mat-form-field mat-icon[matPrefix] {
   }
 }
 
+// ---------- mobile compact step indicator ----------
+// Stand-in for the horizontal stepper header on phone widths (see .crd-mobile
+// breakpoint below, which hides the real header). Invisible on desktop.
+.crd-mobile-progress {
+  display: none;
+}
+
 @media (max-width: 520px) {
   .field-row {
     grid-template-columns: 1fr;
+  }
+}
+
+// =====================================================
+// ---------- mobile: full-screen wizard sheet ----------
+// =====================================================
+@media (max-width: 640px) {
+  // The dialog stops being a small floating card — no room on a phone to
+  // show a title, a 3-label stepper header, and a form and still look like
+  // anything other than a cramped strip. Take over the full viewport like a
+  // native wizard/sheet instead.
+  ::ng-deep .crd-dialog-panel {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+
+    .mat-mdc-dialog-surface {
+      height: 100dvh !important;
+      max-height: 100dvh !important;
+      border-radius: 0 !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    // Only the form area scrolls, between the fixed title/progress header
+    // and the step's own action buttons — a normal, expected mobile pattern,
+    // unlike the tiny centered desktop card this codebase avoids scrolling in.
+    .mat-mdc-dialog-content {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+    }
+
+    // The 3 icon+label headers have no room on a phone width — replaced by
+    // .crd-mobile-progress above the content instead.
+    .mat-horizontal-stepper-header-container {
+      display: none !important;
+    }
+  }
+
+  h2[mat-dialog-title] {
+    padding: 16px 16px 4px;
+    margin: 0;
+    font-size: 18px;
+  }
+
+  .crd-mobile-progress {
+    display: block;
+    padding: 0 16px 12px;
+  }
+
+  .crd-mobile-progress-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .crd-mobile-progress-track {
+    height: 4px;
+    border-radius: 999px;
+    background: var(--border, #EEF1F6);
+    overflow: hidden;
+  }
+
+  .crd-mobile-progress-fill {
+    height: 100%;
+    background: var(--orange);
+    border-radius: inherit;
+    transition: width 0.2s ease;
+  }
+
+  .field-row {
+    gap: 10px;
+  }
+
+  .step-actions {
+    padding-top: 14px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+
+    button {
+      flex: 1;
+      height: 44px;
+      font-size: 14.5px;
+    }
+  }
+
+  .toggle-row {
+    padding: 12px 0;
   }
 }
