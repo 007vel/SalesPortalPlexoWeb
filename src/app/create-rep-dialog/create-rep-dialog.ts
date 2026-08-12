@@ -58,6 +58,11 @@ export class CreateRepDialog {
     status: ['pending' as RepStatus],
   });
 
+  // Labels for the mobile compact step indicator — order matches the mat-step
+  // sequence in the template, since a narrow screen has no room for the
+  // full horizontal stepper header (3 icon+label pairs).
+  readonly stepTitles = ['Profile', 'Certification', 'Bank details'];
+
   readonly missingRequiredFields = { name: false, email: false };
   readonly invalidEmail = signal(false);
 
