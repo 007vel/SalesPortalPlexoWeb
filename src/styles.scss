@@ -267,3 +267,52 @@ mat-icon {
 @media (max-width: 640px) {
   .admin-topbar h1 { font-size: 20px; }
 }
+
+/* ---------- create-rep dialog — invisible scrollbar ----------
+   Must live here (global scope) because ::-webkit-scrollbar pseudo-elements
+   don't survive Angular's ::ng-deep encapsulation compilation.
+   Target every element inside the panel that could carry a scrollbar:
+   the dialog container, surface, and content area. */
+.crd-dialog-panel,
+.crd-dialog-panel .mat-mdc-dialog-container,
+.crd-dialog-panel .mat-mdc-dialog-surface,
+.crd-dialog-panel .mat-mdc-dialog-content {
+  scrollbar-width: thin !important;
+  scrollbar-color: transparent transparent !important;
+}
+
+.crd-dialog-panel:hover,
+.crd-dialog-panel .mat-mdc-dialog-container:hover,
+.crd-dialog-panel .mat-mdc-dialog-surface:hover,
+.crd-dialog-panel .mat-mdc-dialog-content:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.18) transparent !important;
+}
+
+.crd-dialog-panel::-webkit-scrollbar,
+.crd-dialog-panel .mat-mdc-dialog-container::-webkit-scrollbar,
+.crd-dialog-panel .mat-mdc-dialog-surface::-webkit-scrollbar,
+.crd-dialog-panel .mat-mdc-dialog-content::-webkit-scrollbar {
+  width: 5px !important;
+}
+
+.crd-dialog-panel::-webkit-scrollbar-track,
+.crd-dialog-panel .mat-mdc-dialog-container::-webkit-scrollbar-track,
+.crd-dialog-panel .mat-mdc-dialog-surface::-webkit-scrollbar-track,
+.crd-dialog-panel .mat-mdc-dialog-content::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.crd-dialog-panel::-webkit-scrollbar-thumb,
+.crd-dialog-panel .mat-mdc-dialog-container::-webkit-scrollbar-thumb,
+.crd-dialog-panel .mat-mdc-dialog-surface::-webkit-scrollbar-thumb,
+.crd-dialog-panel .mat-mdc-dialog-content::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  border-radius: 999px !important;
+}
+
+.crd-dialog-panel:hover::-webkit-scrollbar-thumb,
+.crd-dialog-panel .mat-mdc-dialog-container:hover::-webkit-scrollbar-thumb,
+.crd-dialog-panel .mat-mdc-dialog-surface:hover::-webkit-scrollbar-thumb,
+.crd-dialog-panel .mat-mdc-dialog-content:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18) !important;
+}
