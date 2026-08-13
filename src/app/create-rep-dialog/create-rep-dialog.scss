@@ -3,13 +3,13 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: scroll;
+
 }
 
 /* Create Rep Dialog */
 ::ng-deep .crd-dialog-panel {
   .mat-mdc-dialog-container {
-    overflow: scroll !important;
+
   }
 
   // !important on every property here, not just overflow/max-height: Material's
