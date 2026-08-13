@@ -1,19 +1,87 @@
-:host { display: block; }
+:host {
+  display: block;
+}
 
-.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
-.stat-card { padding: 18px 20px; }
-.stat-card .num { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--navy); }
-.stat-card .lbl { font-size: 12.5px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
 
-.chart-card { margin-bottom: 18px; }
-mat-card-title { display: flex; align-items: center; gap: 8px; font-size: 16px; }
+.stat-card {
+  padding: 18px 20px;
+}
 
-.comm-chart-wrap { overflow-x: auto; padding-bottom: 2px; }
-.comm-chart { display: flex; align-items: flex-end; gap: 10px; height: 190px; padding: 18px 6px 0; min-width: 560px; }
-.comm-bar-col { width: 34px; flex-shrink: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 7px; }
-.comm-bar-val { font-size: 10.5px; font-weight: 700; color: var(--navy); white-space: nowrap; }
-.comm-bar-col.zero .comm-bar-val { color: var(--faint); font-weight: 500; }
-.comm-bar-track { width: 100%; flex: 1; display: flex; align-items: flex-end; }
+.stat-card .num {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.stat-card .lbl {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.chart-card {
+  margin-bottom: 18px;
+}
+
+mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.comm-chart-wrap {
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.comm-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 190px;
+  padding: 18px 6px 0;
+  min-width: 560px;
+}
+
+.comm-bar-col {
+  width: 34px;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.comm-bar-val {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+.comm-bar-col.zero .comm-bar-val {
+  color: var(--faint);
+  font-weight: 500;
+}
+
+.comm-bar-track {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+}
+
 .comm-bar {
   width: 100%;
   border-radius: 7px 7px 3px 3px;
@@ -21,23 +89,62 @@ mat-card-title { display: flex; align-items: center; gap: 8px; font-size: 16px; 
   transition: height .5s ease;
   min-height: 3px;
 }
-.comm-bar-col.zero .comm-bar { background: var(--border); }
-.comm-bar-col.today .comm-bar { background: linear-gradient(180deg, var(--navy-2) 0%, var(--navy) 100%); }
-.comm-bar-lbl { font-size: 10.5px; color: var(--muted); white-space: nowrap; }
-.comm-bar-col.today .comm-bar-lbl { color: var(--navy); font-weight: 700; }
 
-.table-card { padding: 0; overflow-x: auto; }
-table { width: 100%; }
-.today-tag { color: var(--orange); font-weight: 600; }
-.comm-table-amt { font-weight: 700; font-family: var(--font-mono); font-size: 13px; }
-.comm-table-amt.zero { color: var(--faint); font-weight: 500; font-family: var(--font-body); }
+.comm-bar-col.zero .comm-bar {
+  background: var(--border);
+}
+
+.comm-bar-col.today .comm-bar {
+  background: linear-gradient(180deg, var(--navy-2) 0%, var(--navy) 100%);
+}
+
+.comm-bar-lbl {
+  font-size: 10.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.comm-bar-col.today .comm-bar-lbl {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.table-card {
+  padding: 0;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+.today-tag {
+  color: var(--orange);
+  font-weight: 600;
+}
+
+.comm-table-amt {
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.comm-table-amt.zero {
+  color: var(--faint);
+  font-weight: 500;
+  font-family: var(--font-body);
+}
 
 @media (max-width: 860px) {
-  .stat-row { grid-template-columns: repeat(2, 1fr); }
+  .stat-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 480px) {
-  .stat-row { grid-template-columns: 1fr; }
+  .stat-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 // ---------- mobile commission row ----------

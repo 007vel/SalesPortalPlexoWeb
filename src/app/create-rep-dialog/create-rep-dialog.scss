@@ -176,6 +176,38 @@ mat-form-field.full-width+.error,
   background-color: var(--orange) !important;
 }
 
+// ---------- sales rep type ----------
+.rep-type-field {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border, #DCE3ED);
+  border-radius: 8px;
+  background: #FAFBFD;
+}
+
+.rep-type-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.rep-type-group {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+
+  ::ng-deep .mdc-radio__native-control:enabled:checked+.mdc-radio__background .mdc-radio__outer-circle,
+  ::ng-deep .mdc-radio__native-control:enabled+.mdc-radio__background .mdc-radio__inner-circle {
+    border-color: var(--orange) !important;
+  }
+
+  ::ng-deep .mat-mdc-radio-button .mdc-form-field {
+    font-size: 13.5px;
+  }
+}
+
 // ---------- toggles ----------
 .toggle-row {
   display: flex;

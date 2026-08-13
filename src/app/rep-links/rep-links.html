@@ -1,6 +1,6 @@
 <div class="rep-page-head">
   <div class="eyebrow">Your links</div>
-  <h1>Google &amp; resource links</h1>
+  <h1>Sales Leads &amp; resource links</h1>
   <p>The links admin needs on file for you. These are yours to edit — update them any time.</p>
 </div>
 
@@ -32,11 +32,11 @@
     @if (editing()) {
     <form [formGroup]="form" (ngSubmit)="save()">
       <div class="field-block">
-        <label class="fl">Google link</label>
+        <label class="fl">Sales Leads link</label>
         <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
           <input matInput type="url" formControlName="googleLink">
         </mat-form-field>
-        <p class="fh">Your Google Business, Maps, or Drive link — whatever's most useful for admin to have on file.</p>
+        <p class="fh">Your Sales Leads Business, Maps, or Drive link — whatever's most useful for admin to have on file.</p>
       </div>
 
       <div class="field-block">

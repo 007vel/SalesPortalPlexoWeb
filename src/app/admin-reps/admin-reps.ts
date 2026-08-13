@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { RepDirectoryStore, RepRecord, docsComplete, repStatusBadge } from '../rep-directory-store/rep-directory-store';
 import { CreateRepDialog } from '../create-rep-dialog/create-rep-dialog';
+import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { Toast } from '../toast/toast';
 
 @Component({
@@ -41,10 +42,30 @@ export class AdminReps {
     this.toast.show(`Copied ${email}`);
   }
 
+  askDelete(rep: RepRecord, event: Event): void {
+    event.stopPropagation();
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: 'Delete this rep?',
+          message: `"${rep.name || rep.repId}" and their records will be permanently removed. This can't be undone.`,
+          confirmLabel: 'Delete',
+        },
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
+        this.directory.deleteRep(rep.oId).subscribe({
+          next: () => this.toast.show(`Rep ${rep.repId} deleted`),
+          error: () => this.toast.show('Failed to delete rep'),
+        });
+      });
+  }
+
   openCreateModal(): void {
     this.dialog
       .open(CreateRepDialog, {
-        width: 'min(820px, 96vw)',
+        width: 'min(980px, 96vw)',
         maxWidth: '96vw',
         maxHeight: '90vh',
         autoFocus: false,

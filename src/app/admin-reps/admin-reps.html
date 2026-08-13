@@ -92,6 +92,8 @@
       <td mat-cell *matCellDef="let rep" (click)="$event.stopPropagation()">
         <button type="button" mat-icon-button title="Copy portal link"
           (click)="copyLink(rep.portalLink)"><mat-icon>content_copy</mat-icon></button>
+        <button type="button" mat-icon-button class="delete-btn" title="Delete rep"
+          (click)="askDelete(rep, $event)"><mat-icon>delete</mat-icon></button>
       </td>
     </ng-container>
 
