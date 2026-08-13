@@ -25,7 +25,6 @@
   .mat-mdc-dialog-surface {
     display: flex !important;
     flex-direction: column !important;
-    overflow: hidden !important;
     // vh is the fallback for browsers without dvh support; dvh (dynamic viewport
     // height) accounts for mobile browser toolbars showing/hiding, so it reflects
     // the actual visible area rather than the largest-possible one.
@@ -50,7 +49,7 @@
      the inactive steps during a horizontal transition — leave that alone.
      Only strip the horizontal padding so the dialog's own padding is what governs spacing. */
   .mat-horizontal-content-container {
-    overflow: hidden !important;
+
     padding-left: 0;
     padding-right: 0;
   }
