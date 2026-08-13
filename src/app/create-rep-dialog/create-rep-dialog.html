@@ -79,13 +79,6 @@
           </mat-form-field>
         </div>
       </form>
-
-      <div class="step-actions">
-        <button mat-button type="button" [disabled]="submitting()" (click)="cancel()">Cancel</button>
-        <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep2(stepper)">
-          Next <mat-icon>arrow_forward</mat-icon>
-        </button>
-      </div>
     </mat-step>
 
     <mat-step [stepControl]="certForm" label="Certification" [completed]="false">
@@ -153,13 +146,6 @@
           </div>
         </div>
       </form>
-
-      <div class="step-actions">
-        <button mat-button type="button" matStepperPrevious [disabled]="submitting()">Back</button>
-        <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep3(stepper)">
-          Next <mat-icon>arrow_forward</mat-icon>
-        </button>
-      </div>
     </mat-step>
 
     <mat-step [stepControl]="bankForm" label="Bank details" [completed]="false">
@@ -195,13 +181,6 @@
           </mat-form-field>
         </div>
       </form>
-
-      <div class="step-actions">
-        <button mat-button type="button" matStepperPrevious [disabled]="submitting()">Back</button>
-        <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep4(stepper)">
-          Next <mat-icon>arrow_forward</mat-icon>
-        </button>
-      </div>
     </mat-step>
 
     <mat-step [stepControl]="linksForm" label="Links &amp; Documents" [optional]="true" [completed]="false">
@@ -285,14 +264,41 @@
 
         @if (submitFailed()) { <p class="error">Couldn't create the rep. Please try again.</p> }
       </form>
-
-      <div class="step-actions">
-        <button mat-button type="button" matStepperPrevious [disabled]="submitting()">Back</button>
-        <button mat-flat-button class="create-btn" [disabled]="submitting()" (click)="submit()">
-          {{ submitting() ? 'Creating…' : 'Create rep' }}
-        </button>
-      </div>
     </mat-step>
 
   </mat-stepper>
 </mat-dialog-content>
+
+<!-- A true fixed footer (Material's own non-scrolling dialog-actions region), not part of
+     mat-dialog-content's scroll area — so the buttons stay reachable no matter how tall a
+     step's content gets or how short the viewport is. #stepper is accessible here the same
+     way it already is in .crd-mobile-progress above: template reference variables aren't
+     scoped to their declaring element's subtree. -->
+<mat-dialog-actions class="step-actions">
+  @switch (stepper.selectedIndex) {
+  @case (0) {
+  <button mat-button type="button" [disabled]="submitting()" (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep2(stepper)">
+    Next <mat-icon>arrow_forward</mat-icon>
+  </button>
+  }
+  @case (1) {
+  <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
+  <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep3(stepper)">
+    Next <mat-icon>arrow_forward</mat-icon>
+  </button>
+  }
+  @case (2) {
+  <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
+  <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep4(stepper)">
+    Next <mat-icon>arrow_forward</mat-icon>
+  </button>
+  }
+  @case (3) {
+  <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
+  <button mat-flat-button class="create-btn" [disabled]="submitting()" (click)="submit()">
+    {{ submitting() ? 'Creating…' : 'Create rep' }}
+  </button>
+  }
+  }
+</mat-dialog-actions>

@@ -46,7 +46,7 @@ export class AdminReps {
       .open(CreateRepDialog, {
         width: 'min(820px, 96vw)',
         maxWidth: '96vw',
-        maxHeight: 'none',
+        maxHeight: '90vh',
         autoFocus: false,
         panelClass: 'crd-dialog-panel',
       })

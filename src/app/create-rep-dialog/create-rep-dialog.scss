@@ -3,20 +3,34 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: scroll;
 }
 
 /* Create Rep Dialog */
 ::ng-deep .crd-dialog-panel {
   .mat-mdc-dialog-container {
-    overflow: hidden !important;
+    overflow: scroll !important;
   }
 
+  // !important on every property here, not just overflow/max-height: Material's
+  // own stylesheet sets `display` on this same element, and without !important
+  // that rule can win the cascade (order/specificity aren't guaranteed in our
+  // favor). If `display: flex` loses, `.mat-mdc-dialog-content`'s `flex: 1`
+  // below becomes a no-op (flex properties do nothing without a flex parent),
+  // the surface falls back to plain block stacking, and its hard max-height +
+  // overflow: hidden silently clips whatever doesn't fit — title/content
+  // render, but mat-dialog-actions (the last child) disappears with no
+  // scrollbar and no visible sign anything was cut off. That silent-clip
+  // failure mode is exactly why every layout-critical property here is forced.
   .mat-mdc-dialog-surface {
+    display: flex !important;
+    flex-direction: column !important;
     overflow: hidden !important;
+    // vh is the fallback for browsers without dvh support; dvh (dynamic viewport
+    // height) accounts for mobile browser toolbars showing/hiding, so it reflects
+    // the actual visible area rather than the largest-possible one.
     max-height: 90vh !important;
-    display: flex;
-    flex-direction: column;
+    max-height: 90dvh !important;
   }
 
   // A step's content (the Links & Documents step especially — 4 fields plus 2
@@ -25,8 +39,8 @@
   // max-height and then scroll internally, rather than silently clipping
   // whatever doesn't fit (which `overflow: hidden` here used to do).
   .mat-mdc-dialog-content {
-    flex: 1;
-    min-height: 0;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     max-height: none !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
@@ -145,12 +159,22 @@ mat-form-field button[matSuffix] {
   }
 }
 
+// mat-dialog-actions is a true sibling of mat-dialog-content (not part of its
+// scroll area), so this is Material's own fixed-footer region — the buttons
+// stay reachable regardless of how tall a step's content is or how short the
+// viewport is. Reset Material's own default action-bar spacing/alignment so
+// this class fully governs the layout instead of fighting it.
 .step-actions {
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: space-between;
-  padding-top: 16px;
+  gap: 12px;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 16px 24px !important;
   border-top: 1px solid #EEF1F6;
+  background: var(--card, #fff);
+  flex-shrink: 0 !important;
 
   // Plain mat-button Cancel/Back would otherwise inherit the app-wide
   // Material theme's primary blue instead of the app's neutral gray.
@@ -349,13 +373,20 @@ mat-form-field button[matSuffix] {
 }
 
 // =====================================================
-// ---------- mobile: full-screen wizard sheet ----------
+// ---------- compact: full-screen wizard sheet ----------
 // =====================================================
-@media (max-width: 640px) {
-  // The dialog stops being a small floating card — no room on a phone to
-  // show a title, a 3-label stepper header, and a form and still look like
-  // anything other than a cramped strip. Take over the full viewport like a
-  // native wizard/sheet instead.
+// Triggers on EITHER a narrow width (phones) OR a short height (a shrunk/
+// resized browser window, a split-screen tab, or a page zoomed in enough
+// that the effective viewport height drops even though the width is still
+// "desktop"-sized). A width-only check misses that second case entirely —
+// a short-but-wide viewport would otherwise stay in the small floating-card
+// layout, capped at 90dvh of an already-short viewport, which is exactly
+// the "too small to be usable" case this block exists to avoid.
+@media (max-width: 640px), (max-height: 560px) {
+  // The dialog stops being a small floating card — no room to show a title,
+  // a 4-label stepper header, and a form and still look like anything other
+  // than a cramped strip. Take over the full viewport like a native
+  // wizard/sheet instead.
   ::ng-deep .crd-dialog-panel {
     width: 100vw !important;
     max-width: 100vw !important;
@@ -367,21 +398,21 @@ mat-form-field button[matSuffix] {
       height: 100dvh !important;
       max-height: 100dvh !important;
       border-radius: 0 !important;
-      display: flex;
-      flex-direction: column;
+      display: flex !important;
+      flex-direction: column !important;
     }
 
-    // Only the form area scrolls, between the fixed title/progress header
-    // and the step's own action buttons — a normal, expected mobile pattern,
-    // unlike the tiny centered desktop card this codebase avoids scrolling in.
+    // Only the form area scrolls, between the fixed title/progress header and
+    // the fixed mat-dialog-actions footer (a real sibling of dialog-content,
+    // not scrolled with it — see .step-actions).
     .mat-mdc-dialog-content {
-      flex: 1;
-      min-height: 0;
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
       overflow-y: auto !important;
       overflow-x: hidden !important;
     }
 
-    // The 3 icon+label headers have no room on a phone width — replaced by
+    // The icon+label headers have no room at this size — replaced by
     // .crd-mobile-progress above the content instead.
     .mat-horizontal-stepper-header-container {
       display: none !important;
@@ -427,8 +458,7 @@ mat-form-field button[matSuffix] {
   }
 
   .step-actions {
-    padding-top: 14px;
-    padding-bottom: max(4px, env(safe-area-inset-bottom));
+    padding: 14px 16px max(14px, env(safe-area-inset-bottom)) !important;
 
     button {
       flex: 1;
