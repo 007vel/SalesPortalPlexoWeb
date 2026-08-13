@@ -156,7 +156,8 @@
           <mat-label>Bank name</mat-label>
           <mat-icon matPrefix>account_balance</mat-icon>
           <input matInput formControlName="bankName">
-          @if (bankForm.controls.bankName.invalid && bankForm.controls.bankName.touched) { <mat-error>Bank name is required</mat-error> }
+          @if (bankForm.controls.bankName.invalid && bankForm.controls.bankName.touched) { <mat-error>Bank name is
+            required</mat-error> }
         </mat-form-field>
 
         <div class="field-row">
@@ -164,7 +165,8 @@
             <mat-label>Routing number</mat-label>
             <mat-icon matPrefix>tag</mat-icon>
             <input matInput formControlName="routingNumber" inputmode="numeric" autocomplete="off">
-            @if (bankForm.controls.routingNumber.invalid && bankForm.controls.routingNumber.touched) { <mat-error>Routing number is required</mat-error> }
+            @if (bankForm.controls.routingNumber.invalid && bankForm.controls.routingNumber.touched) {
+            <mat-error>Routing number is required</mat-error> }
           </mat-form-field>
 
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -172,12 +174,14 @@
             <mat-icon matPrefix>lock</mat-icon>
             <input matInput [type]="accountNumberVisible() ? 'text' : 'password'" formControlName="accountNumber"
               inputmode="numeric" autocomplete="off">
-            <button type="button" mat-icon-button matSuffix (click)="toggleAccountNumberVisibility()"
+            <mat-icon matSuffix role="button" tabindex="0" (click)="toggleAccountNumberVisibility()"
+              (keydown.enter)="toggleAccountNumberVisibility()" (keydown.space)="toggleAccountNumberVisibility()"
               [attr.aria-label]="accountNumberVisible() ? 'Hide account number' : 'Show account number'"
               [attr.aria-pressed]="accountNumberVisible()">
-              <mat-icon>{{ accountNumberVisible() ? 'visibility_off' : 'visibility' }}</mat-icon>
-            </button>
-            @if (bankForm.controls.accountNumber.invalid && bankForm.controls.accountNumber.touched) { <mat-error>Account number is required</mat-error> }
+              {{ accountNumberVisible() ? 'visibility_off' : 'visibility' }}
+            </mat-icon>
+            @if (bankForm.controls.accountNumber.invalid && bankForm.controls.accountNumber.touched) {
+            <mat-error>Account number is required</mat-error> }
           </mat-form-field>
         </div>
       </form>
@@ -274,7 +278,7 @@
      step's content gets or how short the viewport is. #stepper is accessible here the same
      way it already is in .crd-mobile-progress above: template reference variables aren't
      scoped to their declaring element's subtree. -->
-<mat-dialog-actions class="step-actions">
+<mat-dialog-actions align="end" class="step-actions">
   @switch (stepper.selectedIndex) {
   @case (0) {
   <button mat-button type="button" [disabled]="submitting()" (click)="cancel()">Cancel</button>

@@ -83,6 +83,15 @@ mat-form-field.full-width,
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  align-items: start;
+}
+
+// Wraps a field + its (optional) error as one grid item, so each column's
+// error lands under its own field regardless of which field(s) in the row
+// are currently invalid — plain grid auto-placement would misplace a lone
+// error into the wrong column whenever the other field has none to show.
+.field-cell {
+  min-width: 0;
 }
 
 mat-form-field mat-icon[matPrefix] {
@@ -106,6 +115,16 @@ mat-form-field button[matSuffix] {
   font-size: 13px;
   color: var(--danger);
   margin-top: 4px;
+}
+
+// Field-validation errors specifically (as opposed to the standalone
+// certificate-missing/submit-failed messages, which stay flush-left) line up
+// with the field's own icon+text start (16px field padding + 19px icon +
+// 8px gap) instead of the field's bare left edge, so the message still reads
+// as "belonging to" the field above it now that it's outside the box.
+mat-form-field.full-width + .error,
+.field-cell .error {
+  padding-left: 43px;
 }
 
 // ---------- stepper ----------
