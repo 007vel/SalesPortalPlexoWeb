@@ -79,13 +79,6 @@
           </mat-form-field>
         </div>
       </form>
-
-      <div class="step-actions">
-        <button mat-button type="button" [disabled]="submitting()" (click)="cancel()">Cancel</button>
-        <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep2(stepper)">
-          Next <mat-icon>arrow_forward</mat-icon>
-        </button>
-      </div>
     </mat-step>
 
     <mat-step [stepControl]="certForm" label="Certification" [completed]="false">
@@ -153,13 +146,6 @@
           </div>
         </div>
       </form>
-
-      <div class="step-actions">
-        <button mat-button type="button" matStepperPrevious [disabled]="submitting()">Back</button>
-        <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep3(stepper)">
-          Next <mat-icon>arrow_forward</mat-icon>
-        </button>
-      </div>
     </mat-step>
 
     <mat-step [stepControl]="bankForm" label="Bank details" [completed]="false">
@@ -170,7 +156,8 @@
           <mat-label>Bank name</mat-label>
           <mat-icon matPrefix>account_balance</mat-icon>
           <input matInput formControlName="bankName">
-          @if (bankForm.controls.bankName.invalid && bankForm.controls.bankName.touched) { <mat-error>Bank name is required</mat-error> }
+          @if (bankForm.controls.bankName.invalid && bankForm.controls.bankName.touched) { <mat-error>Bank name is
+            required</mat-error> }
         </mat-form-field>
 
         <div class="field-row">
@@ -178,7 +165,8 @@
             <mat-label>Routing number</mat-label>
             <mat-icon matPrefix>tag</mat-icon>
             <input matInput formControlName="routingNumber" inputmode="numeric" autocomplete="off">
-            @if (bankForm.controls.routingNumber.invalid && bankForm.controls.routingNumber.touched) { <mat-error>Routing number is required</mat-error> }
+            @if (bankForm.controls.routingNumber.invalid && bankForm.controls.routingNumber.touched) {
+            <mat-error>Routing number is required</mat-error> }
           </mat-form-field>
 
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -186,22 +174,17 @@
             <mat-icon matPrefix>lock</mat-icon>
             <input matInput [type]="accountNumberVisible() ? 'text' : 'password'" formControlName="accountNumber"
               inputmode="numeric" autocomplete="off">
-            <button type="button" mat-icon-button matSuffix (click)="toggleAccountNumberVisibility()"
+            <mat-icon matSuffix role="button" tabindex="0" (click)="toggleAccountNumberVisibility()"
+              (keydown.enter)="toggleAccountNumberVisibility()" (keydown.space)="toggleAccountNumberVisibility()"
               [attr.aria-label]="accountNumberVisible() ? 'Hide account number' : 'Show account number'"
               [attr.aria-pressed]="accountNumberVisible()">
-              <mat-icon>{{ accountNumberVisible() ? 'visibility_off' : 'visibility' }}</mat-icon>
-            </button>
-            @if (bankForm.controls.accountNumber.invalid && bankForm.controls.accountNumber.touched) { <mat-error>Account number is required</mat-error> }
+              {{ accountNumberVisible() ? 'visibility_off' : 'visibility' }}
+            </mat-icon>
+            @if (bankForm.controls.accountNumber.invalid && bankForm.controls.accountNumber.touched) {
+            <mat-error>Account number is required</mat-error> }
           </mat-form-field>
         </div>
       </form>
-
-      <div class="step-actions">
-        <button mat-button type="button" matStepperPrevious [disabled]="submitting()">Back</button>
-        <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep4(stepper)">
-          Next <mat-icon>arrow_forward</mat-icon>
-        </button>
-      </div>
     </mat-step>
 
     <mat-step [stepControl]="linksForm" label="Links &amp; Documents" [optional]="true" [completed]="false">
@@ -285,14 +268,41 @@
 
         @if (submitFailed()) { <p class="error">Couldn't create the rep. Please try again.</p> }
       </form>
-
-      <div class="step-actions">
-        <button mat-button type="button" matStepperPrevious [disabled]="submitting()">Back</button>
-        <button mat-flat-button class="create-btn" [disabled]="submitting()" (click)="submit()">
-          {{ submitting() ? 'Creating…' : 'Create rep' }}
-        </button>
-      </div>
     </mat-step>
 
   </mat-stepper>
 </mat-dialog-content>
+
+<!-- A true fixed footer (Material's own non-scrolling dialog-actions region), not part of
+     mat-dialog-content's scroll area — so the buttons stay reachable no matter how tall a
+     step's content gets or how short the viewport is. #stepper is accessible here the same
+     way it already is in .crd-mobile-progress above: template reference variables aren't
+     scoped to their declaring element's subtree. -->
+<mat-dialog-actions align="end" class="step-actions">
+  @switch (stepper.selectedIndex) {
+  @case (0) {
+  <button mat-button type="button" [disabled]="submitting()" (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep2(stepper)">
+    Next <mat-icon>arrow_forward</mat-icon>
+  </button>
+  }
+  @case (1) {
+  <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
+  <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep3(stepper)">
+    Next <mat-icon>arrow_forward</mat-icon>
+  </button>
+  }
+  @case (2) {
+  <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
+  <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep4(stepper)">
+    Next <mat-icon>arrow_forward</mat-icon>
+  </button>
+  }
+  @case (3) {
+  <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
+  <button mat-flat-button class="create-btn" [disabled]="submitting()" (click)="submit()">
+    {{ submitting() ? 'Creating…' : 'Create rep' }}
+  </button>
+  }
+  }
+</mat-dialog-actions>

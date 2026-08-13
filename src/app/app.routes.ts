@@ -18,7 +18,7 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   {
     path: 'rep',
-    canActivate: [authGuard],
+    //canActivate: [authGuard],
     component: SideNav,
     data: { mode: 'rep' },
     children: [
@@ -33,7 +33,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    canActivate: [adminAuthGuard],
+   // canActivate: [adminAuthGuard],
     component: SideNav,
     data: { mode: 'admin' },
     children: [
