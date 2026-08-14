@@ -57,7 +57,7 @@ export class RepLinks {
     const profile = this.repProfileStore.profile();
     return [
       { key: 'googleLink', label: 'Sales Leads link', value: profile.googleLink },
-      { key: 'resourceLink', label: 'Resource link', value: profile.resourceLink },
+      { key: 'resourceLink', label: 'Knowledge Base', value: profile.resourceLink },
       { key: 'pricingSheetLink', label: 'Pricing sheet link', value: profile.pricingSheetLink },
       { key: 'powerPointLink', label: 'PowerPoint link', value: profile.powerPointLink },
     ].map((row) => ({ ...row, href: this.toHref(row.value) }));
