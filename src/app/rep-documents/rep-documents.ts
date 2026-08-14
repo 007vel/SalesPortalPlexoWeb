@@ -140,8 +140,9 @@ export class RepDocuments {
     const startedAt = Date.now();
     this.directory.downloadDocument(oId).subscribe({
       next: (blob) => {
-        const url = URL.createObjectURL(blob);
         this.stopViewing(startedAt, () => {
+          if (this.dialog.openDialogs.length) return;
+          const url = URL.createObjectURL(blob);
           this.dialog
             .open(MediaViewerDialog, {
               data: { title: label, type: detectFileKind(fileName), url, fileName },

@@ -115,6 +115,7 @@
 
 // ---------- table card ----------
 .table-card {
+  width: 70%;
   padding: 0 !important;
   border-radius: 16px;
   border: 1px solid #EEF1F6;
@@ -202,8 +203,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px 0;
+  padding: 14px 10px;
+  margin: 0 -10px;
+  border-radius: 10px;
   border-top: 1px solid #F0F2F6;
+  transition: background .15s ease;
+
+  &:hover {
+    background: #FAFBFD;
+  }
 
   &:first-of-type {
     border-top: none;
@@ -262,6 +270,87 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+}
+
+// kebab "more actions" trigger for a filled slot
+.menu-trigger {
+  border-radius: 10px;
+  color: var(--muted);
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+
+  &[aria-expanded="true"] {
+    background: var(--bg);
+    color: var(--navy);
+    border-color: var(--border);
+  }
+}
+
+// upload trigger for an empty slot — a touch more inviting than a bare outline
+.upload-slot-btn {
+  border-radius: 10px;
+  border-color: var(--orange);
+  color: var(--orange);
+  background: #FFF6EE;
+
+  &:hover {
+    background: #FFEBD9;
+  }
+
+  &:disabled {
+    border-color: #E5E9F0;
+    color: var(--faint);
+    background: transparent;
+  }
+}
+
+// ---------- hub slot "more actions" menu panel ----------
+// MatMenu renders its panel into the CDK overlay, outside this component's DOM subtree,
+// so the panel-level rules need ::ng-deep; the menu items themselves are declared in this
+// component's template (via matMenuContent) and stay style-scoped normally.
+::ng-deep .hub-slot-menu.mat-mdc-menu-panel {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  min-width: 196px;
+
+  .mat-mdc-menu-content {
+    padding: 6px;
+  }
+
+  .mat-mdc-menu-item {
+    border-radius: 8px;
+    min-height: 38px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+
+    .mat-icon {
+      color: var(--muted);
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+    }
+
+    &:hover:not([disabled]) {
+      background: var(--bg);
+    }
+  }
+}
+
+.menu-item-danger {
+  margin-top: 4px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid var(--border);
+  color: var(--danger) !important;
+
+  .mat-icon {
+    color: var(--danger) !important;
+  }
+
+  &:hover {
+    background: #FBEAEA !important;
+  }
 }
 
 .hidden-file-input {

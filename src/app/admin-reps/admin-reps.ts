@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { RepDirectoryStore, RepRecord, RepStatus, SalesRepType, docsComplete, repStatusBadge, salesRepTypeLabel } from '../rep-directory-store/rep-directory-store';
@@ -20,8 +21,8 @@ const SEARCH_DEBOUNCE_MS = 300;
 @Component({
   selector: 'app-admin-reps',
   imports: [
-    RouterLink, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule, MatSelectModule,
-    MatTableModule,
+    RouterLink, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule,
+    MatProgressSpinnerModule, MatSelectModule, MatTableModule,
   ],
   templateUrl: './admin-reps.html',
   styleUrl: './admin-reps.scss',
@@ -31,6 +32,7 @@ export class AdminReps {
   private readonly directory = inject(RepDirectoryStore);
   private readonly toast = inject(Toast);
   private searchDebounce: ReturnType<typeof setTimeout> | undefined;
+  private readonly deletingIds = signal<ReadonlySet<number>>(new Set());
 
   readonly loading = this.directory.loading;
   readonly statusBadge = repStatusBadge;
@@ -110,8 +112,13 @@ export class AdminReps {
     this.toast.show(`Copied ${email}`);
   }
 
+  isDeleting(oId: number): boolean {
+    return this.deletingIds().has(oId);
+  }
+
   askDelete(rep: RepRecord, event: Event): void {
     event.stopPropagation();
+    if (this.dialog.openDialogs.length) return;
     this.dialog
       .open(ConfirmDialog, {
         data: {
@@ -123,14 +130,28 @@ export class AdminReps {
       .afterClosed()
       .subscribe((confirmed) => {
         if (!confirmed) return;
-        this.directory.deleteRep(rep.oId).subscribe({
-          next: () => this.toast.show(`Rep ${rep.repId} deleted`),
-          error: () => this.toast.show('Failed to delete rep'),
-        });
+        this.setDeleting(rep.oId, true);
+        this.directory
+          .deleteRep(rep.oId)
+          .pipe(finalize(() => this.setDeleting(rep.oId, false)))
+          .subscribe({
+            next: () => this.toast.show(`"${rep.name || rep.repId}" Deleted Successfully`),
+            error: () => this.toast.show('Failed to delete rep'),
+          });
       });
   }
 
+  private setDeleting(oId: number, deleting: boolean): void {
+    this.deletingIds.update((ids) => {
+      const next = new Set(ids);
+      if (deleting) next.add(oId);
+      else next.delete(oId);
+      return next;
+    });
+  }
+
   openCreateModal(): void {
+    if (this.dialog.openDialogs.length) return;
     this.dialog
       .open(CreateRepDialog, {
         width: 'min(980px, 96vw)',

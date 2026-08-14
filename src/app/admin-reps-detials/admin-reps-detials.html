@@ -27,7 +27,16 @@
       </mat-select>
     </mat-form-field>
     <button type="button" mat-stroked-button class="delete-rep-btn" [disabled]="deleting()" (click)="askDelete()">
-      <mat-icon>delete</mat-icon> Delete rep
+      @if (deleting()) {
+      <mat-progress-spinner mode="indeterminate" diameter="18" strokeWidth="2"></mat-progress-spinner>
+      } @else {
+      <mat-icon>delete</mat-icon>
+      }
+      @if (deleting()) {
+      <span>Deleting…</span>
+      } @else {
+      <span>Delete rep</span>
+      }
     </button>
   </div>
 </div>
@@ -55,19 +64,12 @@
             @if (contactForm.controls.name.invalid && contactForm.controls.name.touched) {
             <mat-error>Name is required</mat-error> }
           </mat-form-field>
-          <div class="field-row">
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Business name</mat-label>
-              <input matInput formControlName="businessName">
-            </mat-form-field>
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Sales rep type</mat-label>
-              <mat-select formControlName="salesRepType">
-                <mat-option value="referralAgent">Referral Agent</mat-option>
-                <mat-option value="marketingConsultant">Marketing Consultant</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
+
+          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>Business name</mat-label>
+            <input matInput formControlName="businessName">
+          </mat-form-field>
+
           <div class="field-row">
             <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <mat-label>Email address</mat-label>
@@ -102,6 +104,16 @@
           <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
             <mat-label>Zip</mat-label>
             <input matInput formControlName="zip">
+
+          </mat-form-field>
+
+
+          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>Sales rep type</mat-label>
+            <mat-select formControlName="salesRepType">
+              <mat-option value="referralAgent">Referral Agent</mat-option>
+              <mat-option value="marketingConsultant">Marketing Consultant</mat-option>
+            </mat-select>
           </mat-form-field>
 
           <div class="edit-actions">
@@ -110,10 +122,13 @@
               (click)="saveContact()">{{ savingContact() ? 'Saving…' : 'Save' }}</button>
           </div>
         </form>
-        } @else {
+
+        }
+        @else {
         <ng-container *ngTemplateOutlet="field; context: {label:'Full name', value: rep.name}"></ng-container>
-        <ng-container *ngTemplateOutlet="field; context: {label:'Business name', value: rep.businessName}"></ng-container>
-        <ng-container *ngTemplateOutlet="field; context: {label:'Sales rep type', value: repTypeLabel(rep.salesRepType)}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Business name', value: rep.businessName}"></ng-container>
+
         <ng-container *ngTemplateOutlet="field; context: {label:'Phone', value: rep.phone}"></ng-container>
         <ng-container
           *ngTemplateOutlet="field; context: {label:'Email', value: rep.email, isEmail: true}"></ng-container>
@@ -122,76 +137,17 @@
           <div class="address-box-label"><mat-icon>home</mat-icon> Address</div>
           <div class="address-box-value" [class.empty]="!fullAddress()">{{ fullAddress() || 'Not provided' }}</div>
         </div>
-        }
-      </div>
-    </mat-card>
 
-    <mat-card class="section">
-      <div class="section-head editable">
-        <div>
-          <div class="eyebrow">Links</div>
-          <h2>Sales Leads &amp; Knowledge Bases</h2>
+        <div style="margin-top: 22px;">
+          <ng-container
+            *ngTemplateOutlet="field; context: {label:'Sales rep type', value: repTypeLabel(rep.salesRepType)}"></ng-container>
         </div>
-        @if (!editingLinks()) {
-        <button type="button" mat-stroked-button class="edit-btn" (click)="startEditLinks()">
-          <mat-icon>edit</mat-icon> Edit
-        </button>
-        }
-      </div>
-      <div class="section-body">
-        @if (editingLinks()) {
-        <form [formGroup]="linksForm" class="edit-form">
-          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-            <mat-label>Sales Leads link</mat-label>
-            <input matInput type="url" formControlName="googleLink">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-            <mat-label>Knowledge Base</mat-label>
-            <input matInput type="url" formControlName="resourceLink">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-            <mat-label>Pricing sheet link</mat-label>
-            <input matInput type="url" formControlName="pricingSheetLink">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-            <mat-label>PowerPoint link</mat-label>
-            <input matInput type="url" formControlName="powerPointLink">
-          </mat-form-field>
 
-          <div class="edit-actions">
-            <button type="button" mat-button [disabled]="savingLinks()" (click)="cancelEditLinks()">Cancel</button>
-            <button type="button" mat-flat-button class="save-btn" [disabled]="savingLinks()"
-              (click)="saveLinks()">{{ savingLinks() ? 'Saving…' : 'Save' }}</button>
-          </div>
-        </form>
-        } @else {
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Sales Leads', value: rep.googleLink, isLink: true}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Knowledge Base', value: rep.resourceLink, isLink: true}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Pricing sheet link', value: rep.pricingSheetLink, isLink: true}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'PowerPoint link', value: rep.powerPointLink, isLink: true}"></ng-container>
         }
       </div>
     </mat-card>
-
+    @if (rep.salesRepType === 'marketingConsultant') {
     <mat-card class="section">
-      <div class="section-head">
-        <div class="eyebrow">Meta</div>
-        <h2>Rep record</h2>
-      </div>
-      <div class="section-body">
-        <ng-container *ngTemplateOutlet="field; context: {label:'Rep ID', value: rep.repId}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Portal link', value: rep.portalLink, isLink: true}"></ng-container>
-        <ng-container *ngTemplateOutlet="field; context: {label:'Created', value: formatDate(rep.createdAt)}"></ng-container>
-      </div>
-    </mat-card>
-
-        @if (rep.salesRepType === 'marketingConsultant') {
-        <mat-card class="section">
       <div class="section-head editable">
         <div>
           <div class="eyebrow">Onboarding</div>
@@ -226,16 +182,10 @@
                 {{ pwrRewardsPasswordVisible() ? 'visibility_off' : 'visibility' }}
               </mat-icon>
             </mat-form-field>
-
-            <div class="edit-actions">
-              <button type="button" mat-button [disabled]="savingPwrRewards()"
-                (click)="cancelEditPwrRewards()">Cancel</button>
-              <button type="button" mat-flat-button class="save-btn" [disabled]="savingPwrRewards()"
-                (click)="savePwrRewards()">{{ savingPwrRewards() ? 'Saving…' : 'Save' }}</button>
-            </div>
           </form>
           } @else {
-          <ng-container *ngTemplateOutlet="field; context: {label:'Plexo email', value: rep.pwrRewardsEmail}"></ng-container>
+          <ng-container
+            *ngTemplateOutlet="field; context: {label:'Plexo email', value: rep.pwrRewardsEmail}"></ng-container>
           <ng-container
             *ngTemplateOutlet="field; context: {label:'Password', value: rep.pwrRewardsEmailPassword}"></ng-container>
           }
@@ -247,8 +197,10 @@
                 'check' : 'description' }}</mat-icon></div>
             <div>
               <div class="doc-name">Access instructions (PDF)</div>
-              <div class="doc-status" [class.filled]="!!rep.docs.pwrInstructions">{{ rep.docs.pwrInstructions ?
-                (rep.docs.pwrInstructions.name + ' · ' + formatDate(rep.docs.pwrInstructions.uploadedAt)) : 'Not uploaded' }}</div>
+              <div class="doc-status" [class.filled]="!!rep.docs.pwrInstructions">
+                {{ rep.docs.pwrInstructions ?(rep.docs.pwrInstructions.name + ' · ' +
+                formatDate(rep.docs.pwrInstructions.uploadedAt)) : 'Not uploaded' }}
+              </div>
             </div>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -258,151 +210,75 @@
             <button type="button" mat-icon-button class="action-btn" title="Download"
               (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
             }
-            <button type="button" mat-icon-button class="action-btn" [title]="rep.docs.pwrInstructions ? 'Replace PDF' : 'Upload PDF'"
-              [disabled]="uploadingPwrInstructions()" (click)="pwrInstructionsFileInput.click()">
+            <button type="button" mat-icon-button class="action-btn"
+              [title]="rep.docs.pwrInstructions ? 'Replace PDF' : 'Upload PDF'" [disabled]="uploadingPwrInstructions()"
+              (click)="pwrInstructionsFileInput.click()">
               <mat-icon>{{ uploadingPwrInstructions() ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
             </button>
             <input #pwrInstructionsFileInput type="file" accept=".pdf" class="hidden-file-input"
               (change)="handlePwrInstructionsUpload($event)">
           </div>
         </div>
+
+        @if (editingPwrRewards()) {
+        <div class="edit-actions">
+          <button type="button" mat-button [disabled]="savingPwrRewards()"
+            (click)="cancelEditPwrRewards()">Cancel</button>
+          <button type="button" mat-flat-button class="save-btn" [disabled]="savingPwrRewards()"
+            (click)="savePwrRewards()">{{ savingPwrRewards() ? 'Saving…' : 'Save' }}</button>
+        </div>
+        }
       </div>
     </mat-card>
     }
-  </div>
-
-  <div>
     <mat-card class="section">
-      <div class="section-head">
-        <div class="eyebrow">Documents</div>
-        <h2>Agreements &amp; forms</h2>
+      <div class="section-head editable">
+        <div>
+          <div class="eyebrow">Links</div>
+          <h2>Sales Leads &amp; Knowledge Bases</h2>
+        </div>
+        @if (!editingLinks()) {
+        <button type="button" mat-stroked-button class="edit-btn" (click)="startEditLinks()">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        }
       </div>
-      <div class="section-body no-pad">
-        <div class="doc-row">
-          <div class="doc-info">
-            <div class="doc-icon" [class.filled]="!!rep.docs.agreement"><mat-icon>{{ rep.docs.agreement ? 'check' :
-                'description' }}</mat-icon></div>
-            <div>
-              <div class="doc-name">Representative Agreement</div>
-              <div class="doc-status" [class.filled]="!!rep.docs.agreement">{{ rep.docs.agreement ?
-                (rep.docs.agreement.name + ' · ' + formatDate(rep.docs.agreement.uploadedAt)) : 'Not uploaded' }}</div>
-            </div>
+      <div class="section-body">
+        @if (editingLinks()) {
+        <form [formGroup]="linksForm" class="edit-form">
+          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>Sales Leads link</mat-label>
+            <input matInput type="url" formControlName="googleLink">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>Knowledge Base</mat-label>
+            <input matInput type="url" formControlName="resourceLink">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>Pricing sheet link</mat-label>
+            <input matInput type="url" formControlName="pricingSheetLink">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>PowerPoint link</mat-label>
+            <input matInput type="url" formControlName="powerPointLink">
+          </mat-form-field>
+
+          <div class="edit-actions">
+            <button type="button" mat-button [disabled]="savingLinks()" (click)="cancelEditLinks()">Cancel</button>
+            <button type="button" mat-flat-button class="save-btn" [disabled]="savingLinks()" (click)="saveLinks()">{{
+              savingLinks() ? 'Saving…' : 'Save' }}</button>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            @if (rep.docs.agreement; as doc) {
-            <button type="button" mat-icon-button class="action-btn" title="View"
-              (click)="viewDocument(doc.oId, doc.name, 'Representative Agreement')"><mat-icon>visibility</mat-icon></button>
-            <button type="button" mat-icon-button class="action-btn" title="Download"
-              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
-            }
-            <button type="button" mat-icon-button class="action-btn" [title]="rep.docs.agreement ? 'Replace file' : 'Upload file'"
-              [disabled]="isUploadingDoc('agreement')" (click)="agreementFileInput.click()">
-              <mat-icon>{{ isUploadingDoc('agreement') ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
-            </button>
-            <input #agreementFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
-              (change)="handleDocumentUpload('agreement', 'Representative Agreement', $event)">
-          </div>
-        </div>
-        <div class="doc-row">
-          <div class="doc-info">
-            <div class="doc-icon" [class.filled]="!!rep.docs.w4"><mat-icon>{{ rep.docs.w4 ? 'check' : 'description'
-                }}</mat-icon></div>
-            <div>
-              <div class="doc-name">W-4 Form</div>
-              <div class="doc-status" [class.filled]="!!rep.docs.w4">{{ rep.docs.w4 ? (rep.docs.w4.name + ' · ' +
-                formatDate(rep.docs.w4.uploadedAt)) : 'Not uploaded' }}</div>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            @if (rep.docs.w4; as doc) {
-            <button type="button" mat-icon-button class="action-btn" title="View"
-              (click)="viewDocument(doc.oId, doc.name, 'W-4 Form')"><mat-icon>visibility</mat-icon></button>
-            <button type="button" mat-icon-button class="action-btn" title="Download"
-              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
-            }
-            <button type="button" mat-icon-button class="action-btn" [title]="rep.docs.w4 ? 'Replace file' : 'Upload file'"
-              [disabled]="isUploadingDoc('w4')" (click)="w4FileInput.click()">
-              <mat-icon>{{ isUploadingDoc('w4') ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
-            </button>
-            <input #w4FileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
-              (change)="handleDocumentUpload('w4', 'W-4 Form', $event)">
-          </div>
-        </div>
-        <div class="doc-row">
-          <div class="doc-info">
-            <div class="doc-icon" [class.filled]="!!rep.docs.certification"><mat-icon>{{ rep.docs.certification ?
-                'check' : 'description' }}</mat-icon></div>
-            <div>
-              <div class="doc-name">Passed Certificate</div>
-              <div class="doc-status" [class.filled]="!!rep.docs.certification">{{ rep.docs.certification ?
-                (rep.docs.certification.name + ' · ' + formatDate(rep.docs.certification.uploadedAt)) : 'Not uploaded' }}</div>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            @if (rep.docs.certification; as doc) {
-            <button type="button" mat-icon-button class="action-btn" title="View"
-              (click)="viewDocument(doc.oId, doc.name, 'Passed Certificate')"><mat-icon>visibility</mat-icon></button>
-            <button type="button" mat-icon-button class="action-btn" title="Download"
-              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
-            }
-            <button type="button" mat-icon-button class="action-btn" [title]="rep.docs.certification ? 'Replace file' : 'Upload file'"
-              [disabled]="isUploadingDoc('certification')" (click)="certificationFileInput.click()">
-              <mat-icon>{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
-            </button>
-            <input #certificationFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
-              (change)="handleDocumentUpload('certification', 'Passed Certificate', $event)">
-          </div>
-        </div>
-        <div class="doc-row">
-          <div class="doc-info">
-            <div class="doc-icon" [class.filled]="!!rep.docs.pricingSheet"><mat-icon>{{ rep.docs.pricingSheet ?
-                'check' : 'description' }}</mat-icon></div>
-            <div>
-              <div class="doc-name">Pricing Sheet</div>
-              <div class="doc-status" [class.filled]="!!rep.docs.pricingSheet">{{ rep.docs.pricingSheet ?
-                (rep.docs.pricingSheet.name + ' · ' + formatDate(rep.docs.pricingSheet.uploadedAt)) : 'Not uploaded' }}</div>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            @if (rep.docs.pricingSheet; as doc) {
-            <button type="button" mat-icon-button class="action-btn" title="View"
-              (click)="viewDocument(doc.oId, doc.name, 'Pricing Sheet')"><mat-icon>visibility</mat-icon></button>
-            <button type="button" mat-icon-button class="action-btn" title="Download"
-              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
-            }
-            <button type="button" mat-icon-button class="action-btn" [title]="rep.docs.pricingSheet ? 'Replace file' : 'Upload file'"
-              [disabled]="isUploadingDoc('pricingSheet')" (click)="pricingSheetFileInput.click()">
-              <mat-icon>{{ isUploadingDoc('pricingSheet') ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
-            </button>
-            <input #pricingSheetFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
-              (change)="handleDocumentUpload('pricingSheet', 'Pricing Sheet', $event)">
-          </div>
-        </div>
-        <div class="doc-row">
-          <div class="doc-info">
-            <div class="doc-icon" [class.filled]="!!rep.docs.powerPoint"><mat-icon>{{ rep.docs.powerPoint ? 'check' :
-                'description' }}</mat-icon></div>
-            <div>
-              <div class="doc-name">PowerPoint</div>
-              <div class="doc-status" [class.filled]="!!rep.docs.powerPoint">{{ rep.docs.powerPoint ?
-                (rep.docs.powerPoint.name + ' · ' + formatDate(rep.docs.powerPoint.uploadedAt)) : 'Not uploaded' }}</div>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            @if (rep.docs.powerPoint; as doc) {
-            <button type="button" mat-icon-button class="action-btn" title="View"
-              (click)="viewDocument(doc.oId, doc.name, 'PowerPoint')"><mat-icon>visibility</mat-icon></button>
-            <button type="button" mat-icon-button class="action-btn" title="Download"
-              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
-            }
-            <button type="button" mat-icon-button class="action-btn" [title]="rep.docs.powerPoint ? 'Replace file' : 'Upload file'"
-              [disabled]="isUploadingDoc('powerPoint')" (click)="powerPointFileInput.click()">
-              <mat-icon>{{ isUploadingDoc('powerPoint') ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
-            </button>
-            <input #powerPointFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
-              (change)="handleDocumentUpload('powerPoint', 'PowerPoint', $event)">
-          </div>
-        </div>
+        </form>
+        } @else {
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Sales Leads', value: rep.googleLink, isLink: true}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Knowledge Base', value: rep.resourceLink, isLink: true}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Pricing sheet link', value: rep.pricingSheetLink, isLink: true}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'PowerPoint link', value: rep.powerPointLink, isLink: true}"></ng-container>
+        }
       </div>
     </mat-card>
 
@@ -433,27 +309,9 @@
       </div>
     </mat-card>
 
-    <mat-card class="section">
-      <div class="section-head">
-        <div class="eyebrow">Payouts</div>
-        <h2>Bank details</h2>
-      </div>
-      <div class="section-body">
-        @if (rep.bankDetails; as bank) {
-        <ng-container *ngTemplateOutlet="field; context: {label:'Bank name', value: bank.bankName}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Routing number', value: bank.routingNumber}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Account number', value: bank.accountNumber}"></ng-container>
-        <ng-container *ngTemplateOutlet="field; context: {label:'Last updated', value: formatDate(bank.updatedAt)}"></ng-container>
-        } @else {
-        <div class="hub-empty">
-          <mat-icon>account_balance</mat-icon>
-          <div>No bank details on file yet.</div>
-        </div>
-        }
-      </div>
-    </mat-card>
+  </div>
+
+  <div>
 
     <mat-card class="section">
       <div class="section-head editable">
@@ -515,10 +373,185 @@
       </div>
     </mat-card>
 
+    <mat-card class="section">
+      <div class="section-head">
+        <div class="eyebrow">Documents</div>
+        <h2>Agreements &amp; forms</h2>
+      </div>
+      <div class="section-body no-pad">
+        <div class="doc-row">
+          <div class="doc-info">
+            <div class="doc-icon" [class.filled]="!!rep.docs.agreement"><mat-icon>{{ rep.docs.agreement ? 'check' :
+                'description' }}</mat-icon></div>
+            <div>
+              <div class="doc-name">Representative Agreement</div>
+              <div class="doc-status" [class.filled]="!!rep.docs.agreement">{{ rep.docs.agreement ?
+                (rep.docs.agreement.name + ' · ' + formatDate(rep.docs.agreement.uploadedAt)) : 'Not uploaded' }}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            @if (rep.docs.agreement; as doc) {
+            <button type="button" mat-icon-button class="action-btn" title="View"
+              (click)="viewDocument(doc.oId, doc.name, 'Representative Agreement')"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download"
+              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+            }
+            <button type="button" mat-icon-button class="action-btn"
+              [title]="rep.docs.agreement ? 'Replace file' : 'Upload file'" [disabled]="isUploadingDoc('agreement')"
+              (click)="agreementFileInput.click()">
+              <mat-icon>{{ isUploadingDoc('agreement') ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
+            </button>
+            <input #agreementFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
+              (change)="handleDocumentUpload('agreement', 'Representative Agreement', $event)">
+          </div>
+        </div>
+        <div class="doc-row">
+          <div class="doc-info">
+            <div class="doc-icon" [class.filled]="!!rep.docs.w4"><mat-icon>{{ rep.docs.w4 ? 'check' : 'description'
+                }}</mat-icon></div>
+            <div>
+              <div class="doc-name">W-4 Form</div>
+              <div class="doc-status" [class.filled]="!!rep.docs.w4">{{ rep.docs.w4 ? (rep.docs.w4.name + ' · ' +
+                formatDate(rep.docs.w4.uploadedAt)) : 'Not uploaded' }}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            @if (rep.docs.w4; as doc) {
+            <button type="button" mat-icon-button class="action-btn" title="View"
+              (click)="viewDocument(doc.oId, doc.name, 'W-4 Form')"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download"
+              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+            }
+            <button type="button" mat-icon-button class="action-btn"
+              [title]="rep.docs.w4 ? 'Replace file' : 'Upload file'" [disabled]="isUploadingDoc('w4')"
+              (click)="w4FileInput.click()">
+              <mat-icon>{{ isUploadingDoc('w4') ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
+            </button>
+            <input #w4FileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
+              (change)="handleDocumentUpload('w4', 'W-4 Form', $event)">
+          </div>
+        </div>
+        <div class="doc-row">
+          <div class="doc-info">
+            <div class="doc-icon" [class.filled]="!!rep.docs.certification"><mat-icon>{{ rep.docs.certification ?
+                'check' : 'description' }}</mat-icon></div>
+            <div>
+              <div class="doc-name">Passed Certificate</div>
+              <div class="doc-status" [class.filled]="!!rep.docs.certification">{{ rep.docs.certification ?
+                (rep.docs.certification.name + ' · ' + formatDate(rep.docs.certification.uploadedAt)) : 'Not uploaded'
+                }}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            @if (rep.docs.certification; as doc) {
+            <button type="button" mat-icon-button class="action-btn" title="View"
+              (click)="viewDocument(doc.oId, doc.name, 'Passed Certificate')"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download"
+              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+            }
+            <button type="button" mat-icon-button class="action-btn"
+              [title]="rep.docs.certification ? 'Replace file' : 'Upload file'"
+              [disabled]="isUploadingDoc('certification')" (click)="certificationFileInput.click()">
+              <mat-icon>{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
+            </button>
+            <input #certificationFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
+              (change)="handleDocumentUpload('certification', 'Passed Certificate', $event)">
+          </div>
+        </div>
+        <div class="doc-row">
+          <div class="doc-info">
+            <div class="doc-icon" [class.filled]="!!rep.docs.pricingSheet"><mat-icon>{{ rep.docs.pricingSheet ?
+                'check' : 'description' }}</mat-icon></div>
+            <div>
+              <div class="doc-name">Pricing Sheet</div>
+              <div class="doc-status" [class.filled]="!!rep.docs.pricingSheet">{{ rep.docs.pricingSheet ?
+                (rep.docs.pricingSheet.name + ' · ' + formatDate(rep.docs.pricingSheet.uploadedAt)) : 'Not uploaded' }}
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            @if (rep.docs.pricingSheet; as doc) {
+            <button type="button" mat-icon-button class="action-btn" title="View"
+              (click)="viewDocument(doc.oId, doc.name, 'Pricing Sheet')"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download"
+              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+            }
+            <button type="button" mat-icon-button class="action-btn"
+              [title]="rep.docs.pricingSheet ? 'Replace file' : 'Upload file'"
+              [disabled]="isUploadingDoc('pricingSheet')" (click)="pricingSheetFileInput.click()">
+              <mat-icon>{{ isUploadingDoc('pricingSheet') ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
+            </button>
+            <input #pricingSheetFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
+              (change)="handleDocumentUpload('pricingSheet', 'Pricing Sheet', $event)">
+          </div>
+        </div>
+        <div class="doc-row">
+          <div class="doc-info">
+            <div class="doc-icon" [class.filled]="!!rep.docs.powerPoint"><mat-icon>{{ rep.docs.powerPoint ? 'check' :
+                'description' }}</mat-icon></div>
+            <div>
+              <div class="doc-name">PowerPoint</div>
+              <div class="doc-status" [class.filled]="!!rep.docs.powerPoint">{{ rep.docs.powerPoint ?
+                (rep.docs.powerPoint.name + ' · ' + formatDate(rep.docs.powerPoint.uploadedAt)) : 'Not uploaded' }}
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            @if (rep.docs.powerPoint; as doc) {
+            <button type="button" mat-icon-button class="action-btn" title="View"
+              (click)="viewDocument(doc.oId, doc.name, 'PowerPoint')"><mat-icon>visibility</mat-icon></button>
+            <button type="button" mat-icon-button class="action-btn" title="Download"
+              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+            }
+            <button type="button" mat-icon-button class="action-btn"
+              [title]="rep.docs.powerPoint ? 'Replace file' : 'Upload file'" [disabled]="isUploadingDoc('powerPoint')"
+              (click)="powerPointFileInput.click()">
+              <mat-icon>{{ isUploadingDoc('powerPoint') ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
+            </button>
+            <input #powerPointFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
+              (change)="handleDocumentUpload('powerPoint', 'PowerPoint', $event)">
+          </div>
+        </div>
+      </div>
+    </mat-card>
 
+    <mat-card class="section">
+      <div class="section-head">
+        <div class="eyebrow">Meta</div>
+        <h2>Rep record</h2>
+      </div>
+      <div class="section-body">
+        <ng-container *ngTemplateOutlet="field; context: {label:'Rep ID', value: rep.repId}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Portal link', value: rep.portalLink, isLink: true}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Created', value: formatDate(rep.createdAt)}"></ng-container>
+      </div>
+    </mat-card>
   </div>
 </div>
-
+<mat-card class="section">
+  <div class="section-head">
+    <div class="eyebrow">Payouts</div>
+    <h2>Bank details</h2>
+  </div>
+  <div class="section-body">
+    @if (rep.bankDetails; as bank) {
+    <ng-container *ngTemplateOutlet="field; context: {label:'Bank name', value: bank.bankName}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Routing number', value: bank.routingNumber}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Account number', value: bank.accountNumber}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Last updated', value: formatDate(bank.updatedAt)}"></ng-container>
+    } @else {
+    <div class="hub-empty">
+      <mat-icon>account_balance</mat-icon>
+      <div>No bank details on file yet.</div>
+    </div>
+    }
+  </div>
+</mat-card>
 <mat-card class="section training-section">
   <div class="section-head">
     <div class="eyebrow">Training hub</div>
@@ -529,16 +562,20 @@
       @for (slot of adminHubSlots(); track slot.key) {
       <div class="doc-row">
         <div class="doc-info">
-          <div class="doc-icon" [class.filled]="!!slot.resource"><mat-icon>{{ slot.resource ? 'check' : slot.icon }}</mat-icon></div>
+          <div class="doc-icon" [class.filled]="!!slot.resource"><mat-icon>{{ slot.resource ? 'check' : slot.icon
+              }}</mat-icon></div>
           <div>
             <div class="doc-name">{{ slot.label }}</div>
-            <div class="doc-status" [class.filled]="!!slot.resource">{{ slot.resource ? slot.resource.fileName : 'Not uploaded yet' }}</div>
+            <div class="doc-status" [class.filled]="!!slot.resource">{{ slot.resource ? slot.resource.fileName : 'Not
+              uploaded yet'}} </div>
           </div>
         </div>
         @if (slot.resource; as res) {
         <div style="display: flex; align-items: center; gap: 10px;">
-          <button type="button" mat-icon-button class="action-btn" title="View" (click)="view(res)"><mat-icon>visibility</mat-icon></button>
-          <button type="button" mat-icon-button class="action-btn" title="Download" (click)="downloadResource(res.oId, res.fileName)"><mat-icon>download</mat-icon></button>
+          <button type="button" mat-icon-button class="action-btn" title="View"
+            (click)="view(res)"><mat-icon>visibility</mat-icon></button>
+          <button type="button" mat-icon-button class="action-btn" title="Download"
+            (click)="downloadResource(res.oId, res.fileName)"><mat-icon>download</mat-icon></button>
         </div>
         }
       </div>

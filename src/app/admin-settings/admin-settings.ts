@@ -3,12 +3,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { finalize } from 'rxjs';
 import { HubSlotDef, TrainingResource, TrainingResourceStore, detectFileKind, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { RepDirectoryStore, RepDocumentRecord } from '../rep-directory-store/rep-directory-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
+import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { Toast } from '../toast/toast';
 
 const DOC_KIND_LABEL: Record<string, string> = { agreement: 'Representative Agreement', w4: 'W-4 Form' };
@@ -28,7 +30,7 @@ interface HubSlotView extends HubSlotDef {
 
 @Component({
   selector: 'app-admin-settings',
-  imports: [MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule, MatTableModule],
+  imports: [MatButtonModule, MatCardModule, MatIconModule, MatMenuModule, MatProgressSpinnerModule, MatTableModule],
   templateUrl: './admin-settings.html',
   styleUrl: './admin-settings.scss',
 })
@@ -99,6 +101,31 @@ export class AdminSettings {
     input.value = '';
   }
 
+  /** Confirms then deletes a hub slot's uploaded file, clearing the slot back to "Not uploaded yet". */
+  askDeleteResource(slot: HubSlotDef, resource: TrainingResource): void {
+    if (this.dialog.openDialogs.length) return;
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: `Delete ${slot.label}?`,
+          message: `"${resource.fileName}" will be permanently removed. This can't be undone.`,
+          confirmLabel: 'Delete',
+        },
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
+        this.setSlotUploading(slot.key, true);
+        this.trainingResourceStore
+          .remove(resource.id)
+          .pipe(finalize(() => this.setSlotUploading(slot.key, false)))
+          .subscribe({
+            next: () => this.toast.show(`${slot.label} deleted`),
+            error: () => this.toast.show(`Failed to delete ${slot.label}`),
+          });
+      });
+  }
+
   private setSlotUploading(key: string, uploading: boolean): void {
     this.uploadingSlots.update((keys) => {
       const next = new Set(keys);
@@ -115,6 +142,7 @@ export class AdminSettings {
    */
   viewResource(resource: TrainingResource): void {
     if (resource.type === 'video') {
+      if (this.dialog.openDialogs.length) return;
       this.dialog.open(MediaViewerDialog, {
         data: { title: resource.title, type: resource.type, url: resource.url, fileName: resource.fileName },
         maxWidth: '90vw',
@@ -163,6 +191,7 @@ export class AdminSettings {
 
   /** Opens the file in the in-app media viewer instead of a new browser tab — the file endpoint forces a download rather than letting the browser render it. */
   private openViewer(blob: Blob, title: string, type: TrainingResource['type'], fileName: string): void {
+    if (this.dialog.openDialogs.length) return;
     const url = URL.createObjectURL(blob);
     this.dialog
       .open(MediaViewerDialog, {
