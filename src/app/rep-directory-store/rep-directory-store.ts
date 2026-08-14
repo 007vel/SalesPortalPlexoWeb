@@ -294,6 +294,21 @@ export class RepDirectoryStore {
     return this.reps().find((r) => r.repId === repId);
   }
 
+  /**
+   * Fetches a filtered view via `api/reps/filter` — every param is optional and combines with AND.
+   * Deliberately does NOT touch `repsSignal`: it returns the filtered list for a caller (the admin
+   * reps list) to hold locally, so the app-wide directory other pages rely on (e.g. rep detail pages
+   * resolving `findByRepId`) never loses reps that a filter would otherwise hide.
+   */
+  filterReps(filters: { status?: RepStatus; salesRepType?: SalesRepType; search?: string }): Observable<RepRecord[]> {
+    const params: Record<string, string | number> = {};
+    if (filters.status) params['status'] = STATUS_TO_API[filters.status];
+    if (filters.salesRepType) params['salesRepType'] = SALES_REP_TYPE_TO_API[filters.salesRepType];
+    if (filters.search) params['search'] = filters.search;
+
+    return this.api.get<RepDto[]>('reps/filter', params).pipe(map((dtos) => dtos.map((dto) => this.mergeDto(dto))));
+  }
+
   createRep(input: NewRepInput): Observable<RepRecord> {
     const body: RepWriteDto = {
       fullName: input.name,

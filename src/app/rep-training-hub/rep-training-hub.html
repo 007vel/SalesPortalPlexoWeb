@@ -16,8 +16,6 @@
         <div class="l">Categories</div>
       </div>
     </div>
-    <button type="button" mat-stroked-button class="invert-btn" (click)="openAddVideoModal()"><mat-icon>add</mat-icon>
-      Upload</button>
   </div>
 </div>
 
@@ -33,29 +31,52 @@
 </div>
 }
 
-<mat-chip-listbox class="th-filters" aria-label="Filter by category" hideSingleSelectionIndicator>
+<mat-card class="th-card-section">
+  <div class="th-card-section-head">
+    <h3 class="th-section-title">Admin</h3>
+  </div>
+  <div class="th-card-section-body">
+    @for (slot of adminHubSlots(); track slot.key) {
+    <div class="th-slot-row">
+      <div class="th-slot-info">
+        <div class="th-slot-icon" [class.filled]="!!slot.resource"><mat-icon>{{ slot.resource ? 'check' : slot.icon }}</mat-icon></div>
+        <div>
+          <div class="th-slot-name">{{ slot.label }}</div>
+          <div class="th-slot-status" [class.filled]="!!slot.resource">{{ slot.resource ? slot.resource.fileName : 'Not uploaded yet' }}</div>
+        </div>
+      </div>
+      @if (slot.resource; as res) {
+      <div class="th-slot-actions">
+        <button type="button" mat-icon-button class="th-action-btn" title="View" (click)="view(res)"><mat-icon>visibility</mat-icon></button>
+        <button type="button" mat-icon-button class="th-action-btn" title="Download" (click)="downloadResource(res.oId, res.fileName)"><mat-icon>download</mat-icon></button>
+      </div>
+      }
+    </div>
+    }
+  </div>
+</mat-card>
+
+<mat-chip-listbox class="th-filters" aria-label="Filter your uploads by category" hideSingleSelectionIndicator>
   @for (cat of filterOptions(); track cat) {
   <mat-chip-option class="th-chip" [selected]="activeCategory() === cat" (click)="selectCategory(cat)">{{ cat
     }}</mat-chip-option>
   }
 </mat-chip-listbox>
 
-<div class="th-upload-note">
-  <span>Add your own materials with <b class="hl"><mat-icon>add</mat-icon>Upload</b>, or use the <mat-icon
-      class="inline-ic">close</mat-icon> on one of your cards to remove it from the hub.</span>
-</div>
-
-<h3 class="th-section-title">Shared by Admin</h3>
-<h4 class="th-lang-subtitle">English</h4>
-<ng-container *ngTemplateOutlet="langGrid; context: { list: filteredAdminResourcesEnglish(), removable: false, emptyMsg: 'No English materials shared by Admin in this category yet.' }"></ng-container>
-<h4 class="th-lang-subtitle">Spanish</h4>
-<ng-container *ngTemplateOutlet="langGrid; context: { list: filteredAdminResourcesSpanish(), removable: false, emptyMsg: 'No Spanish materials shared by Admin in this category yet.' }"></ng-container>
-
-<h3 class="th-section-title">Your uploads</h3>
-<h4 class="th-lang-subtitle">English</h4>
-<ng-container *ngTemplateOutlet="langGrid; context: { list: filteredOwnResourcesEnglish(), removable: true, emptyMsg: 'You have not uploaded anything in English in this category yet.' }"></ng-container>
-<h4 class="th-lang-subtitle">Spanish</h4>
-<ng-container *ngTemplateOutlet="langGrid; context: { list: filteredOwnResourcesSpanish(), removable: true, emptyMsg: 'You have not uploaded anything in Spanish in this category yet.' }"></ng-container>
+<mat-card class="th-card-section">
+  <div class="th-card-section-head">
+    <h3 class="th-section-title">Your uploads</h3>
+    <button type="button" mat-flat-button class="th-upload-btn" (click)="openAddVideoModal()">
+      <mat-icon>add</mat-icon> Upload
+    </button>
+  </div>
+  <div class="th-card-section-body">
+    <h4 class="th-lang-subtitle">English</h4>
+    <ng-container *ngTemplateOutlet="langGrid; context: { list: filteredOwnResourcesEnglish(), removable: true, emptyMsg: 'You have not uploaded anything in English in this category yet.' }"></ng-container>
+    <h4 class="th-lang-subtitle">Spanish</h4>
+    <ng-container *ngTemplateOutlet="langGrid; context: { list: filteredOwnResourcesSpanish(), removable: true, emptyMsg: 'You have not uploaded anything in Spanish in this category yet.' }"></ng-container>
+  </div>
+</mat-card>
 
 <ng-template #langGrid let-list="list" let-removable="removable" let-emptyMsg="emptyMsg">
   <div class="th-grid">

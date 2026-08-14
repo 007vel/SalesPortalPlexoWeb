@@ -6,7 +6,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { TrainingResource, TrainingResourceStore, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { TrainingResource, TrainingResourceStore, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { Toast } from '../toast/toast';
 import { RepVideoDialog } from '../rep-video-dialog/rep-video-dialog';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
@@ -35,20 +35,19 @@ export class RepTrainingHub {
   readonly activeCategory = signal('All');
   readonly viewing = signal(false);
 
-  readonly categories = computed(() => Array.from(new Set(this.resources().map((r) => r.category))));
+  /** The fixed 5-slot Admin card — no category filter applies to it, only to "Your uploads" below. */
+  readonly adminHubSlots = computed(() => matchHubSlots(this.resources().filter((r) => r.uploadedBy === 'Admin')));
+
+  readonly ownResources = computed(() => this.resources().filter((r) => r.uploadedBy === 'Rep'));
+  readonly categories = computed(() => Array.from(new Set(this.ownResources().map((r) => r.category))));
   readonly filterOptions = computed(() => ['All', ...this.categories()]);
   readonly featured = computed(() => this.resources().find((r) => r.featured));
 
-  readonly filteredResources = computed(() => {
+  readonly filteredOwnResources = computed(() => {
     const category = this.activeCategory();
-    return category === 'All' ? this.resources() : this.resources().filter((r) => r.category === category);
+    return category === 'All' ? this.ownResources() : this.ownResources().filter((r) => r.category === category);
   });
 
-  readonly filteredAdminResources = computed(() => this.filteredResources().filter((r) => r.uploadedBy === 'Admin'));
-  readonly filteredOwnResources = computed(() => this.filteredResources().filter((r) => r.uploadedBy === 'Rep'));
-
-  readonly filteredAdminResourcesEnglish = computed(() => this.filteredAdminResources().filter((r) => r.language === 'English'));
-  readonly filteredAdminResourcesSpanish = computed(() => this.filteredAdminResources().filter((r) => r.language === 'Spanish'));
   readonly filteredOwnResourcesEnglish = computed(() => this.filteredOwnResources().filter((r) => r.language === 'English'));
   readonly filteredOwnResourcesSpanish = computed(() => this.filteredOwnResources().filter((r) => r.language === 'Spanish'));
 
@@ -102,6 +101,23 @@ export class RepTrainingHub {
         });
       },
       error: () => this.stopViewing(startedAt, () => this.toast.show(`Failed to open ${resource.title}`)),
+    });
+  }
+
+  downloadResource(oId: number, fileName: string): void {
+    this.trainingResourceStore.downloadDocument(oId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        this.toast.show('Download started');
+      },
+      error: () => this.toast.show('Failed to download resource'),
     });
   }
 

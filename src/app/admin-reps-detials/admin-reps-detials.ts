@@ -12,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { RepDirectoryStore, RepDocs, RepStatus, SalesRepType, portalLink, repStatusBadge, salesRepTypeLabel } from '../rep-directory-store/rep-directory-store';
-import { TrainingResource, TrainingResourceStore, detectFileKind, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { TrainingResource, TrainingResourceStore, detectFileKind, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { Toast } from '../toast/toast';
@@ -63,8 +63,8 @@ export class AdminRepsDetials {
   readonly adminResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Admin'));
   readonly ownResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Rep'));
 
-  readonly adminResourcesEnglish = computed(() => this.adminResources().filter((r) => r.language === 'English'));
-  readonly adminResourcesSpanish = computed(() => this.adminResources().filter((r) => r.language === 'Spanish'));
+  /** The same 5 fixed Training & Resource Hub slots admin manages from Settings — read-only here, matched by category so this never shows stale free-form uploads from before that redesign. */
+  readonly adminHubSlots = computed(() => matchHubSlots(this.adminResources()));
   readonly ownResourcesEnglish = computed(() => this.ownResources().filter((r) => r.language === 'English'));
   readonly ownResourcesSpanish = computed(() => this.ownResources().filter((r) => r.language === 'Spanish'));
   readonly typeIcon = trainingResourceTypeIcon;
@@ -463,6 +463,23 @@ export class AdminRepsDetials {
     this.trainingResourceStore.downloadDocument(resource.oId).subscribe({
       next: (blob) => this.stopViewing(startedAt, () => this.openViewer({ title: resource.title, type: resource.type, blob, fileName: resource.fileName })),
       error: () => this.stopViewing(startedAt, () => this.toast.show(`Failed to open ${resource.title}`)),
+    });
+  }
+
+  downloadResource(oId: number, fileName: string): void {
+    this.trainingResourceStore.downloadDocument(oId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        this.toast.show('Download started');
+      },
+      error: () => this.toast.show('Failed to download resource'),
     });
   }
 

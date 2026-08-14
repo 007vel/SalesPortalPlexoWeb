@@ -5,9 +5,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
-import { TrainingResource, TrainingResourceStore, detectFileKind, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { finalize } from 'rxjs';
+import { HubSlotDef, TrainingResource, TrainingResourceStore, detectFileKind, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { RepDirectoryStore, RepDocumentRecord } from '../rep-directory-store/rep-directory-store';
-import { RepVideoDialog } from '../rep-video-dialog/rep-video-dialog';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { Toast } from '../toast/toast';
 
@@ -19,6 +19,11 @@ interface DocumentRow {
   repName: string;
   label: string;
   fileName: string;
+}
+
+interface HubSlotView extends HubSlotDef {
+  resource: TrainingResource | null;
+  uploading: boolean;
 }
 
 @Component({
@@ -34,6 +39,7 @@ export class AdminSettings {
   private readonly toast = inject(Toast);
 
   private readonly documentsSignal = signal<RepDocumentRecord[]>([]);
+  private readonly uploadingSlots = signal<ReadonlySet<string>>(new Set());
 
   /** Minimum time the view-loading overlay stays up — keeps it from flashing on fast/mocked responses. */
   private static readonly MIN_VIEWING_MS = 200;
@@ -43,8 +49,15 @@ export class AdminSettings {
   readonly resources = this.trainingResourceStore.resources;
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
-  readonly displayedColumns = ['resource', 'category', 'language', 'type', 'actions'];
   readonly documentColumns = ['rep', 'repId', 'document', 'actions'];
+
+  /** The 5 fixed hub slots, each matched to its uploaded file (if any) by category. */
+  readonly hubSlots = computed<HubSlotView[]>(() => {
+    const uploading = this.uploadingSlots();
+    return matchHubSlots(this.resources()).map((slot) => ({ ...slot, uploading: uploading.has(slot.key) }));
+  });
+
+  readonly filledSlotCount = computed(() => this.hubSlots().filter((s) => !!s.resource).length);
 
   readonly documentRows = computed<DocumentRow[]>(() => {
     const reps = this.directory.reps();
@@ -62,19 +75,37 @@ export class AdminSettings {
     this.directory.loadAllDocuments().subscribe((docs) => this.documentsSignal.set(docs));
   }
 
-  openUploadModal(): void {
-    this.dialog
-      .open(RepVideoDialog, { data: { mode: 'admin' } })
-      .afterClosed()
-      .subscribe((added) => {
-        if (added) this.toast.show('Added to the hub');
+  /** Uploads (or replaces) the file for a fixed hub slot — no title/category/description form, just the file. */
+  handleSlotUpload(slot: HubSlotDef, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const previous = this.resources().find((r) => r.category === slot.category) ?? null;
+    this.setSlotUploading(slot.key, true);
+    this.trainingResourceStore
+      .uploadDocument(
+        { title: slot.label, category: slot.category, length: '', description: '', uploadedBy: 'Admin', language: slot.language },
+        file,
+      )
+      .pipe(finalize(() => this.setSlotUploading(slot.key, false)))
+      .subscribe({
+        next: () => {
+          this.toast.show(`${slot.label} uploaded`);
+          if (previous) this.trainingResourceStore.remove(previous.id).subscribe();
+        },
+        error: () => this.toast.show(`Failed to upload ${slot.label}`),
       });
+    input.value = '';
   }
 
-  // Admins are a more trusted actor than reps — delete here is immediate,
-  // unlike the rep-side remove flow which confirms first.
-  deleteResource(id: string): void {
-    this.trainingResourceStore.remove(id).subscribe(() => this.toast.show('Resource removed'));
+  private setSlotUploading(key: string, uploading: boolean): void {
+    this.uploadingSlots.update((keys) => {
+      const next = new Set(keys);
+      if (uploading) next.add(key);
+      else next.delete(key);
+      return next;
+    });
   }
 
   /**

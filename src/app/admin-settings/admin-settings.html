@@ -6,63 +6,45 @@
 </div>
 
 <div class="stat-row">
-  <mat-card class="stat-card">
-    <div class="num">{{ resources().length }}</div>
-    <div class="lbl">Training resources</div>
+  <mat-card class="stat-card hub-progress-card">
+    <div class="hub-progress-top">
+      <div>
+        <div class="num">{{ filledSlotCount() }}<span class="of">/5</span></div>
+        <div class="lbl">Training resources uploaded</div>
+      </div>
+      <div class="hub-progress-ring" [style.--pct]="(filledSlotCount() / 5) * 100">
+        <mat-icon>school</mat-icon>
+      </div>
+    </div>
+    <div class="hub-progress-track"><div class="hub-progress-fill" [style.width.%]="(filledSlotCount() / 5) * 100"></div></div>
   </mat-card>
-  <!-- <mat-card class="stat-card">
-    <div class="num">{{ documentRows().length }}</div>
-    <div class="lbl">Documents</div>
-  </mat-card> -->
 </div>
 
 <div class="section-header">
   <h3 class="section-title">Training &amp; resource hub</h3>
-  <button type="button" mat-flat-button color="primary" class="upload-btn"
-    (click)="openUploadModal()"><mat-icon>add</mat-icon> Upload</button>
 </div>
-<mat-card class="table-card">
-  @if (resources().length === 0) {
-    <div class="empty-state">
-      <mat-icon>school</mat-icon>
-      <div>No training hub uploads yet.</div>
+<mat-card class="table-card hub-slots-card">
+  @for (slot of hubSlots(); track slot.key) {
+  <div class="hub-slot-row">
+    <div class="hub-slot-info">
+      <div class="hub-slot-icon" [class.filled]="!!slot.resource"><mat-icon>{{ slot.resource ? 'check' : slot.icon }}</mat-icon></div>
+      <div>
+        <div class="hub-slot-name">{{ slot.label }}</div>
+        <div class="hub-slot-status" [class.filled]="!!slot.resource">{{ slot.resource ? slot.resource.fileName : 'Not uploaded yet' }}</div>
+      </div>
     </div>
-  } @else {
-    <table mat-table [dataSource]="resources()" class="responsive-table">
-      <ng-container matColumnDef="resource">
-        <th mat-header-cell *matHeaderCellDef>Resource</th>
-        <td mat-cell *matCellDef="let res">
-          <div class="rep-name-cell">
-            <span class="nm"><mat-icon>{{ typeIcon(res.type) }}</mat-icon>{{ res.title }}</span>
-            <span class="em">{{ res.duration }}</span>
-          </div>
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="category">
-        <th mat-header-cell *matHeaderCellDef>Category</th>
-        <td mat-cell *matCellDef="let res" class="muted-cell" data-label="Category">{{ res.category }}</td>
-      </ng-container>
-      <ng-container matColumnDef="language">
-        <th mat-header-cell *matHeaderCellDef>Language</th>
-        <td mat-cell *matCellDef="let res" class="muted-cell" data-label="Language">{{ res.language }}</td>
-      </ng-container>
-      <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef>Type</th>
-        <td mat-cell *matCellDef="let res" class="muted-cell" data-label="Type">{{ typeLabel(res.type) }}</td>
-      </ng-container>
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let res">
-          <div class="row-actions">
-            <button type="button" mat-icon-button class="action-btn" title="View" (click)="viewResource(res)"><mat-icon>visibility</mat-icon></button>
-            <button type="button" mat-icon-button class="action-btn" title="Download" (click)="downloadResource(res.oId, res.fileName)"><mat-icon>download</mat-icon></button>
-            <button type="button" mat-icon-button class="action-btn action-danger" title="Delete" (click)="deleteResource(res.id)"><mat-icon>delete</mat-icon></button>
-          </div>
-        </td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="resource-row"></tr>
-    </table>
+    <div class="hub-slot-actions">
+      @if (slot.resource; as res) {
+      <button type="button" mat-icon-button class="action-btn" title="View" (click)="viewResource(res)"><mat-icon>visibility</mat-icon></button>
+      <button type="button" mat-icon-button class="action-btn" title="Download" (click)="downloadResource(res.oId, res.fileName)"><mat-icon>download</mat-icon></button>
+      }
+      <button type="button" mat-icon-button class="action-btn" [title]="slot.resource ? 'Replace file' : 'Upload file'"
+        [disabled]="slot.uploading" (click)="fileInput.click()">
+        <mat-icon>{{ slot.uploading ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
+      </button>
+      <input #fileInput type="file" [attr.accept]="slot.accept" class="hidden-file-input" (change)="handleSlotUpload(slot, $event)">
+    </div>
+  </div>
   }
 </mat-card>
 
