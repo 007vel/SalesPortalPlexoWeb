@@ -107,6 +107,7 @@ export class AdminRepsDetials {
   askDelete(): void {
     const rep = this.rep();
     if (!rep) return;
+    if (this.dialog.openDialogs.length) return;
 
     this.dialog
       .open(ConfirmDialog, {
@@ -122,7 +123,7 @@ export class AdminRepsDetials {
         this.deleting.set(true);
         this.directory.deleteRep(rep.oId).subscribe({
           next: () => {
-            this.toast.show(`Rep ${rep.repId} deleted`);
+            this.toast.show(`"${rep.name || rep.repId}" deleted`);
             this.router.navigateByUrl('/admin/reps');
           },
           error: () => {
@@ -450,6 +451,7 @@ export class AdminRepsDetials {
    */
   view(resource: TrainingResource): void {
     if (resource.type === 'video') {
+      if (this.dialog.openDialogs.length) return;
       this.dialog.open(MediaViewerDialog, {
         data: { title: resource.title, type: resource.type, url: resource.url, fileName: resource.fileName },
         maxWidth: '90vw',
@@ -493,6 +495,7 @@ export class AdminRepsDetials {
   }
 
   private openViewer(args: { title: string; type: ReturnType<typeof detectFileKind>; blob: Blob; fileName: string }): void {
+    if (this.dialog.openDialogs.length) return;
     const url = URL.createObjectURL(args.blob);
     this.dialog
       .open(MediaViewerDialog, {

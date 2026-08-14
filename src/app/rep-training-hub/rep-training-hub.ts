@@ -63,6 +63,7 @@ export class RepTrainingHub {
   }
 
   openAddVideoModal(): void {
+    if (this.dialog.openDialogs.length) return;
     this.dialog.open(RepVideoDialog).afterClosed().subscribe((added) => {
       if (added) this.toast.show('Added to the hub');
     });
@@ -76,6 +77,7 @@ export class RepTrainingHub {
    */
   view(resource: TrainingResource): void {
     if (resource.type === 'video') {
+      if (this.dialog.openDialogs.length) return;
       this.dialog.open(MediaViewerDialog, {
         data: { title: resource.title, type: resource.type, url: resource.url, fileName: resource.fileName },
         maxWidth: '90vw',
@@ -88,8 +90,9 @@ export class RepTrainingHub {
     const startedAt = Date.now();
     this.trainingResourceStore.downloadDocument(resource.oId).subscribe({
       next: (blob) => {
-        const url = URL.createObjectURL(blob);
         this.stopViewing(startedAt, () => {
+          if (this.dialog.openDialogs.length) return;
+          const url = URL.createObjectURL(blob);
           this.dialog
             .open(MediaViewerDialog, {
               data: { title: resource.title, type: resource.type, url, fileName: resource.fileName },
@@ -131,6 +134,7 @@ export class RepTrainingHub {
   }
 
   askRemove(resource: TrainingResource): void {
+    if (this.dialog.openDialogs.length) return;
     this.dialog
       .open(ConfirmDialog, {
         data: {

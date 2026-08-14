@@ -169,6 +169,18 @@
     margin-right: 2px;
   }
 
+  mat-progress-spinner {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+    --mdc-circular-progress-active-indicator-color: var(--danger);
+    --mat-progress-spinner-active-indicator-color: var(--danger);
+  }
+
+  ::ng-deep .mat-mdc-progress-spinner circle {
+    stroke: var(--danger) !important;
+  }
+
   &:hover {
     background: #FDF1F0;
   }
@@ -253,7 +265,7 @@
   margin-bottom: 20px;
   padding: 0 !important;
   border-radius: 16px;
-  border: 1px solid #EEF1F6;
+  border: 1px solid #aec0e0;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
   overflow: hidden;
 }
@@ -359,6 +371,12 @@
 
   button[mat-button] {
     color: var(--muted);
+  }
+
+  // When trailing a .doc-row inside a .no-pad section body, add back the
+  // bottom breathing room that .no-pad's tight padding doesn't provide.
+  .no-pad > & {
+    padding-bottom: 16px;
   }
 }
 
