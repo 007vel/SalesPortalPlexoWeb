@@ -53,13 +53,9 @@ describe('AdminSettings', () => {
     expect(rows[0]).toMatchObject({ repId: '1001', repName: 'Jordan Reyes', label: 'Representative Agreement', fileName: 'signed.pdf' });
   });
 
-  it('deleteResource removes the training hub document via the backend', () => {
-    component.deleteResource(component.resources()[0].id);
-
-    const req = httpMock.expectOne(apiUrl('traininghub/9'));
-    expect(req.request.method).toBe('DELETE');
-    req.flush(null);
-
-    expect(component.resources()).toEqual([]);
+  it('builds the 5 fixed hub slots, leaving unmatched categories (e.g. legacy free-form uploads) unfilled', () => {
+    const slots = component.hubSlots();
+    expect(slots.length).toBe(5);
+    expect(slots.every((s) => s.resource === null)).toBe(true);
   });
 });

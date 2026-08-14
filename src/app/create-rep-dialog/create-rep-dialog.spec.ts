@@ -46,46 +46,52 @@ describe('CreateRepDialog', () => {
 
   it('goToStep2() advances once name/email are valid', () => {
     component.infoForm.setValue({
-      name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending',
+      name: 'Jordan Reyes', businessName: '', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', status: 'pending',
     });
     const stepper = stubStepper();
     component.goToStep2(stepper);
     expect(stepper.next).toHaveBeenCalled();
   });
 
-  it('goToStep3() blocks on a missing certificate file when passed certification is Yes', () => {
-    component.certForm.controls.passedCertification.setValue(true);
-    const stepper = stubStepper();
-    component.goToStep3(stepper);
-    expect(stepper.next).not.toHaveBeenCalled();
-    expect(component.missingCertificateFile()).toBe(true);
-  });
-
-  it('goToStep3() advances when passed certification is No', () => {
+  it('goToStep3() advances without validation — address fields are all optional', () => {
     const stepper = stubStepper();
     component.goToStep3(stepper);
     expect(stepper.next).toHaveBeenCalled();
   });
 
-  it('goToStep4() flags errors and does not advance when bank fields are blank', () => {
+  it('goToStep4() blocks on a missing certificate file when passed certification is Yes', () => {
+    component.certForm.controls.passedCertification.setValue(true);
     const stepper = stubStepper();
     component.goToStep4(stepper);
+    expect(stepper.next).not.toHaveBeenCalled();
+    expect(component.missingCertificateFile()).toBe(true);
+  });
+
+  it('goToStep4() advances when passed certification is No', () => {
+    const stepper = stubStepper();
+    component.goToStep4(stepper);
+    expect(stepper.next).toHaveBeenCalled();
+  });
+
+  it('goToStep5() flags errors and does not advance when bank fields are blank', () => {
+    const stepper = stubStepper();
+    component.goToStep5(stepper);
     expect(stepper.next).not.toHaveBeenCalled();
     expect(component.missingBankFields.bankName).toBe(true);
     expect(component.missingBankFields.routingNumber).toBe(true);
     expect(component.missingBankFields.accountNumber).toBe(true);
   });
 
-  it('goToStep4() advances once bank fields are valid', () => {
+  it('goToStep5() advances once bank fields are valid', () => {
     component.bankForm.setValue({ bankName: 'First Bank', routingNumber: '111000025', accountNumber: '123456789' });
     const stepper = stubStepper();
-    component.goToStep4(stepper);
+    component.goToStep5(stepper);
     expect(stepper.next).toHaveBeenCalled();
   });
 
   it('submit() creates the rep, saves bank details, and closes the dialog with the created rep', () => {
     component.infoForm.setValue({
-      name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', address: '', city: '', state: '', zip: '', status: 'pending',
+      name: 'Jordan Reyes', businessName: '', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', status: 'pending',
     });
     component.bankForm.setValue({ bankName: 'First Bank', routingNumber: '111000025', accountNumber: '123456789' });
     component.submit();
@@ -96,8 +102,8 @@ describe('CreateRepDialog', () => {
       expect.objectContaining({ passedCertification: false, businessCardsSent: false, consultantFeePaid: false }),
     );
     createReq.flush({
-      oId: 1, repId: '1001', fullName: 'Jordan Reyes', email: 'jordan@example.com', phone: null, address: null,
-      city: null, state: null, zip: null, googleLink: null, resourceLink: null, status: 1,
+      oId: 1, repId: '1001', fullName: 'Jordan Reyes', businessName: null, email: 'jordan@example.com', phone: null,
+      salesRepType: 0, address: null, city: null, state: null, zip: null, googleLink: null, resourceLink: null, status: 1,
       passedCertification: false, businessCardsSent: false, consultantFeePaid: false,
       createdAt: '2026-08-06T00:00:00Z', updatedAt: '2026-08-06T00:00:00Z',
     });

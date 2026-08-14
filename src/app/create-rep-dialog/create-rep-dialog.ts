@@ -6,12 +6,14 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { Observable, catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
-import { RepDirectoryStore, RepRecord, RepStatus } from '../rep-directory-store/rep-directory-store';
+import { RepDirectoryStore, RepRecord, RepStatus, SalesRepType } from '../rep-directory-store/rep-directory-store';
 import { Toast } from '../toast/toast';
+import { PHONE_PATTERN, formatPhoneInput } from '../shared/format-phone';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -50,6 +52,7 @@ function certificateRequiredWhenPassedValidator(group: AbstractControl): Validat
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatRadioModule,
     MatSelectModule,
     MatSlideToggleModule,
     MatStepperModule,
@@ -68,24 +71,37 @@ export class CreateRepDialog {
   // stepper relies on that to block a direct header-click into a later, incomplete step.
   readonly infoForm = this.fb.nonNullable.group({
     name: ['', Validators.required],
+    businessName: [''],
     email: ['', [Validators.required, Validators.pattern(EMAIL_PATTERN)]],
-    phone: [''],
+    phone: ['', Validators.pattern(PHONE_PATTERN)],
+    salesRepType: ['referralAgent' as SalesRepType],
+    status: ['pending' as RepStatus],
+  });
+
+  // ----- step 2: address (its own step — kept separate from the rest of the profile fields) -----
+  readonly addressForm = this.fb.nonNullable.group({
     address: [''],
     city: [''],
     state: [''],
     zip: [''],
-    status: ['pending' as RepStatus],
   });
 
   // Labels for the mobile compact step indicator — order matches the mat-step
   // sequence in the template, since a narrow screen has no room for the
-  // full horizontal stepper header (4 icon+label pairs).
-  readonly stepTitles = ['Profile', 'Certification', 'Bank details', 'Links & Documents'];
+  // full horizontal stepper header (5 icon+label pairs).
+  readonly stepTitles = ['Profile', 'Address', 'Certification', 'Bank details', 'Links & Documents'];
 
   readonly missingRequiredFields = { name: false, email: false };
   readonly invalidEmail = signal(false);
+  readonly invalidPhone = signal(false);
 
-  // ----- step 2: certification -----
+  /** Reformats the phone field as the rep types — strips non-digits and caps at 10 (`xxx-xxx-xxxx`). */
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.infoForm.controls.phone.setValue(formatPhoneInput(input.value));
+  }
+
+  // ----- step 3: certification -----
   // certificateFile lives on the form (not a plain class field) so the group's own validity
   // — and therefore the linear stepper's header-click guard — reacts to it being set/cleared.
   readonly certForm = this.fb.nonNullable.group(
@@ -106,7 +122,7 @@ export class CreateRepDialog {
   readonly certificateFileIcon = computed(() => fileKindIcon(this.certificateFileName()));
   readonly certificateFileSizeLabel = computed(() => fileSizeLabel(this.certificateFileSize()));
 
-  // ----- step 3: bank details -----
+  // ----- step 4: bank details -----
   readonly bankForm = this.fb.nonNullable.group({
     bankName: ['', Validators.required],
     routingNumber: ['', Validators.required],
@@ -120,7 +136,7 @@ export class CreateRepDialog {
     this.accountNumberVisible.update((visible) => !visible);
   }
 
-  // ----- step 4: links & documents (all optional — admin can fill these in later via the rep's own Links/Documents pages) -----
+  // ----- step 5: links & documents (all optional — admin can fill these in later via the rep's own Links/Documents pages) -----
   readonly linksForm = this.fb.nonNullable.group({
     googleLink: [''],
     resourceLink: [''],
@@ -150,14 +166,33 @@ export class CreateRepDialog {
     this.dialogRef.close(undefined);
   }
 
+  /**
+   * Angular CDK's horizontal stepper sometimes computes the newly-active step's slide
+   * transform against a stale layout measurement right as it becomes visible, leaving its
+   * content shifted sideways and clipped by the dialog's own overflow (verified: the
+   * certification toggles were rendering ~150px past the visible edge). A later reflow —
+   * e.g. a resize event — makes the CDK recompute correctly, so trigger one after every
+   * step change (Next, Back, or a header click) once the DOM has settled.
+   */
+  onStepChange(): void {
+    // Two nudges: one for the common case, and a second after Material's own step
+    // slide transition (~225-400ms) has actually finished settling, since the first
+    // can otherwise land mid-animation and miss.
+    window.dispatchEvent(new Event('resize'));
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 400);
+  }
+
   goToStep2(stepper: MatStepper): void {
     this.infoForm.markAllAsTouched();
     const v = this.infoForm.getRawValue();
     const name = v.name.trim();
     const email = v.email.trim();
+    const phone = v.phone.trim();
     this.missingRequiredFields.name = !name;
     this.missingRequiredFields.email = !email;
     this.invalidEmail.set(!!email && !EMAIL_PATTERN.test(email));
+    this.invalidPhone.set(!!phone && !PHONE_PATTERN.test(phone));
 
     if (!name || !email) {
       this.toast.show('Name and email are required.');
@@ -167,6 +202,15 @@ export class CreateRepDialog {
       this.toast.show('Enter a valid email address.');
       return;
     }
+    if (this.invalidPhone()) {
+      this.toast.show('Enter a complete 10-digit phone number.');
+      return;
+    }
+    stepper.next();
+  }
+
+  // Address fields are all optional — nothing to validate before moving on.
+  goToStep3(stepper: MatStepper): void {
     stepper.next();
   }
 
@@ -207,7 +251,7 @@ export class CreateRepDialog {
     this.missingCertificateFile.set(false);
   }
 
-  goToStep3(stepper: MatStepper): void {
+  goToStep4(stepper: MatStepper): void {
     const passedCertification = this.certForm.controls.passedCertification.value;
     if (passedCertification && !this.certForm.controls.certificateFile.value) {
       this.missingCertificateFile.set(true);
@@ -217,7 +261,7 @@ export class CreateRepDialog {
     stepper.next();
   }
 
-  goToStep4(stepper: MatStepper): void {
+  goToStep5(stepper: MatStepper): void {
     this.bankForm.markAllAsTouched();
     const bank = this.bankForm.getRawValue();
     const bankName = bank.bankName.trim();
@@ -279,6 +323,7 @@ export class CreateRepDialog {
     const accountNumber = bank.accountNumber.trim();
 
     const info = this.infoForm.getRawValue();
+    const address = this.addressForm.getRawValue();
     const cert = this.certForm.getRawValue();
     const certificateFile = cert.certificateFile;
     const links = this.linksForm.getRawValue();
@@ -291,12 +336,14 @@ export class CreateRepDialog {
     this.directory
       .createRep({
         name: info.name.trim(),
+        businessName: info.businessName.trim(),
         email: info.email.trim(),
         phone: info.phone.trim(),
-        address: info.address.trim(),
-        city: info.city.trim(),
-        state: info.state.trim(),
-        zip: info.zip.trim(),
+        salesRepType: info.salesRepType,
+        address: address.address.trim(),
+        city: address.city.trim(),
+        state: address.state.trim(),
+        zip: address.zip.trim(),
         status: info.status,
         passedCertification: cert.passedCertification,
         businessCardsSent: cert.businessCardsSent,

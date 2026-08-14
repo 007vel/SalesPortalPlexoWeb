@@ -37,6 +37,7 @@
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
   border: 1px solid #EEF1F6;
   overflow: hidden;
+  margin-bottom: 10px;
 }
 
 .head-row {
@@ -247,9 +248,137 @@
   }
 }
 
+// ---------- PWR Rewards card ----------
+.pwr-chip {
+  background: #FDF1DD;
+
+  mat-icon {
+    color: #B36B0D;
+  }
+}
+
+.rp-pwr-doc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid #F0F2F6;
+}
+
+.rp-pwr-doc-info {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.doc-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: #EEF1F5;
+  color: #9AA6B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &.filled {
+    background: #E4F7EE;
+    color: #1A8A5F;
+  }
+}
+
+.doc-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.doc-status {
+  font-size: 12.5px;
+  color: var(--faint, #9AA6B8);
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+
+  &.filled {
+    color: #3B8A63;
+    font-weight: 500;
+  }
+}
+
+.rp-pwr-doc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ghost-btn {
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 12.5px;
+  height: 36px;
+  padding: 0 14px;
+  border-color: #E1E6ED !important;
+  color: var(--text) !important;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+  }
+
+  &:hover {
+    background: #F5F7FA;
+    border-color: #D6DDE7 !important;
+  }
+}
+
+// ---------- full-page loading overlay (shown while opening the instructions PDF) ----------
+.rp-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(1px);
+
+  mat-progress-spinner {
+    --mdc-circular-progress-active-indicator-color: var(--orange);
+    --mat-progress-spinner-active-indicator-color: var(--orange);
+  }
+
+  ::ng-deep .mat-mdc-progress-spinner circle {
+    stroke: var(--orange) !important;
+  }
+}
+
 @media (max-width: 640px) {
   .rp-readonly {
     grid-template-columns: 1fr;
+  }
+
+  .rp-pwr-doc {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rp-pwr-doc-actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .rep-page-head h1 {

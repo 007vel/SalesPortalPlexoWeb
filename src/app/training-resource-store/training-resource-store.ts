@@ -74,6 +74,34 @@ export function detectFileKind(fileName: string): TrainingResourceType {
 }
 
 /**
+ * The Training & Resource Hub's "Shared by Admin" material is a fixed set of 5 slots — not a
+ * free-form upload list — matched to whatever's actually been uploaded by `category`. Defined once
+ * here so admin-settings (which can upload/replace), admin-reps-detials, and rep-training-hub (both
+ * read-only) all agree on the same 5 slots instead of drifting.
+ */
+export interface HubSlotDef {
+  key: string;
+  label: string;
+  category: string;
+  language: TrainingResourceLanguage;
+  accept: string;
+  icon: string;
+}
+
+export const HUB_SLOTS: HubSlotDef[] = [
+  { key: 'productVideoEn', label: 'Product Video (English)', category: 'Product Video (English)', language: 'English', accept: 'video/*', icon: 'movie' },
+  { key: 'productVideoEs', label: 'Product Video (Spanish)', category: 'Product Video (Spanish)', language: 'Spanish', accept: 'video/*', icon: 'movie' },
+  { key: 'dashboardVideoEs', label: 'Dashboard Video (Spanish)', category: 'Dashboard Video (Spanish)', language: 'Spanish', accept: 'video/*', icon: 'movie' },
+  { key: 'trainingMaterial', label: 'Training Material (PDF)', category: 'Training Material', language: 'English', accept: '.pdf', icon: 'picture_as_pdf' },
+  { key: 'faq', label: 'FAQ (PDF)', category: 'FAQ', language: 'English', accept: '.pdf', icon: 'picture_as_pdf' },
+];
+
+/** Matches each fixed slot to its uploaded resource (if any) by category. `resources` should already be Admin-only. */
+export function matchHubSlots(resources: TrainingResource[]): (HubSlotDef & { resource: TrainingResource | null })[] {
+  return HUB_SLOTS.map((def) => ({ ...def, resource: resources.find((r) => r.category === def.category) ?? null }));
+}
+
+/**
  * The team-wide Training & Resource Hub library — real files (video/image/pdf/etc)
  * reps upload, backed by `api/traininghub`. Reps see their own uploads
  * (`loadForRole`); admin can browse every rep's uploads at once (`loadAll`).

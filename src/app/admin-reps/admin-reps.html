@@ -1,13 +1,13 @@
 <div class="admin-topbar">
   <div>
     <h1>Reps</h1>
-    <p>Every rep currently on Plexo, their status, and a quick link to their portal.</p>
+    <!-- <p>Every rep currently on Plexo, their status, and a quick link to their portal.</p> -->
   </div>
   <button type="button" mat-flat-button color="primary" class="new-rep-btn"
     (click)="openCreateModal()"><mat-icon>add</mat-icon> New rep</button>
 </div>
 
-<div class="stat-row">
+<!-- <div class="stat-row">
   <mat-card class="stat-card">
     <div class="num">{{ totalCount() }}</div>
     <div class="lbl">Total reps</div>
@@ -24,13 +24,52 @@
     <div class="num">{{ docsCompleteCount() }}</div>
     <div class="lbl">Docs complete</div>
   </mat-card>
-</div>
+</div> -->
+
+<mat-card class="filter-bar">
+  <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput placeholder="Search by name" [value]="searchTerm()" (input)="onSearchInput($event)">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+    <mat-select [value]="statusFilter()" (selectionChange)="statusFilter.set($event.value)">
+      <mat-option value="all">All statuses</mat-option>
+      <mat-option value="active">Active</mat-option>
+      <mat-option value="pending">Pending</mat-option>
+      <mat-option value="inactive">Inactive</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+    <mat-select [value]="salesRepTypeFilter()" (selectionChange)="salesRepTypeFilter.set($event.value)">
+      <mat-option value="all">All rep types</mat-option>
+      <mat-option value="referralAgent">Referral Agent</mat-option>
+      <mat-option value="marketingConsultant">Marketing Consultant</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  @if (isFiltered()) {
+  <button type="button" mat-button class="clear-filters-btn" (click)="clearFilters()">
+    <mat-icon>close</mat-icon> Clear
+  </button>
+  }
+
+  @if (filtering()) {
+  <mat-icon class="filtering-spinner">sync</mat-icon>
+  }
+</mat-card>
 
 <mat-card class="table-card">
   @if (loading() && reps().length === 0) {
   <div class="empty-state">
     <mat-icon>hourglass_empty</mat-icon>
     <div>Loading reps…</div>
+  </div>
+  } @else if (reps().length === 0 && isFiltered()) {
+  <div class="empty-state">
+    <mat-icon>search_off</mat-icon>
+    <div>No reps match these filters.</div>
   </div>
   } @else if (reps().length === 0) {
   <div class="empty-state">
@@ -60,6 +99,11 @@
           </span>
         </div>
       </td>
+    </ng-container>
+
+    <ng-container matColumnDef="salesRepType">
+      <th mat-header-cell *matHeaderCellDef>Rep type</th>
+      <td mat-cell *matCellDef="let rep" data-label="Rep type">{{ repTypeLabel(rep.salesRepType) }}</td>
     </ng-container>
 
     <ng-container matColumnDef="status">
@@ -92,6 +136,8 @@
       <td mat-cell *matCellDef="let rep" (click)="$event.stopPropagation()">
         <button type="button" mat-icon-button title="Copy portal link"
           (click)="copyLink(rep.portalLink)"><mat-icon>content_copy</mat-icon></button>
+        <button type="button" mat-icon-button class="delete-btn" title="Delete rep"
+          (click)="askDelete(rep, $event)"><mat-icon>delete</mat-icon></button>
       </td>
     </ng-container>
 

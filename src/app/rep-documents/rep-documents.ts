@@ -12,6 +12,7 @@ import { DocumentTemplateStore, DocTemplateKind } from '../document-template-sto
 import { Toast } from '../toast/toast';
 import { detectFileKind } from '../training-resource-store/training-resource-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
+import { formatDateMDY } from '../shared/format-date';
 
 interface DocDef {
   kind: keyof RepDocs;
@@ -71,7 +72,7 @@ export class RepDocuments {
         ...def,
         templateFilename: isTemplateKind(def.kind) ? templates[def.kind].name : null,
         filled: !!record,
-        statusText: record ? `Uploaded — ${record.name} · ${record.uploadedAt}` : 'Not uploaded yet',
+        statusText: record ? `Uploaded — ${record.name} · ${formatDateMDY(record.uploadedAt)}` : 'Not uploaded yet',
         oId: record?.oId ?? null,
         fileName: record?.name ?? null,
         uploading: uploading.has(def.kind),

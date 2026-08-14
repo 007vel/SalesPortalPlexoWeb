@@ -145,6 +145,39 @@
   }
 }
 
+// ---------- header actions ----------
+.detail-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.delete-rep-btn {
+  height: 40px;
+  border-radius: 9px;
+  border-color: #F0D0CE !important;
+  color: var(--danger) !important;
+  font-weight: 600;
+  font-size: 13.5px;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+    margin-right: 2px;
+  }
+
+  &:hover {
+    background: #FDF1F0;
+  }
+
+  &:disabled {
+    opacity: .6;
+  }
+}
+
 // ---------- status select ----------
 .status-field {
   width: 150px;
@@ -244,6 +277,98 @@
     color: var(--text);
     margin: 0;
   }
+
+  &.editable {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+}
+
+.edit-btn {
+  flex-shrink: 0;
+  height: 34px;
+  padding: 0 14px 0 10px;
+  border-radius: 8px;
+  border-color: #E1E6ED !important;
+  color: var(--text) !important;
+  font-weight: 600;
+  font-size: 13px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  &:hover {
+    background: #F5F7FA;
+    border-color: var(--orange) !important;
+    color: var(--orange) !important;
+  }
+}
+
+// ---------- inline edit forms (contact info, links, contract wizard, PWR Rewards email) ----------
+.edit-form {
+  .full-width {
+    width: 100%;
+  }
+
+  mat-form-field.full-width,
+  .field-row mat-form-field {
+    margin-top: 10px;
+  }
+
+  mat-form-field:first-child {
+    margin-top: 0;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+
+  mat-form-field button[matSuffix],
+  mat-form-field mat-icon[matSuffix] {
+    color: var(--faint);
+    margin-right: -8px;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--muted);
+    }
+  }
+}
+
+// Lives inside a .section-body.no-pad (which already supplies horizontal padding) — only adds
+// the vertical breathing room the plain readonly-field/edit-form content needs above the doc-row.
+.edit-form-pad {
+  padding: 12px 0 8px;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+
+  button[mat-button] {
+    color: var(--muted);
+  }
+}
+
+.save-btn {
+  color: #fff !important;
+  background-color: var(--orange) !important;
+}
+
+.hidden-file-input {
+  display: none;
 }
 
 .section-body {
@@ -325,6 +450,46 @@
         overflow-wrap: anywhere;
       }
     }
+  }
+}
+
+// ---------- address (its own box, set apart from the plain contact rows) ----------
+.address-box {
+  margin-top: 4px;
+  padding: 14px 16px;
+  background: #F8FAFD;
+  border: 1.5px solid #E5EAF1;
+  border-radius: 10px;
+}
+
+.address-box-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 8px;
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+    color: var(--orange);
+  }
+}
+
+.address-box-value {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+
+  &.empty {
+    color: var(--faint, #9AA6B8);
+    font-style: italic;
   }
 }
 
@@ -630,7 +795,16 @@
     align-items: stretch;
   }
 
+  .detail-head-actions {
+    width: 100%;
+  }
+
   .status-field {
     width: 100%;
+  }
+
+  .delete-rep-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

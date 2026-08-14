@@ -56,8 +56,8 @@ export class RepLinks {
   readonly linkRows = computed<LinkRow[]>(() => {
     const profile = this.repProfileStore.profile();
     return [
-      { key: 'googleLink', label: 'Google link', value: profile.googleLink },
-      { key: 'resourceLink', label: 'Resource link', value: profile.resourceLink },
+      { key: 'googleLink', label: 'Sales Leads link', value: profile.googleLink },
+      { key: 'resourceLink', label: 'Knowledge Base', value: profile.resourceLink },
       { key: 'pricingSheetLink', label: 'Pricing sheet link', value: profile.pricingSheetLink },
       { key: 'powerPointLink', label: 'PowerPoint link', value: profile.powerPointLink },
     ].map((row) => ({ ...row, href: this.toHref(row.value) }));

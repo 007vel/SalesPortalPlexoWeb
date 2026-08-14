@@ -1,11 +1,13 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { Auth } from '../auth/auth';
-import { RepDirectoryStore, RepDocRecord, RepDocs, RepRecord, CommissionDay } from '../rep-directory-store/rep-directory-store';
+import { RepDirectoryStore, RepDocRecord, RepDocs, RepRecord, CommissionDay, SalesRepType } from '../rep-directory-store/rep-directory-store';
 
 export interface RepProfileData {
   name: string;
+  businessName: string;
   phone: string;
+  salesRepType: SalesRepType;
   address: string;
   city: string;
   state: string;
@@ -19,12 +21,17 @@ export interface RepProfileData {
   consultantFeePaid: boolean;
   docs: RepDocs;
   commissions: CommissionDay[];
+  /** Assigned once the rep becomes a Marketing Consultant — only meaningful when salesRepType is 'marketingConsultant'. */
+  pwrRewardsEmail: string;
+  pwrRewardsEmailPassword: string;
 }
 
 function emptyRepProfile(): RepProfileData {
   return {
     name: '',
+    businessName: '',
     phone: '',
+    salesRepType: 'referralAgent',
     address: '',
     city: '',
     state: '',
@@ -36,8 +43,10 @@ function emptyRepProfile(): RepProfileData {
     passedCertification: false,
     businessCardsSent: false,
     consultantFeePaid: false,
-    docs: { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null },
+    docs: { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null },
     commissions: [],
+    pwrRewardsEmail: '',
+    pwrRewardsEmailPassword: '',
   };
 }
 
@@ -45,7 +54,9 @@ function toProfileData(rep: RepRecord | undefined): RepProfileData {
   if (!rep) return emptyRepProfile();
   return {
     name: rep.name,
+    businessName: rep.businessName,
     phone: rep.phone,
+    salesRepType: rep.salesRepType,
     address: rep.address,
     city: rep.city,
     state: rep.state,
@@ -59,6 +70,8 @@ function toProfileData(rep: RepRecord | undefined): RepProfileData {
     consultantFeePaid: rep.consultantFeePaid,
     docs: rep.docs,
     commissions: rep.commissions,
+    pwrRewardsEmail: rep.pwrRewardsEmail,
+    pwrRewardsEmailPassword: rep.pwrRewardsEmailPassword,
   };
 }
 

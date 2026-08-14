@@ -60,3 +60,56 @@
     </div>
   </div>
 </mat-card>
+
+@if (isMarketingConsultant()) {
+<mat-card class="rp-profile-card">
+  <div class="head-row">
+    <div class="head-title">
+      <div class="eyebrow">Onboarding</div>
+      <div class="title-line">
+        <span class="icon-chip pwr-chip"><mat-icon>redeem</mat-icon></span>
+        <h2>PWR Rewards email</h2>
+      </div>
+    </div>
+    <span class="ro-badge"><span class="ro-dot"></span>Read only</span>
+  </div>
+
+  <div class="rp-card-body">
+    <div class="rp-readonly">
+      @for (row of pwrRewardsRows(); track row.key) {
+      <div class="rp-ro-item" [class.wide]="row.wide">
+        <div class="rl">{{ row.label }}</div>
+        <div class="rv" [class.empty]="!row.value">{{ row.value || 'Not provided — ask your admin to add it' }}</div>
+      </div>
+      }
+    </div>
+
+    <div class="rp-pwr-doc">
+      <div class="rp-pwr-doc-info">
+        <div class="doc-icon" [class.filled]="!!pwrInstructions()"><mat-icon>{{ pwrInstructions() ? 'check' : 'description' }}</mat-icon></div>
+        <div>
+          <div class="doc-name">Access instructions (PDF)</div>
+          <div class="doc-status" [class.filled]="!!pwrInstructions()">{{ pwrInstructions() ?
+            (pwrInstructions()!.name + ' · ' + formatDate(pwrInstructions()!.uploadedAt)) : 'Not uploaded yet — ask your admin to add it' }}</div>
+        </div>
+      </div>
+      @if (pwrInstructions(); as doc) {
+      <div class="rp-pwr-doc-actions">
+        <button type="button" mat-stroked-button class="ghost-btn" (click)="viewDocument(doc.oId, doc.name)">
+          <mat-icon>visibility</mat-icon> View
+        </button>
+        <button type="button" mat-stroked-button class="ghost-btn" (click)="downloadDocument(doc.oId, doc.name)">
+          <mat-icon>download</mat-icon> Download
+        </button>
+      </div>
+      }
+    </div>
+  </div>
+</mat-card>
+}
+
+@if (viewing()) {
+<div class="rp-loading-overlay">
+  <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
+</div>
+}

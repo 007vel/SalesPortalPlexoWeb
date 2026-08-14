@@ -3,40 +3,26 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-
+  overflow: hidden;
+  overflow-y: auto !important;
 }
 
 /* Create Rep Dialog */
 ::ng-deep .crd-dialog-panel {
   .mat-mdc-dialog-container {
-
+    overflow: hidden !important;
+    overflow-y: auto !important;
   }
 
-  // !important on every property here, not just overflow/max-height: Material's
-  // own stylesheet sets `display` on this same element, and without !important
-  // that rule can win the cascade (order/specificity aren't guaranteed in our
-  // favor). If `display: flex` loses, `.mat-mdc-dialog-content`'s `flex: 1`
-  // below becomes a no-op (flex properties do nothing without a flex parent),
-  // the surface falls back to plain block stacking, and its hard max-height +
-  // overflow: hidden silently clips whatever doesn't fit — title/content
-  // render, but mat-dialog-actions (the last child) disappears with no
-  // scrollbar and no visible sign anything was cut off. That silent-clip
-  // failure mode is exactly why every layout-critical property here is forced.
   .mat-mdc-dialog-surface {
     display: flex !important;
     flex-direction: column !important;
-    // vh is the fallback for browsers without dvh support; dvh (dynamic viewport
-    // height) accounts for mobile browser toolbars showing/hiding, so it reflects
-    // the actual visible area rather than the largest-possible one.
+
     max-height: 90vh !important;
     max-height: 90dvh !important;
   }
 
-  // A step's content (the Links & Documents step especially — 4 fields plus 2
-  // dropzones) can be taller than the 90vh surface budget on a short viewport.
-  // This is the one true scroll container: it can grow the surface up to its
-  // max-height and then scroll internally, rather than silently clipping
-  // whatever doesn't fit (which `overflow: hidden` here used to do).
+
   .mat-mdc-dialog-content {
     flex: 1 1 auto !important;
     min-height: 0 !important;
@@ -45,10 +31,7 @@
     overflow-x: hidden !important;
   }
 
-  /* These wrapper elements' own overflow:hidden is part of how Material hides
-     the inactive steps during a horizontal transition — leave that alone.
-     Only strip the horizontal padding so the dialog's own padding is what governs spacing. */
-  .mat-horizontal-content-container {
+    .mat-horizontal-content-container {
 
     padding-left: 0;
     padding-right: 0;
@@ -71,8 +54,6 @@
   width: 100%;
 }
 
-// subscriptSizing="dynamic" already collapses the reserved hint/error space
-// when a field has nothing to show, so fields only need a small gap here.
 mat-form-field.full-width,
 .field-row mat-form-field {
   margin-top: 10px;
@@ -85,10 +66,6 @@ mat-form-field.full-width,
   align-items: start;
 }
 
-// Wraps a field + its (optional) error as one grid item, so each column's
-// error lands under its own field regardless of which field(s) in the row
-// are currently invalid — plain grid auto-placement would misplace a lone
-// error into the wrong column whenever the other field has none to show.
 .field-cell {
   min-width: 0;
 }
@@ -116,12 +93,7 @@ mat-form-field button[matSuffix] {
   margin-top: 4px;
 }
 
-// Field-validation errors specifically (as opposed to the standalone
-// certificate-missing/submit-failed messages, which stay flush-left) line up
-// with the field's own icon+text start (16px field padding + 19px icon +
-// 8px gap) instead of the field's bare left edge, so the message still reads
-// as "belonging to" the field above it now that it's outside the box.
-mat-form-field.full-width + .error,
+mat-form-field.full-width+.error,
 .field-cell .error {
   padding-left: 43px;
 }
@@ -132,11 +104,7 @@ mat-form-field.full-width + .error,
     margin-bottom: 8px;
   }
 
-  // Default Material theming would paint every un-visited step icon in the
-  // app-wide theme's primary blue — recolor every state so only the active
-  // step and completed steps pick up the brand orange, and everything else
-  // reads as a neutral, inactive circle.
-  ::ng-deep .mat-step-header .mat-step-icon {
+    ::ng-deep .mat-step-header .mat-step-icon {
     background-color: var(--border);
     color: var(--muted);
   }
@@ -147,11 +115,7 @@ mat-form-field.full-width + .error,
     color: #fff;
   }
 
-  // Material shrinks each step header to fit and ellipsis-truncates the label
-  // by default ("Certific…", "Bank de…") — with 4 steps that kicks in even at
-  // a generous dialog width. Let the label wrap onto a second line instead of
-  // truncating, and don't let the header shrink the icon below its own size.
-  ::ng-deep .mat-step-header {
+    ::ng-deep .mat-step-header {
     min-width: 0;
     white-space: normal;
   }
@@ -177,11 +141,6 @@ mat-form-field.full-width + .error,
   }
 }
 
-// mat-dialog-actions is a true sibling of mat-dialog-content (not part of its
-// scroll area), so this is Material's own fixed-footer region — the buttons
-// stay reachable regardless of how tall a step's content is or how short the
-// viewport is. Reset Material's own default action-bar spacing/alignment so
-// this class fully governs the layout instead of fighting it.
 .step-actions {
   display: flex !important;
   align-items: center;
@@ -194,9 +153,7 @@ mat-form-field.full-width + .error,
   background: var(--card, #fff);
   flex-shrink: 0 !important;
 
-  // Plain mat-button Cancel/Back would otherwise inherit the app-wide
-  // Material theme's primary blue instead of the app's neutral gray.
-  button[mat-button] {
+   button[mat-button] {
     color: var(--muted);
   }
 }
@@ -217,6 +174,38 @@ mat-form-field.full-width + .error,
 .create-btn {
   color: #fff !important;
   background-color: var(--orange) !important;
+}
+
+// ---------- sales rep type ----------
+.rep-type-field {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border, #DCE3ED);
+  border-radius: 8px;
+  background: #FAFBFD;
+}
+
+.rep-type-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.rep-type-group {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+
+  ::ng-deep .mdc-radio__native-control:enabled:checked+.mdc-radio__background .mdc-radio__outer-circle,
+  ::ng-deep .mdc-radio__native-control:enabled+.mdc-radio__background .mdc-radio__inner-circle {
+    border-color: var(--orange) !important;
+  }
+
+  ::ng-deep .mat-mdc-radio-button .mdc-form-field {
+    font-size: 13.5px;
+  }
 }
 
 // ---------- toggles ----------
@@ -307,11 +296,13 @@ mat-form-field.full-width + .error,
   height: 28px;
   margin-bottom: 2px;
 }
+
 .dz-title {
   font-size: 13.5px;
   font-weight: 600;
   color: var(--text);
 }
+
 .dz-hint {
   font-size: 12px;
   color: var(--muted);
@@ -324,6 +315,7 @@ mat-form-field.full-width + .error,
   width: 100%;
   text-align: left;
 }
+
 .dz-file-ic {
   width: 40px;
   height: 40px;
@@ -335,6 +327,7 @@ mat-form-field.full-width + .error,
   background: #EEF3F9;
   color: var(--navy);
 }
+
 .dz-file-txt {
   flex: 1;
   min-width: 0;
@@ -348,12 +341,14 @@ mat-form-field.full-width + .error,
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
   span {
     font-size: 12px;
     color: var(--muted);
     margin-top: 1px;
   }
 }
+
 .dz-remove {
   flex-shrink: 0;
   color: var(--faint);
@@ -362,6 +357,7 @@ mat-form-field.full-width + .error,
     color: var(--text);
   }
 }
+
 .hidden-file-input {
   display: none;
 }
@@ -400,7 +396,9 @@ mat-form-field.full-width + .error,
 // a short-but-wide viewport would otherwise stay in the small floating-card
 // layout, capped at 90dvh of an already-short viewport, which is exactly
 // the "too small to be usable" case this block exists to avoid.
-@media (max-width: 640px), (max-height: 560px) {
+@media (max-width: 640px),
+(max-height: 560px) {
+
   // The dialog stops being a small floating card — no room to show a title,
   // a 4-label stepper header, and a form and still look like anything other
   // than a cramped strip. Take over the full viewport like a native

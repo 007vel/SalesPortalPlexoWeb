@@ -1,4 +1,9 @@
-<h2 mat-dialog-title>Create new rep</h2>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid rgba(0, 0, 0, 0.12);">
+  <h2 mat-dialog-title>Create new rep</h2>
+ <button mat-icon-button aria-label="Close" (click)="cancel()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
 
 <!-- Mobile-only compact stand-in for the horizontal stepper header, which has
      no room for 3 icon+label steps on a phone width. Hidden on desktop. -->
@@ -12,7 +17,7 @@
 </div>
 
 <mat-dialog-content>
-  <mat-stepper #stepper class="crd-stepper" [linear]="true">
+  <mat-stepper #stepper class="crd-stepper" [linear]="true" (selectionChange)="onStepChange()">
 
     <mat-step [stepControl]="infoForm" label="Profile" [completed]="false">
       <p class="sub">Fill in the rep's contact record — they'll see it on their profile page. A Rep ID and portal link
@@ -29,6 +34,22 @@
 
         <div class="field-row">
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Business name</mat-label>
+            <mat-icon matPrefix>storefront</mat-icon>
+            <input matInput formControlName="businessName">
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="pending">Pending</mat-option>
+              <mat-option value="active">Active</mat-option>
+              <mat-option value="inactive">Inactive</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="field-row">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Email address</mat-label>
             <mat-icon matPrefix>mail</mat-icon>
             <input matInput type="email" formControlName="email">
@@ -40,10 +61,28 @@
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Phone</mat-label>
             <mat-icon matPrefix>call</mat-icon>
-            <input matInput type="tel" formControlName="phone">
+            <input matInput type="tel" formControlName="phone" maxlength="12" placeholder="xxx-xxx-xxxx"
+              (input)="onPhoneInput($event)">
+            @if (infoForm.controls.phone.touched && infoForm.controls.phone.hasError('pattern')) {
+            <mat-error>Enter a complete 10-digit phone number</mat-error>
+            }
           </mat-form-field>
         </div>
 
+        <div class="rep-type-field">
+          <div class="rep-type-label">Sales rep type</div>
+          <mat-radio-group formControlName="salesRepType" class="rep-type-group">
+            <mat-radio-button value="referralAgent">Referral Agent</mat-radio-button>
+            <mat-radio-button value="marketingConsultant">Marketing Consultant</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </form>
+    </mat-step>
+
+    <mat-step [stepControl]="addressForm" label="Address" [completed]="false">
+      <p class="sub">Where this rep is based — all optional.</p>
+
+      <form [formGroup]="addressForm">
         <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
           <mat-label>Address</mat-label>
           <mat-icon matPrefix>home</mat-icon>
@@ -63,21 +102,11 @@
           </mat-form-field>
         </div>
 
-        <div class="field-row">
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Zip</mat-label>
-            <mat-icon matPrefix>pin_drop</mat-icon>
-            <input matInput formControlName="zip">
-          </mat-form-field>
-          <mat-form-field appearance="outline" subscriptSizing="dynamic">
-            <mat-label>Status</mat-label>
-            <mat-select formControlName="status">
-              <mat-option value="pending">Pending</mat-option>
-              <mat-option value="active">Active</mat-option>
-              <mat-option value="inactive">Inactive</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <mat-label>Zip</mat-label>
+          <mat-icon matPrefix>pin_drop</mat-icon>
+          <input matInput formControlName="zip">
+        </mat-form-field>
       </form>
     </mat-step>
 
@@ -299,6 +328,12 @@
   </button>
   }
   @case (3) {
+  <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
+  <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep5(stepper)">
+    Next <mat-icon>arrow_forward</mat-icon>
+  </button>
+  }
+  @case (4) {
   <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
   <button mat-flat-button class="create-btn" [disabled]="submitting()" (click)="submit()">
     {{ submitting() ? 'Creating…' : 'Create rep' }}

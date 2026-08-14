@@ -6,6 +6,8 @@ import { MOCK_CONFIG } from '../mock-config/mock-config';
 
 export type RepStatus = 'active' | 'pending' | 'inactive';
 
+export type SalesRepType = 'referralAgent' | 'marketingConsultant';
+
 export interface RepDocRecord {
   oId: number;
   name: string;
@@ -18,7 +20,11 @@ export interface RepDocs {
   certification: RepDocRecord | null;
   pricingSheet: RepDocRecord | null;
   powerPoint: RepDocRecord | null;
+  /** How-to-access instructions for the rep's PWR Rewards email — admin-uploaded PDF, details view only. */
+  pwrInstructions: RepDocRecord | null;
 }
+
+const EMPTY_DOCS: RepDocs = { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null };
 
 /** A single document row across every rep — used by admin oversight views. */
 export interface RepDocumentRecord {
@@ -38,8 +44,10 @@ export interface RepRecord {
   oId: number;
   repId: string;
   name: string;
+  businessName: string;
   email: string;
   phone: string;
+  salesRepType: SalesRepType;
   address: string;
   city: string;
   state: string;
@@ -57,12 +65,22 @@ export interface RepRecord {
   bankDetails: RepBankDetails | null;
   commissions: CommissionDay[];
   createdAt: string;
+
+  // ----- admin-only, set after creation — shown only on the admin Rep Details page -----
+  contractWizardLink: string;
+  contractWizardUsername: string;
+  contractWizardPassword: string;
+  contractWizardInstructionsLink: string;
+  pwrRewardsEmail: string;
+  pwrRewardsEmailPassword: string;
 }
 
 export interface NewRepInput {
   name: string;
+  businessName?: string;
   email: string;
   phone: string;
+  salesRepType: SalesRepType;
   address: string;
   city: string;
   state: string;
@@ -96,8 +114,10 @@ interface RepDto {
   oId: number;
   repId: string;
   fullName: string;
+  businessName: string | null;
   email: string;
   phone: string | null;
+  salesRepType: number;
   address: string | null;
   city: string | null;
   state: string | null;
@@ -113,13 +133,21 @@ interface RepDto {
   consultantFeePaid: boolean;
   createdAt: string;
   updatedAt: string;
+  contractWizardLink: string | null;
+  contractWizardUsername: string | null;
+  contractWizardPassword: string | null;
+  contractWizardInstructionsLink: string | null;
+  pwrRewardsEmail: string | null;
+  pwrRewardsEmailPassword: string | null;
 }
 
 /** Body shape for POST api/reps (RepCreateRequest). */
 interface RepWriteDto {
   fullName: string;
+  businessName: string;
   email: string;
   phone: string;
+  salesRepType: number;
   address: string;
   city: string;
   state: string;
@@ -155,6 +183,12 @@ interface RepBankDetailsDto {
 /** Body shape for PUT api/reps/{oId} (RepUpdateRequest) — the whole record, RepId included. */
 interface RepUpdateDto extends RepWriteDto {
   repId: string;
+  contractWizardLink: string;
+  contractWizardUsername: string;
+  contractWizardPassword: string;
+  contractWizardInstructionsLink: string;
+  pwrRewardsEmail: string;
+  pwrRewardsEmailPassword: string;
 }
 
 /** Body shape for POST api/reps/link (RepLinkUpdateRequest). */
@@ -185,6 +219,9 @@ interface RepDocumentDto {
 const STATUS_TO_API: Record<RepStatus, number> = { inactive: 0, pending: 1, active: 2 };
 const STATUS_FROM_API: RepStatus[] = ['inactive', 'pending', 'active'];
 
+const SALES_REP_TYPE_TO_API: Record<SalesRepType, number> = { referralAgent: 0, marketingConsultant: 1 };
+const SALES_REP_TYPE_FROM_API: SalesRepType[] = ['referralAgent', 'marketingConsultant'];
+
 /** Last `days` calendar days ending today, each credited $0 — nothing's been credited yet. */
 export function emptyCommissionHistory(days: number): CommissionDay[] {
   const out: CommissionDay[] = [];
@@ -206,6 +243,10 @@ export function repStatusBadge(status: RepStatus): { cssClass: string; label: st
     case 'inactive':
       return { cssClass: 'badge-inactive', label: 'Inactive' };
   }
+}
+
+export function salesRepTypeLabel(type: SalesRepType): string {
+  return type === 'marketingConsultant' ? 'Marketing Consultant' : 'Referral Agent';
 }
 
 export function docsComplete(rep: Pick<RepRecord, 'docs'>): boolean {
@@ -253,11 +294,28 @@ export class RepDirectoryStore {
     return this.reps().find((r) => r.repId === repId);
   }
 
+  /**
+   * Fetches a filtered view via `api/reps/filter` — every param is optional and combines with AND.
+   * Deliberately does NOT touch `repsSignal`: it returns the filtered list for a caller (the admin
+   * reps list) to hold locally, so the app-wide directory other pages rely on (e.g. rep detail pages
+   * resolving `findByRepId`) never loses reps that a filter would otherwise hide.
+   */
+  filterReps(filters: { status?: RepStatus; salesRepType?: SalesRepType; search?: string }): Observable<RepRecord[]> {
+    const params: Record<string, string | number> = {};
+    if (filters.status) params['status'] = STATUS_TO_API[filters.status];
+    if (filters.salesRepType) params['salesRepType'] = SALES_REP_TYPE_TO_API[filters.salesRepType];
+    if (filters.search) params['search'] = filters.search;
+
+    return this.api.get<RepDto[]>('reps/filter', params).pipe(map((dtos) => dtos.map((dto) => this.mergeDto(dto))));
+  }
+
   createRep(input: NewRepInput): Observable<RepRecord> {
     const body: RepWriteDto = {
       fullName: input.name,
+      businessName: input.businessName ?? '',
       email: input.email,
       phone: input.phone,
+      salesRepType: SALES_REP_TYPE_TO_API[input.salesRepType],
       address: input.address,
       city: input.city,
       state: input.state,
@@ -305,7 +363,7 @@ export class RepDirectoryStore {
   }
 
   updateStatus(repId: string, status: RepStatus): Observable<RepRecord> {
-    return this.putRep(repId, { status });
+    return this.updateRep(repId, { status });
   }
 
   /** POSTs just the link fields via api/reps/link, identifying the rep by its plain RepId rather than the full record PUT requires. */
@@ -343,9 +401,9 @@ export class RepDirectoryStore {
   loadDocuments(repId: string): Observable<RepDocs> {
     return this.api.get<RepDocumentDto[]>(`documents/rep/${repId}`).pipe(
       map((dtos): RepDocs => {
-        const docs: RepDocs = { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null };
+        const docs: RepDocs = { ...EMPTY_DOCS };
         for (const dto of dtos) {
-          if (dto.kind === 'agreement' || dto.kind === 'w4' || dto.kind === 'certification' || dto.kind === 'pricingSheet' || dto.kind === 'powerPoint') {
+          if (dto.kind === 'agreement' || dto.kind === 'w4' || dto.kind === 'certification' || dto.kind === 'pricingSheet' || dto.kind === 'powerPoint' || dto.kind === 'pwrInstructions') {
             docs[dto.kind] = { oId: dto.oId, name: dto.fileName, uploadedAt: dto.uploadedAt.slice(0, 10) };
           }
         }
@@ -366,7 +424,15 @@ export class RepDirectoryStore {
     );
   }
 
-  private putRep(repId: string, changes: Partial<Pick<RepRecord, 'status' | 'googleLink' | 'resourceLink' | 'pricingSheetLink' | 'powerPointLink'>>): Observable<RepRecord> {
+  /** Deletes a rep permanently via `api/reps/{oId}` and drops it from the in-memory directory. */
+  deleteRep(oId: number): Observable<void> {
+    return this.api.delete<void>(`reps/${oId}`).pipe(
+      tap(() => this.repsSignal.update((list) => list.filter((r) => r.oId !== oId))),
+    );
+  }
+
+  /** PUTs the whole rep record — RepId included — merging `changes` over the currently-known rep. Every field must round-trip on every save since the endpoint replaces the full record. */
+  updateRep(repId: string, changes: Partial<RepRecord>): Observable<RepRecord> {
     const rep = this.findByRepId(repId);
     if (!rep) return throwError(() => new Error('Rep not found'));
 
@@ -374,8 +440,10 @@ export class RepDirectoryStore {
     const body: RepUpdateDto = {
       repId: merged.repId,
       fullName: merged.name,
+      businessName: merged.businessName,
       email: merged.email,
       phone: merged.phone,
+      salesRepType: SALES_REP_TYPE_TO_API[merged.salesRepType],
       address: merged.address,
       city: merged.city,
       state: merged.state,
@@ -388,6 +456,12 @@ export class RepDirectoryStore {
       passedCertification: merged.passedCertification,
       businessCardsSent: merged.businessCardsSent,
       consultantFeePaid: merged.consultantFeePaid,
+      contractWizardLink: merged.contractWizardLink,
+      contractWizardUsername: merged.contractWizardUsername,
+      contractWizardPassword: merged.contractWizardPassword,
+      contractWizardInstructionsLink: merged.contractWizardInstructionsLink,
+      pwrRewardsEmail: merged.pwrRewardsEmail,
+      pwrRewardsEmailPassword: merged.pwrRewardsEmailPassword,
     };
     return this.api.put<RepDto>(`reps/${rep.oId}`, body).pipe(
       map((dto) => this.mergeDto(dto)),
@@ -402,8 +476,10 @@ export class RepDirectoryStore {
       oId: dto.oId,
       repId: dto.repId,
       name: dto.fullName,
+      businessName: dto.businessName ?? '',
       email: dto.email,
       phone: dto.phone ?? '',
+      salesRepType: SALES_REP_TYPE_FROM_API[dto.salesRepType] ?? 'referralAgent',
       address: dto.address ?? '',
       city: dto.city ?? '',
       state: dto.state ?? '',
@@ -417,10 +493,16 @@ export class RepDirectoryStore {
       passedCertification: dto.passedCertification,
       businessCardsSent: dto.businessCardsSent,
       consultantFeePaid: dto.consultantFeePaid,
-      docs: existing?.docs ?? { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null },
+      docs: existing?.docs ?? { ...EMPTY_DOCS },
       bankDetails: existing?.bankDetails ?? null,
       commissions: existing?.commissions ?? emptyCommissionHistory(14),
       createdAt: dto.createdAt.slice(0, 10),
+      contractWizardLink: dto.contractWizardLink ?? '',
+      contractWizardUsername: dto.contractWizardUsername ?? '',
+      contractWizardPassword: dto.contractWizardPassword ?? '',
+      contractWizardInstructionsLink: dto.contractWizardInstructionsLink ?? '',
+      pwrRewardsEmail: dto.pwrRewardsEmail ?? '',
+      pwrRewardsEmailPassword: dto.pwrRewardsEmailPassword ?? '',
     };
   }
 }
