@@ -73,17 +73,7 @@ describe('CreateRepDialog', () => {
     expect(stepper.next).toHaveBeenCalled();
   });
 
-  it('goToStep5() flags errors and does not advance when bank fields are blank', () => {
-    const stepper = stubStepper();
-    component.goToStep5(stepper);
-    expect(stepper.next).not.toHaveBeenCalled();
-    expect(component.missingBankFields.bankName).toBe(true);
-    expect(component.missingBankFields.routingNumber).toBe(true);
-    expect(component.missingBankFields.accountNumber).toBe(true);
-  });
-
-  it('goToStep5() advances once bank fields are valid', () => {
-    component.bankForm.setValue({ bankName: 'First Bank', routingNumber: '111000025', accountNumber: '123456789' });
+  it('goToStep5() advances without validation — bank fields are all optional', () => {
     const stepper = stubStepper();
     component.goToStep5(stepper);
     expect(stepper.next).toHaveBeenCalled();
@@ -115,6 +105,28 @@ describe('CreateRepDialog', () => {
     });
     bankReq.flush({ oId: 1, repId: '1001', maskedAccountNumber: '****6789', updatedAt: '2026-08-06T00:00:00Z' });
 
+    expect(dialogRef.close).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Jordan Reyes', email: 'jordan@example.com', repId: '1001' }),
+    );
+  });
+
+  it('submit() closes the dialog even when bank details (and every other optional step) are left blank', () => {
+    // Regression test: when there's nothing optional to follow up on, the switchMap must not
+    // route through forkJoin([]) — that never emits, so the dialog would never close.
+    component.infoForm.setValue({
+      name: 'Jordan Reyes', businessName: '', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', status: 'pending',
+    });
+    component.submit();
+
+    const createReq = httpMock.expectOne(apiUrl('reps'));
+    createReq.flush({
+      oId: 1, repId: '1001', fullName: 'Jordan Reyes', businessName: null, email: 'jordan@example.com', phone: null,
+      salesRepType: 0, address: null, city: null, state: null, zip: null, googleLink: null, resourceLink: null, status: 1,
+      passedCertification: false, businessCardsSent: false, consultantFeePaid: false,
+      createdAt: '2026-08-06T00:00:00Z', updatedAt: '2026-08-06T00:00:00Z',
+    });
+
+    // No api/repbankdetails (or any other follow-up) request should fire — httpMock.verify() in afterEach confirms it.
     expect(dialogRef.close).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Jordan Reyes', email: 'jordan@example.com', repId: '1001' }),
     );

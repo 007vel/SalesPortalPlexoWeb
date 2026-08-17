@@ -177,16 +177,14 @@
       </form>
     </mat-step>
 
-    <mat-step [stepControl]="bankForm" label="Bank details" [completed]="false">
-      <p class="sub">Where this rep's payouts are sent.</p>
+    <mat-step [stepControl]="bankForm" label="Bank details" [optional]="true" [completed]="false">
+      <p class="sub">Where this rep's payouts are sent — optional, can be added later.</p>
 
       <form [formGroup]="bankForm">
         <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
           <mat-label>Bank name</mat-label>
           <mat-icon matPrefix>account_balance</mat-icon>
           <input matInput formControlName="bankName">
-          @if (bankForm.controls.bankName.invalid && bankForm.controls.bankName.touched) { <mat-error>Bank name is
-            required</mat-error> }
         </mat-form-field>
 
         <div class="field-row">
@@ -194,8 +192,6 @@
             <mat-label>Routing number</mat-label>
             <mat-icon matPrefix>tag</mat-icon>
             <input matInput formControlName="routingNumber" inputmode="numeric" autocomplete="off">
-            @if (bankForm.controls.routingNumber.invalid && bankForm.controls.routingNumber.touched) {
-            <mat-error>Routing number is required</mat-error> }
           </mat-form-field>
 
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -209,8 +205,6 @@
               [attr.aria-pressed]="accountNumberVisible()">
               {{ accountNumberVisible() ? 'visibility_off' : 'visibility' }}
             </mat-icon>
-            @if (bankForm.controls.accountNumber.invalid && bankForm.controls.accountNumber.touched) {
-            <mat-error>Account number is required</mat-error> }
           </mat-form-field>
         </div>
       </form>

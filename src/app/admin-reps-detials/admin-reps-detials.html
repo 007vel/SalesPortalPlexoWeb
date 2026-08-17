@@ -250,10 +250,10 @@
             <mat-label>Sales Leads link</mat-label>
             <input matInput type="url" formControlName="googleLink">
           </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <!-- <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
             <mat-label>Knowledge Base</mat-label>
             <input matInput type="url" formControlName="resourceLink">
-          </mat-form-field>
+          </mat-form-field> -->
           <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
             <mat-label>Pricing sheet link</mat-label>
             <input matInput type="url" formControlName="pricingSheetLink">
@@ -272,8 +272,8 @@
         } @else {
         <ng-container
           *ngTemplateOutlet="field; context: {label:'Sales Leads', value: rep.googleLink, isLink: true}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Knowledge Base', value: rep.resourceLink, isLink: true}"></ng-container>
+        <!-- <ng-container
+          *ngTemplateOutlet="field; context: {label:'Knowledge Base', value: rep.resourceLink, isLink: true}"></ng-container> -->
         <ng-container
           *ngTemplateOutlet="field; context: {label:'Pricing sheet link', value: rep.pricingSheetLink, isLink: true}"></ng-container>
         <ng-container

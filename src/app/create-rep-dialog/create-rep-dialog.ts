@@ -124,12 +124,11 @@ export class CreateRepDialog {
 
   // ----- step 4: bank details -----
   readonly bankForm = this.fb.nonNullable.group({
-    bankName: ['', Validators.required],
-    routingNumber: ['', Validators.required],
-    accountNumber: ['', Validators.required],
+    bankName: [''],
+    routingNumber: [''],
+    accountNumber: [''],
   });
 
-  readonly missingBankFields = { bankName: false, routingNumber: false, accountNumber: false };
   readonly accountNumberVisible = signal(false);
 
   toggleAccountNumberVisibility(): void {
@@ -261,20 +260,8 @@ export class CreateRepDialog {
     stepper.next();
   }
 
+  // Bank details are optional — nothing to validate before moving on.
   goToStep5(stepper: MatStepper): void {
-    this.bankForm.markAllAsTouched();
-    const bank = this.bankForm.getRawValue();
-    const bankName = bank.bankName.trim();
-    const routingNumber = bank.routingNumber.trim();
-    const accountNumber = bank.accountNumber.trim();
-    this.missingBankFields.bankName = !bankName;
-    this.missingBankFields.routingNumber = !routingNumber;
-    this.missingBankFields.accountNumber = !accountNumber;
-
-    if (!bankName || !routingNumber || !accountNumber) {
-      this.toast.show('Bank name, routing number, and account number are required.');
-      return;
-    }
     stepper.next();
   }
 
@@ -355,9 +342,10 @@ export class CreateRepDialog {
       })
       .pipe(
         switchMap((rep) => {
-          const followUps: Observable<unknown>[] = [
-            this.directory.setBankDetails(rep.repId, { bankName, routingNumber, accountNumber }),
-          ];
+          const followUps: Observable<unknown>[] = [];
+          if (bankName || routingNumber || accountNumber) {
+            followUps.push(this.directory.setBankDetails(rep.repId, { bankName, routingNumber, accountNumber }));
+          }
           if (cert.passedCertification && certificateFile) {
             followUps.push(this.directory.setDocument(rep.repId, 'certification', certificateFile));
           }
@@ -367,6 +355,10 @@ export class CreateRepDialog {
           if (powerPointFile) {
             followUps.push(this.directory.setDocument(rep.repId, 'powerPoint', powerPointFile));
           }
+          // forkJoin([]) never emits (only completes), so an all-optional submission with nothing
+          // to follow up on needs its own path straight to `rep` rather than falling into forkJoin.
+          if (followUps.length === 0) return of(rep);
+
           return forkJoin(followUps).pipe(
             map(() => rep),
             catchError(() => {
