@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TrainingResource, TrainingResourceStore, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { TrainingHubLinksStore, videoLinkRows } from '../training-hub-links-store/training-hub-links-store';
 import { Toast } from '../toast/toast';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { Auth } from '../auth/auth';
@@ -19,6 +20,7 @@ export class RepTrainingHub {
   private readonly dialog = inject(MatDialog);
   private readonly auth = inject(Auth);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
+  private readonly trainingHubLinksStore = inject(TrainingHubLinksStore);
   private readonly toast = inject(Toast);
 
   /** Minimum time the view-loading overlay stays up — keeps it from flashing on fast/mocked responses. */
@@ -33,6 +35,12 @@ export class RepTrainingHub {
   /** The fixed Admin card — the only content reps see on this page now that "Your uploads" is gone. */
   readonly adminHubSlots = computed(() => matchHubSlots(this.resources().filter((r) => r.uploadedBy === 'Admin')));
 
+  /** The 4 product/dashboard videos — plain YouTube links, not uploaded files, so they open in a new tab rather than the media viewer. */
+  readonly videoRows = computed(() => {
+    const links = this.trainingHubLinksStore.links();
+    return links ? videoLinkRows(links) : [];
+  });
+
   readonly featured = computed(() => this.resources().find((r) => r.featured));
 
   constructor() {
@@ -40,6 +48,11 @@ export class RepTrainingHub {
     if (repId) {
       this.trainingResourceStore.loadForRoleWithAdmin(repId).subscribe();
     }
+    this.trainingHubLinksStore.load().subscribe();
+  }
+
+  openVideoLink(url: string): void {
+    window.open(url, '_blank', 'noopener');
   }
 
   /**

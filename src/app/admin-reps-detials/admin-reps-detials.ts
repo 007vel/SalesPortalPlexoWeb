@@ -14,6 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { RepDirectoryStore, RepDocs, RepStatus, SalesRepType, portalLink, repStatusBadge, salesRepTypeLabel } from '../rep-directory-store/rep-directory-store';
 import { TrainingResource, TrainingResourceStore, detectFileKind, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { TrainingHubLinksStore, videoLinkRows } from '../training-hub-links-store/training-hub-links-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { Toast } from '../toast/toast';
@@ -35,6 +36,7 @@ export class AdminRepsDetials {
   private readonly fb = inject(FormBuilder);
   private readonly directory = inject(RepDirectoryStore);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
+  private readonly trainingHubLinksStore = inject(TrainingHubLinksStore);
   private readonly toast = inject(Toast);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
@@ -64,12 +66,21 @@ export class AdminRepsDetials {
   readonly adminResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Admin'));
   readonly ownResources = computed(() => this.trainingResources().filter((r) => r.uploadedBy === 'Rep'));
 
-  /** The same 5 fixed Training & Resource Hub slots admin manages from Settings — read-only here, matched by category so this never shows stale free-form uploads from before that redesign. */
+  /** The same fixed Training & Resource Hub slots admin manages from Settings — read-only here, matched by category so this never shows stale free-form uploads from before that redesign. */
   readonly adminHubSlots = computed(() => matchHubSlots(this.adminResources()));
+  /** The 4 product/dashboard videos — plain YouTube links, not uploaded files, so they open in a new tab. */
+  readonly videoRows = computed(() => {
+    const links = this.trainingHubLinksStore.links();
+    return links ? videoLinkRows(links) : [];
+  });
   readonly ownResourcesEnglish = computed(() => this.ownResources().filter((r) => r.language === 'English'));
   readonly ownResourcesSpanish = computed(() => this.ownResources().filter((r) => r.language === 'Spanish'));
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
+
+  openVideoLink(url: string): void {
+    window.open(url, '_blank', 'noopener');
+  }
 
   constructor() {
     // Docs (and this rep's Training Hub view) live in shared in-memory stores — fetch them once
@@ -84,6 +95,7 @@ export class AdminRepsDetials {
       this.directory.loadBankDetails(repId).subscribe();
       this.trainingResourceStore.loadForRoleWithAdmin(repId).subscribe();
     });
+    this.trainingHubLinksStore.load().subscribe();
   }
 
   copyLink(link: string): void {

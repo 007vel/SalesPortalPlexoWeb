@@ -1,13 +1,18 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { finalize } from 'rxjs';
 import { HubSlotDef, TrainingResource, TrainingResourceStore, detectFileKind, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { TrainingHubLinksStore } from '../training-hub-links-store/training-hub-links-store';
 import { RepDirectoryStore, RepDocumentRecord } from '../rep-directory-store/rep-directory-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
@@ -30,13 +35,18 @@ interface HubSlotView extends HubSlotDef {
 
 @Component({
   selector: 'app-admin-settings',
-  imports: [MatButtonModule, MatCardModule, MatIconModule, MatMenuModule, MatProgressSpinnerModule, MatTableModule],
+  imports: [
+    ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule,
+    MatMenuModule, MatProgressSpinnerModule, MatTableModule, NgTemplateOutlet,
+  ],
   templateUrl: './admin-settings.html',
   styleUrl: './admin-settings.scss',
 })
 export class AdminSettings {
+  private readonly fb = inject(FormBuilder);
   private readonly dialog = inject(MatDialog);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
+  private readonly trainingHubLinksStore = inject(TrainingHubLinksStore);
   private readonly directory = inject(RepDirectoryStore);
   private readonly toast = inject(Toast);
 
@@ -72,9 +82,65 @@ export class AdminSettings {
     }));
   });
 
+  // ----- training links edit (Product/Dashboard videos, Knowledge Base, Sales Leads — plain URLs, not uploads) -----
+  readonly videoLinks = this.trainingHubLinksStore.links;
+  readonly editingVideoLinks = signal(false);
+  readonly savingVideoLinks = signal(false);
+  readonly videoLinksForm = this.fb.nonNullable.group({
+    productVideoEnglishLink: [''],
+    productVideoSpanishLink: [''],
+    dashboardVideoEnglishLink: [''],
+    dashboardVideoSpanishLink: [''],
+    knowledgeBaseLink: [''],
+    salesLeadLink: [''],
+  });
+
   constructor() {
     this.trainingResourceStore.loadAdminUploads().subscribe();
     this.directory.loadAllDocuments().subscribe((docs) => this.documentsSignal.set(docs));
+    this.trainingHubLinksStore.load().subscribe();
+  }
+
+  startEditVideoLinks(): void {
+    const links = this.videoLinks();
+    if (!links) return;
+    this.videoLinksForm.setValue({
+      productVideoEnglishLink: links.productVideoEnglishLink ?? '',
+      productVideoSpanishLink: links.productVideoSpanishLink ?? '',
+      dashboardVideoEnglishLink: links.dashboardVideoEnglishLink ?? '',
+      dashboardVideoSpanishLink: links.dashboardVideoSpanishLink ?? '',
+      knowledgeBaseLink: links.knowledgeBaseLink ?? '',
+      salesLeadLink: links.salesLeadLink ?? '',
+    });
+    this.editingVideoLinks.set(true);
+  }
+
+  cancelEditVideoLinks(): void {
+    this.editingVideoLinks.set(false);
+  }
+
+  saveVideoLinks(): void {
+    const links = this.videoLinks();
+    if (!links) return;
+    const v = this.videoLinksForm.getRawValue();
+    this.savingVideoLinks.set(true);
+    this.trainingHubLinksStore
+      .update(links.oId, {
+        productVideoEnglishLink: v.productVideoEnglishLink.trim(),
+        productVideoSpanishLink: v.productVideoSpanishLink.trim(),
+        dashboardVideoEnglishLink: v.dashboardVideoEnglishLink.trim(),
+        dashboardVideoSpanishLink: v.dashboardVideoSpanishLink.trim(),
+        knowledgeBaseLink: v.knowledgeBaseLink.trim(),
+        salesLeadLink: v.salesLeadLink.trim(),
+      })
+      .pipe(finalize(() => this.savingVideoLinks.set(false)))
+      .subscribe({
+        next: () => {
+          this.editingVideoLinks.set(false);
+          this.toast.show('Video links updated');
+        },
+        error: () => this.toast.show('Failed to update video links'),
+      });
   }
 
   /** Uploads (or replaces) the file for a fixed hub slot — no title/category/description form, just the file. */

@@ -610,6 +610,23 @@
   <div class="section-body">
     <h3 class="hub-section-title">Shared by Admin</h3>
     <div class="hub-slots-list">
+      @for (row of videoRows(); track row.key) {
+      <div class="doc-row">
+        <div class="doc-info">
+          <div class="doc-icon" [class.filled]="!!row.url"><mat-icon>movie</mat-icon></div>
+          <div>
+            <div class="doc-name">{{ row.label }}</div>
+            <div class="doc-status" [class.filled]="!!row.url">{{ row.url ? 'YouTube link' : 'Not set yet' }}</div>
+          </div>
+        </div>
+        @if (row.url) {
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button type="button" mat-icon-button class="action-btn" title="Open"
+            (click)="openVideoLink(row.url)"><mat-icon>open_in_new</mat-icon></button>
+        </div>
+        }
+      </div>
+      }
       @for (slot of adminHubSlots(); track slot.key) {
       <div class="doc-row">
         <div class="doc-info">

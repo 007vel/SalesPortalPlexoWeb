@@ -32,6 +32,12 @@ describe('AdminSettings', () => {
     httpMock.expectOne(apiUrl('documents')).flush([
       { oId: 5, repId: '1001', kind: 'agreement', fileName: 'signed.pdf', uploadedAt: '2026-08-06T00:00:00Z' },
     ]);
+    httpMock.expectOne(apiUrl('traininghublinks')).flush([
+      {
+        oId: 1, productVideoEnglishLink: 'https://youtu.be/product-en', productVideoSpanishLink: 'https://youtu.be/product-es',
+        dashboardVideoEnglishLink: 'https://youtu.be/dashboard-en', dashboardVideoSpanishLink: 'https://youtu.be/dashboard-es',
+      },
+    ]);
 
     await fixture.whenStable();
   });
@@ -55,7 +61,7 @@ describe('AdminSettings', () => {
 
   it('builds the fixed hub slots, leaving unmatched categories (e.g. legacy free-form uploads) unfilled', () => {
     const slots = component.hubSlots();
-    expect(slots.length).toBe(6);
+    expect(slots.length).toBe(2);
     expect(slots.every((s) => s.resource === null)).toBe(true);
   });
 });
