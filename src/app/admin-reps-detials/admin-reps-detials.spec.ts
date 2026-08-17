@@ -188,6 +188,12 @@ describe('AdminRepsDetials', () => {
     fixture = TestBed.createComponent(AdminRepsDetials);
     fixture.componentRef.setInput('repId', '1001');
     component = fixture.componentInstance;
+    httpMock.expectOne(apiUrl('traininghublinks')).flush([
+      {
+        oId: 1, productVideoEnglishLink: 'https://youtu.be/product-en', productVideoSpanishLink: 'https://youtu.be/product-es',
+        dashboardVideoEnglishLink: 'https://youtu.be/dashboard-en', dashboardVideoSpanishLink: 'https://youtu.be/dashboard-es',
+      },
+    ]);
     await fixture.whenStable();
 
     httpMock.expectOne(apiUrl('documents/rep/1001')).flush([]);

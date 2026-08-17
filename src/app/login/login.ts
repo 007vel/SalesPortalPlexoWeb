@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -11,6 +12,8 @@ import { finalize } from 'rxjs';
 import { Api } from '../api/api';
 import { Auth } from '../auth/auth';
 import { AdminAuth } from '../admin-auth/admin-auth';
+import { AskAdminDialog } from '../ask-admin-dialog/ask-admin-dialog';
+import { Toast } from '../toast/toast';
 
 interface RepValidateResponseDto {
   repId: string;
@@ -38,6 +41,8 @@ export class Login implements OnInit {
   private readonly api = inject(Api);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
+  private readonly toast = inject(Toast);
 
   readonly activeTabIndex = signal(0);
 
@@ -111,6 +116,16 @@ export class Login implements OnInit {
       .subscribe({
         next: () => this.router.navigateByUrl('/admin'),
         error: () => this.adminLoginFailed.set(true),
+      });
+  }
+
+  askAdmin(): void {
+    if (this.dialog.openDialogs.length) return;
+    this.dialog
+      .open(AskAdminDialog)
+      .afterClosed()
+      .subscribe((sent) => {
+        if (sent) this.toast.show('Message sent — the team will be in touch');
       });
   }
 }

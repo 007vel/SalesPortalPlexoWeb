@@ -1,0 +1,46 @@
+:host ::ng-deep .mat-mdc-dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.title-ic {
+  color: var(--orange);
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 18px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+mat-form-field mat-icon[matPrefix] {
+  color: var(--faint);
+  margin-right: 8px;
+  font-size: 19px;
+  width: 19px;
+  height: 19px;
+}
+
+.send-error {
+  color: var(--danger, #D64545);
+  font-size: 12.5px;
+  margin-top: -4px;
+  margin-bottom: 8px;
+}
+
+.send-btn ::ng-deep .mdc-button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.send-btn mat-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: #fff;
+  --mat-progress-spinner-active-indicator-color: #fff;
+}
+.send-btn ::ng-deep .mat-mdc-progress-spinner circle {
+  stroke: #fff !important;
+}
