@@ -20,7 +20,7 @@ interface ChecklistItem {
 function calcProgressPct(profile: RepProfileData, email: string | undefined): number {
   const fields = [
     profile.name, profile.address, profile.city, profile.state, profile.zip,
-    profile.phone, email, profile.googleLink, profile.resourceLink,
+    profile.phone, email, profile.googleLink,
   ];
   let filled = fields.filter((v) => !!v && v.trim().length > 0).length;
   if (profile.docs.agreement) filled++;
@@ -62,7 +62,7 @@ export class RepOverview {
     const email = this.session()?.email ?? '';
     return [
       { label: 'Contact info', done: !!(p.name && p.address && p.city && p.state && p.zip && p.phone && email) },
-      { label: 'Google & resource links', done: !!(p.googleLink && p.resourceLink) },
+      //{ label: 'Sales Leads link', done: !!p.googleLink },
       { label: 'Representative Agreement', done: !!p.docs.agreement },
       { label: 'W-4 form', done: !!p.docs.w4 },
     ];

@@ -1,91 +1,40 @@
 <div class="rep-page-head">
   <div class="eyebrow">Your links</div>
-  <h1>Sales Leads &amp; Knowledge Base</h1>
-  <p>The links admin needs on file for you. These are yours to edit — update them any time.</p>
+  <h1>Sales Leads</h1>
+  <p>The Sales Leads link admin has on file for you. Reach out to admin if this needs to change.</p>
 </div>
 
 <mat-card class="rp-links-card">
   <div class="head-row">
     <div class="head-title">
-      <div class="eyebrow">{{ editing() ? 'Editing' : 'View' }}</div>
       <div class="title-line">
         <span class="icon-chip"><mat-icon>link</mat-icon></span>
         <h2>Link details</h2>
       </div>
     </div>
-
-    @if (editing()) {
-    <div class="head-actions">
-      <button mat-button [disabled]="saving()" (click)="cancelEdit()">Cancel</button>
-      <button mat-flat-button color="primary" class="save-btn" [disabled]="saving()" (click)="save()">
-        {{ saving() ? 'Saving…' : 'Save links' }}
-      </button>
-    </div>
-    } @else {
-    <button mat-stroked-button class="edit-btn" (click)="startEdit()">
-      <mat-icon>edit</mat-icon> Edit links
-    </button>
-    }
   </div>
 
-  <div class="rp-card-body">
-    @if (editing()) {
-    <form [formGroup]="form" (ngSubmit)="save()">
-      <div class="field-block">
-        <label class="fl">Sales Leads link</label>
-        <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
-          <input matInput type="url" formControlName="googleLink">
-        </mat-form-field>
-        <p class="fh">Your Sales Leads Business, Maps, or Drive link — whatever's most useful for admin to have on file.</p>
-      </div>
+  <div class="rp-list">
+    @for (row of linkRows(); track row.key) {
+    <div class="rp-row" [class.is-empty]="!row.value">
+      <span class="row-icon"><mat-icon>{{ row.icon }}</mat-icon></span>
 
-      <div class="field-block">
-        <label class="fl">Knowledge Base</label>
-        <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
-          <input matInput type="url" formControlName="resourceLink">
-        </mat-form-field>
-        <p class="fh">A personal doc link, e.g. your BitDocs share link. (The team-wide Training &amp; Resource Hub
-          lives in its own tab.)</p>
-      </div>
-
-      <div class="field-block">
-        <label class="fl">Pricing sheet link</label>
-        <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
-          <input matInput type="url" formControlName="pricingSheetLink">
-        </mat-form-field>
-        <p class="fh">A shareable link to your current pricing sheet.</p>
-      </div>
-
-      <div class="field-block">
-        <label class="fl">PowerPoint link</label>
-        <mat-form-field appearance="outline" class="full-width plain-field" [floatLabel]="'always'" hideRequiredMarker>
-          <input matInput type="url" formControlName="powerPointLink">
-        </mat-form-field>
-        <p class="fh">A shareable link to your sales deck or PowerPoint presentation.</p>
-      </div>
-    </form>
-    } @else {
-    <div class="rp-readonly">
-      @for (row of linkRows(); track row.key) {
-      <div class="rp-ro-item">
-        <div class="rl">{{ row.label }}</div>
+      <div class="row-main">
+        <div class="row-label">{{ row.label }}</div>
         @if (row.value) {
-        <a class="rv link-value" [href]="row.href" target="_blank" rel="noopener noreferrer">
-          <mat-icon>open_in_new</mat-icon>
-          <span>{{ row.value }}</span>
-        </a>
+        <div class="row-value" [title]="row.value">{{ row.value }}</div>
         } @else {
-        <div class="rv empty">Not added yet — click Edit links to add one</div>
+        <div class="row-value empty">Not added yet</div>
         }
       </div>
+
+      @if (row.value) {
+      <a class="open-btn" [href]="row.href" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Open ' + row.label">
+        <span>Open</span>
+        <mat-icon>arrow_outward</mat-icon>
+      </a>
       }
     </div>
     }
   </div>
 </mat-card>
-
-@if (saving()) {
-<div class="rl-loading-overlay">
-  <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
-</div>
-}

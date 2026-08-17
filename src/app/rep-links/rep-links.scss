@@ -91,249 +91,114 @@
     }
 }
 
-.rp-card-body {
-    padding: 24px 26px 26px;
+// ---------- read-only link list ----------
+.rp-list {
+    display: flex;
+    flex-direction: column;
+    padding: 6px 10px 10px;
 }
 
-// ---------- head actions ----------
-.head-actions {
+.rp-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-}
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    transition: background .15s ease;
 
-.edit-btn {
-    border-radius: 9px;
-    font-weight: 600;
-    font-size: 13px;
-    height: 38px;
-    padding: 0 16px;
-    border-color: #E1E6ED !important;
-    color: var(--text) !important;
-
-    mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-        margin-right: 4px;
+    &:not(:last-child) {
+        border-bottom: 1px solid #F2F4F8;
     }
 
     &:hover {
-        background: #F5F7FA;
-        border-color: #D6DDE7 !important;
-    }
-}
-
-// ---------- full-page loading overlay (shown while saving) ----------
-.rl-loading-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(1px);
-
-    mat-progress-spinner {
-        --mdc-circular-progress-active-indicator-color: var(--orange);
-        --mat-progress-spinner-active-indicator-color: var(--orange);
-    }
-
-    ::ng-deep .mat-mdc-progress-spinner circle {
-        stroke: var(--orange) !important;
-    }
-}
-
-// ---------- save button ----------
-.save-btn {
-    background: var(--orange) !important;
-    color: #fff !important;
-    border-radius: 9px;
-    font-weight: 600;
-    font-size: 13.5px;
-    padding: 0 18px;
-    height: 38px;
-
-    &:disabled {
-        background: #F3B57C !important;
-        color: rgba(255, 255, 255, 0.85) !important;
-    }
-
-    mat-progress-spinner {
-        display: inline-block;
-        vertical-align: middle;
-        margin-right: 6px;
-        --mdc-circular-progress-active-indicator-color: var(--white);
-        --mat-progress-spinner-active-indicator-color: var(--white);
-    }
-
-    ::ng-deep .mat-mdc-progress-spinner circle {
-        stroke: var(--white) !important;
-    }
-}
-
-// ---------- read-only field grid ----------
-.rp-readonly {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px 24px;
-}
-
-.rp-ro-item {
-    .rl {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: .06em;
-        margin-bottom: 7px;
-    }
-
-    .rv {
-        display: block;
-        font-size: 14.5px;
-        font-weight: 500;
-        color: var(--text);
-        padding: 12px 15px;
         background: #FAFBFD;
-        border: 1.5px solid #E9EDF3;
-        border-radius: 10px;
-        overflow-wrap: anywhere;
-        box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.03);
-        transition: border-color .15s ease, background .15s ease;
+    }
 
+    &.is-empty {
         &:hover {
-            border-color: #DCE3ED;
-            background: #F7F9FC;
-        }
-
-        &.empty {
-            color: var(--faint, #9AA6B8);
-            font-style: italic;
-            font-weight: 400;
-            font-size: 13px;
-        }
-    }
-
-    .link-value {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: var(--orange);
-        text-decoration: none;
-        cursor: pointer;
-
-        span {
-            overflow-wrap: anywhere;
-        }
-
-        mat-icon {
-            flex-shrink: 0;
-            font-size: 16px;
-            width: 16px;
-            height: 16px;
-            color: var(--orange);
-        }
-
-        &:hover {
-            text-decoration: underline;
-            border-color: #F3B57C;
-            background: #FFF6EE;
-        }
-    }
-}
-
-// ---------- fields ----------
-.field-block {
-    margin-bottom: 22px;
-
-    .fl {
-        display: block;
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: .06em;
-        margin-bottom: 7px;
-    }
-
-    .fh {
-        font-size: 12px;
-        color: var(--faint, #9AA6B8);
-        margin-top: 7px;
-        line-height: 1.5;
-    }
-}
-
-.full-width {
-    width: 100%;
-}
-
-// Strip Material's default outline chrome to a flat, boxed look matching the mock
-.plain-field {
-    ::ng-deep {
-        .mat-mdc-text-field-wrapper {
-            padding: 0;
             background: transparent;
         }
 
-        .mat-mdc-form-field-flex {
-            align-items: center;
-        }
+        .row-icon {
+            background: #F1F3F7;
 
-        .mdc-notched-outline__leading,
-        .mdc-notched-outline__notch,
-        .mdc-notched-outline__trailing {
-            border-color: #E9EDF3 !important;
-            border-width: 1.5px !important;
-        }
-
-        .mdc-notched-outline__notch {
-            border-left: none;
-        }
-
-        .mat-mdc-form-field-infix {
-            padding: 12px 15px !important;
-            min-height: 0;
-            background: #FAFBFD;
-            border-radius: 10px;
-            box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.03);
-        }
-
-        // Hide the floating label entirely — we render our own static label above the field
-        .mat-mdc-floating-label,
-        .mdc-notched-outline__notch {
-            display: none !important;
-        }
-
-        .mdc-notched-outline__leading,
-        .mdc-notched-outline__trailing {
-            border-radius: 10px;
-        }
-
-        input.mat-mdc-input-element {
-            font-size: 14.5px;
-            color: var(--text);
-            caret-color: var(--orange);
-        }
-
-        input::placeholder {
-            color: #B9C2D0;
-        }
-
-        .mat-mdc-form-field-subscript-wrapper {
-            display: none;
-        }
-
-        &.mat-focused {
-
-            .mdc-notched-outline__leading,
-            .mdc-notched-outline__notch,
-            .mdc-notched-outline__trailing {
-                border-color: var(--orange) !important;
+            mat-icon {
+                color: var(--faint, #9AA6B8);
             }
         }
+    }
+}
+
+.row-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: #FFF3E9;
+    flex-shrink: 0;
+
+    mat-icon {
+        color: var(--orange);
+        font-size: 19px;
+        width: 19px;
+        height: 19px;
+    }
+}
+
+.row-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.row-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+}
+
+.row-value {
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.empty {
+        color: var(--faint, #9AA6B8);
+        font-style: italic;
+    }
+}
+
+.open-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    padding: 7px 12px;
+    border-radius: 8px;
+    background: #FFF3E9;
+    color: var(--orange);
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background .15s ease, transform .1s ease;
+
+    mat-icon {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+    }
+
+    &:hover {
+        background: var(--orange);
+        color: #fff;
+    }
+
+    &:active {
+        transform: scale(.97);
     }
 }
 
@@ -342,27 +207,21 @@
         font-size: 20px;
     }
 
-    .head-row,
-    .rp-card-body {
+    .head-row {
         padding-left: 18px;
         padding-right: 18px;
     }
 
-    .head-row {
-        flex-direction: column;
-        align-items: stretch;
+    .rp-list {
+        padding: 4px 6px 8px;
     }
 
-    .head-actions {
-        justify-content: stretch;
-
-        .save-btn {
-            flex: 1;
-        }
+    .rp-row {
+        gap: 10px;
+        padding: 12px 10px;
     }
 
-    .edit-btn,
-    .save-btn {
-        width: 100%;
+    .open-btn span {
+        display: none;
     }
 }

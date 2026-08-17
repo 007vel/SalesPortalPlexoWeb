@@ -196,6 +196,7 @@
 .hub-slots-card {
   overflow: visible;
   padding: 4px 24px !important;
+  margin-top: 20px;
 }
 
 .hub-slot-row {
@@ -496,6 +497,144 @@ td.mat-mdc-cell {
 @media (max-width: 480px) {
   .stat-row {
     grid-template-columns: 1fr;
+  }
+}
+
+// ---------- video links card (inline edit, mirrors admin-reps-detials' Sales Leads section) ----------
+.video-links-card {
+  padding: 0 !important;
+}
+
+.section-head {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #F0F2F6;
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 4px;
+  }
+
+  h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+
+  &.editable {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+}
+
+.edit-btn {
+  flex-shrink: 0;
+  height: 34px;
+  padding: 0 14px 0 10px;
+  border-radius: 8px;
+  border-color: #E1E6ED !important;
+  color: var(--text) !important;
+  font-weight: 600;
+  font-size: 13px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  &:hover {
+    background: #F5F7FA;
+    border-color: var(--orange) !important;
+    color: var(--orange) !important;
+  }
+}
+
+.edit-form {
+  .full-width {
+    width: 100%;
+  }
+
+  mat-form-field.full-width {
+    margin-top: 10px;
+  }
+
+  mat-form-field:first-child {
+    margin-top: 0;
+  }
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+
+  button[mat-button] {
+    color: var(--muted);
+  }
+}
+
+.save-btn {
+  color: #fff !important;
+  background-color: var(--orange) !important;
+}
+
+.video-links-card .section-body {
+  padding: 20px 24px 22px;
+}
+
+// ---------- readonly field ----------
+.readonly-field {
+  margin-bottom: 18px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .rl {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 5px;
+  }
+
+  .rv {
+    font-size: 14px;
+    color: var(--text);
+    padding: 10px 13px;
+    background: #FAFBFD;
+    border: 1.5px solid #E9EDF3;
+    border-radius: 9px;
+    overflow-wrap: anywhere;
+
+    &.empty {
+      color: var(--faint, #9AA6B8);
+      font-style: italic;
+      background: transparent;
+      border-style: dashed;
+    }
+
+    a {
+      color: var(--navy);
+      font-weight: 600;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+        color: var(--orange);
+      }
+    }
   }
 }
 

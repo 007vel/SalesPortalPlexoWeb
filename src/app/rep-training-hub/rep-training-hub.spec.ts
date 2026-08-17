@@ -22,9 +22,19 @@ describe('RepTrainingHub', () => {
 
   afterEach(() => httpMock.verify());
 
+  function flushVideoLinks(): void {
+    httpMock.expectOne(apiUrl('traininghublinks')).flush([
+      {
+        oId: 1, productVideoEnglishLink: 'https://youtu.be/product-en', productVideoSpanishLink: 'https://youtu.be/product-es',
+        dashboardVideoEnglishLink: 'https://youtu.be/dashboard-en', dashboardVideoSpanishLink: 'https://youtu.be/dashboard-es',
+      },
+    ]);
+  }
+
   it('creates with no active session (no fetch fired)', async () => {
     fixture = TestBed.createComponent(RepTrainingHub);
     component = fixture.componentInstance;
+    flushVideoLinks();
     await fixture.whenStable();
 
     expect(component).toBeTruthy();
@@ -37,6 +47,7 @@ describe('RepTrainingHub', () => {
 
     fixture = TestBed.createComponent(RepTrainingHub);
     component = fixture.componentInstance;
+    flushVideoLinks();
     await fixture.whenStable();
 
     const req = httpMock.expectOne((r) => r.url === apiUrl('traininghub/filter'));
