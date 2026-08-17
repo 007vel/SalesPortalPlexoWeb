@@ -1,21 +1,17 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TrainingResource, TrainingResourceStore, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { Toast } from '../toast/toast';
-import { RepVideoDialog } from '../rep-video-dialog/rep-video-dialog';
-import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { Auth } from '../auth/auth';
 
 @Component({
   selector: 'app-rep-training-hub',
-  imports: [MatButtonModule, MatCardModule, MatChipsModule, MatIconModule, MatProgressSpinnerModule, NgTemplateOutlet],
+  imports: [MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './rep-training-hub.html',
   styleUrl: './rep-training-hub.scss',
 })
@@ -32,41 +28,18 @@ export class RepTrainingHub {
   readonly typeLabel = trainingResourceTypeLabel;
 
   readonly resources = this.trainingResourceStore.resources;
-  readonly activeCategory = signal('All');
   readonly viewing = signal(false);
 
-  /** The fixed 5-slot Admin card — no category filter applies to it, only to "Your uploads" below. */
+  /** The fixed Admin card — the only content reps see on this page now that "Your uploads" is gone. */
   readonly adminHubSlots = computed(() => matchHubSlots(this.resources().filter((r) => r.uploadedBy === 'Admin')));
 
-  readonly ownResources = computed(() => this.resources().filter((r) => r.uploadedBy === 'Rep'));
-  readonly categories = computed(() => Array.from(new Set(this.ownResources().map((r) => r.category))));
-  readonly filterOptions = computed(() => ['All', ...this.categories()]);
   readonly featured = computed(() => this.resources().find((r) => r.featured));
-
-  readonly filteredOwnResources = computed(() => {
-    const category = this.activeCategory();
-    return category === 'All' ? this.ownResources() : this.ownResources().filter((r) => r.category === category);
-  });
-
-  readonly filteredOwnResourcesEnglish = computed(() => this.filteredOwnResources().filter((r) => r.language === 'English'));
-  readonly filteredOwnResourcesSpanish = computed(() => this.filteredOwnResources().filter((r) => r.language === 'Spanish'));
 
   constructor() {
     const repId = this.auth.session()?.repId;
     if (repId) {
       this.trainingResourceStore.loadForRoleWithAdmin(repId).subscribe();
     }
-  }
-
-  selectCategory(category: string): void {
-    this.activeCategory.set(category);
-  }
-
-  openAddVideoModal(): void {
-    if (this.dialog.openDialogs.length) return;
-    this.dialog.open(RepVideoDialog).afterClosed().subscribe((added) => {
-      if (added) this.toast.show('Added to the hub');
-    });
   }
 
   /**
@@ -131,23 +104,5 @@ export class RepTrainingHub {
       this.viewing.set(false);
       after();
     }, Math.max(remaining, 0));
-  }
-
-  askRemove(resource: TrainingResource): void {
-    if (this.dialog.openDialogs.length) return;
-    this.dialog
-      .open(ConfirmDialog, {
-        data: {
-          title: 'Remove this resource?',
-          message: `"${resource.title}" will be taken out of the Training & Resource Hub for everyone.`,
-          confirmLabel: 'Remove',
-        },
-      })
-      .afterClosed()
-      .subscribe((confirmed) => {
-        if (confirmed) {
-          this.trainingResourceStore.remove(resource.id).subscribe(() => this.toast.show('Removed from the hub'));
-        }
-      });
   }
 }
