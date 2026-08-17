@@ -71,6 +71,23 @@ export class AdminSettings {
 
   readonly filledSlotCount = computed(() => this.hubSlots().filter((s) => !!s.resource).length);
 
+  /** 6 admin-edited link fields (4 videos + Knowledge Base + Sales Leads) counted alongside the 2 PDF slots for the overview stat. */
+  private readonly filledLinkCount = computed(() => {
+    const links = this.videoLinks();
+    if (!links) return 0;
+    return [
+      links.productVideoEnglishLink,
+      links.productVideoSpanishLink,
+      links.dashboardVideoEnglishLink,
+      links.dashboardVideoSpanishLink,
+      links.knowledgeBaseLink,
+      links.salesLeadLink,
+    ].filter((v) => !!v?.trim()).length;
+  });
+
+  readonly totalResourceCount = computed(() => this.hubSlots().length + 6);
+  readonly filledResourceCount = computed(() => this.filledSlotCount() + this.filledLinkCount());
+
   readonly documentRows = computed<DocumentRow[]>(() => {
     const reps = this.directory.reps();
     return this.documentsSignal().map((doc) => ({
