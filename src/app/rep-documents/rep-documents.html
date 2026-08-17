@@ -1,7 +1,7 @@
 <div class="rep-page-head">
   <div class="eyebrow">Paperwork</div>
   <h1>Documents</h1>
-  <p>Upload your signed agreement and W-4, plus your pricing sheet and PowerPoint.</p>
+  <p>Upload your signed 1099. View or download your agreement, pricing sheet, and PowerPoint.</p>
 </div>
 
 <mat-card class="rp-docs-card">
@@ -34,6 +34,7 @@
             <mat-icon>download</mat-icon> Download
           </button>
           }
+          @if (doc.uploadable) {
           <button type="button" mat-flat-button class="upload-btn" [disabled]="doc.uploading"
             (click)="fileInput.click()">
             @if (doc.uploading) {
@@ -45,6 +46,7 @@
           </button>
           <input #fileInput type="file" class="hidden-file-input" [disabled]="doc.uploading"
             (change)="handleUpload(doc.kind, doc.label, $event)">
+          }
         </div>
       </div>
       }
