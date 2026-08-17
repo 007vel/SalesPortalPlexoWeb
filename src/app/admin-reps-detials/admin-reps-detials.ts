@@ -241,7 +241,7 @@ export class AdminRepsDetials {
     const v = this.linksForm.getRawValue();
     this.savingLinks.set(true);
     this.directory
-      .updateLinksByRepId(rep.oId, {
+      .updateLinksByRepId(Number(rep.repId), {
         googleLink: v.googleLink.trim(),
         resourceLink: v.resourceLink.trim(),
         pricingSheetLink: v.pricingSheetLink.trim(),
