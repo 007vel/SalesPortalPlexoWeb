@@ -175,4 +175,45 @@ describe('AdminRepsDetials', () => {
 
     expect(component.editingCertification()).toBe(false);
   });
+
+  it('saveBankDetails() posts the new details, reloads them, and exits edit mode', async () => {
+    const directory = TestBed.inject(RepDirectoryStore);
+    flushInitialReps();
+
+    directory
+      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false })
+      .subscribe();
+    httpMock.expectOne(apiUrl('reps')).flush(repDto());
+
+    fixture = TestBed.createComponent(AdminRepsDetials);
+    fixture.componentRef.setInput('repId', '1001');
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+
+    httpMock.expectOne(apiUrl('documents/rep/1001')).flush([]);
+    httpMock.expectOne(apiUrl('repbankdetails/rep/1001')).flush(null, { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne((r) => r.url === apiUrl('traininghub/filter') && r.params.get('roleId') === '1001').flush([]);
+    await fixture.whenStable();
+
+    component.startEditBankDetails();
+    component.bankDetailsForm.setValue({ bankName: 'First Bank', routingNumber: '111000025', accountNumber: '123456789' });
+    component.saveBankDetails();
+
+    const postReq = httpMock.expectOne(apiUrl('repbankdetails'));
+    expect(postReq.request.method).toBe('POST');
+    expect(postReq.request.body).toEqual({
+      repId: '1001', bankName: 'First Bank', routingNumber: '111000025', accountNumber: '123456789',
+    });
+    postReq.flush({ oId: 1, repId: '1001', bankName: 'First Bank', routingNumber: '111000025', accountNumber: '123456789', updatedAt: '2026-08-10T00:00:00Z' });
+
+    // setBankDetails() doesn't itself update the store, so a GET must follow to refresh rep.bankDetails.
+    const getReq = httpMock.expectOne(apiUrl('repbankdetails/rep/1001'));
+    expect(getReq.request.method).toBe('GET');
+    getReq.flush({ oId: 1, repId: '1001', bankName: 'First Bank', routingNumber: '111000025', accountNumber: '123456789', updatedAt: '2026-08-10T00:00:00Z' });
+
+    expect(component.editingBankDetails()).toBe(false);
+    expect(component.rep()?.bankDetails).toEqual({
+      bankName: 'First Bank', routingNumber: '111000025', accountNumber: '123456789', updatedAt: '2026-08-10',
+    });
+  });
 });

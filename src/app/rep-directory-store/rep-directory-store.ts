@@ -397,6 +397,21 @@ export class RepDirectoryStore {
     );
   }
 
+  /** Removes the file in the given doc slot with no replacement. */
+  deleteDocument(repId: string, kind: keyof RepDocs): Observable<void> {
+    const rep = this.findByRepId(repId);
+    const doc = rep?.docs[kind];
+    if (!rep || !doc) return of(undefined);
+
+    return this.api.delete<void>(`documents/${doc.oId}`).pipe(
+      tap(() => {
+        this.repsSignal.update((list) =>
+          list.map((r) => (r.repId === repId ? { ...r, docs: { ...r.docs, [kind]: null } } : r)),
+        );
+      }),
+    );
+  }
+
   /** Fetches every document on file for a rep (via `api/documents/rep/{repId}`) and fills in its agreement/w4 slots. */
   loadDocuments(repId: string): Observable<RepDocs> {
     return this.api.get<RepDocumentDto[]>(`documents/rep/${repId}`).pipe(
