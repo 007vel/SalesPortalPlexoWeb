@@ -41,6 +41,16 @@ export class RepTrainingHub {
     return links ? videoLinkRows(links) : [];
   });
 
+  /** Knowledge Base and Sales Leads — also plain admin-edited links, not uploaded files. */
+  readonly resourceLinkRows = computed(() => {
+    const links = this.trainingHubLinksStore.links();
+    if (!links) return [];
+    return [
+      { key: 'knowledgeBase', label: 'Knowledge Base', icon: 'menu_book', url: links.knowledgeBaseLink ?? '' },
+      { key: 'salesLead', label: 'Sales Leads', icon: 'storefront', url: links.salesLeadLink ?? '' },
+    ];
+  });
+
   readonly featured = computed(() => this.resources().find((r) => r.featured));
 
   constructor() {
@@ -51,7 +61,7 @@ export class RepTrainingHub {
     this.trainingHubLinksStore.load().subscribe();
   }
 
-  openVideoLink(url: string): void {
+  openLink(url: string): void {
     window.open(url, '_blank', 'noopener');
   }
 
