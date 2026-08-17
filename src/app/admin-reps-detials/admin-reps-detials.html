@@ -257,18 +257,15 @@
             <mat-label>Sales Leads link</mat-label>
             <input matInput type="url" formControlName="googleLink">
           </mat-form-field>
+
           <!-- <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-            <mat-label>Knowledge Base</mat-label>
-            <input matInput type="url" formControlName="resourceLink">
-          </mat-form-field> -->
-          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
             <mat-label>Pricing sheet link</mat-label>
             <input matInput type="url" formControlName="pricingSheetLink">
           </mat-form-field>
           <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
             <mat-label>PowerPoint link</mat-label>
             <input matInput type="url" formControlName="powerPointLink">
-          </mat-form-field>
+          </mat-form-field> -->
 
           <div class="edit-actions">
             <button type="button" mat-button [disabled]="savingLinks()" (click)="cancelEditLinks()">Cancel</button>
@@ -280,11 +277,9 @@
         <ng-container
           *ngTemplateOutlet="field; context: {label:'Sales Leads', value: rep.googleLink, isLink: true}"></ng-container>
         <!-- <ng-container
-          *ngTemplateOutlet="field; context: {label:'Knowledge Base', value: rep.resourceLink, isLink: true}"></ng-container> -->
-        <ng-container
           *ngTemplateOutlet="field; context: {label:'Pricing sheet link', value: rep.pricingSheetLink, isLink: true}"></ng-container>
         <ng-container
-          *ngTemplateOutlet="field; context: {label:'PowerPoint link', value: rep.powerPointLink, isLink: true}"></ng-container>
+          *ngTemplateOutlet="field; context: {label:'PowerPoint link', value: rep.powerPointLink, isLink: true}"></ng-container> -->
         }
       </div>
     </mat-card>
@@ -345,68 +340,68 @@
         <div class="cert-doc">
           @if (editingCertification() ? certificationForm.controls.passedCertification.value :
           rep.passedCertification) {
-            @if (editingCertification()) {
-            <div class="dropzone" [class.drag-active]="certDragActive()" [class.has-file]="!!rep.docs.certification"
-              (click)="triggerCertificateUpload(certificationFileInput)" (dragover)="onCertDragOver($event)"
-              (dragleave)="onCertDragLeave()" (drop)="onCertDrop($event)">
-              <input #certificationFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
-                (change)="handleDocumentUpload('certification', 'Passed Certificate', $event)">
+          @if (editingCertification()) {
+          <div class="dropzone" [class.drag-active]="certDragActive()" [class.has-file]="!!rep.docs.certification"
+            (click)="triggerCertificateUpload(certificationFileInput)" (dragover)="onCertDragOver($event)"
+            (dragleave)="onCertDragLeave()" (drop)="onCertDrop($event)">
+            <input #certificationFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
+              (change)="handleDocumentUpload('certification', 'Passed Certificate', $event)">
 
-              @if (rep.docs.certification; as doc) {
-              <div class="dz-file">
-                <div class="dz-file-ic">
-                  <mat-icon>{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'picture_as_pdf' }}</mat-icon>
-                </div>
-                <div class="dz-file-txt">
-                  <b>{{ doc.name }}</b>
-                  <span>{{ formatDate(doc.uploadedAt) }} · Click to replace</span>
-                </div>
-                <div class="dz-file-actions">
-                  <button type="button" mat-icon-button class="dz-remove" title="View"
-                    (click)="$event.stopPropagation(); viewDocument(doc.oId, doc.name, 'Passed Certificate')">
-                    <mat-icon>visibility</mat-icon>
-                  </button>
-                  <button type="button" mat-icon-button class="dz-remove" title="Download"
-                    (click)="$event.stopPropagation(); downloadDocument(doc.oId, doc.name)">
-                    <mat-icon>download</mat-icon>
-                  </button>
-                  <button type="button" mat-icon-button class="dz-remove" title="Delete"
-                    [disabled]="isDeletingDoc('certification')"
-                    (click)="$event.stopPropagation(); askDeleteDocument('certification', 'Passed Certificate')">
-                    <mat-icon>{{ isDeletingDoc('certification') ? 'hourglass_empty' : 'delete' }}</mat-icon>
-                  </button>
-                </div>
+            @if (rep.docs.certification; as doc) {
+            <div class="dz-file">
+              <div class="dz-file-ic">
+                <mat-icon>{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'picture_as_pdf' }}</mat-icon>
               </div>
-              } @else {
-              <mat-icon class="dz-ic">{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'cloud_upload'
-                }}</mat-icon>
-              <div class="dz-title">Drop the passed certificate here, or click to browse</div>
-              <div class="dz-hint">PDF or image</div>
-              }
+              <div class="dz-file-txt">
+                <b>{{ doc.name }}</b>
+                <span>{{ formatDate(doc.uploadedAt) }} · Click to replace</span>
+              </div>
+              <div class="dz-file-actions">
+                <button type="button" mat-icon-button class="dz-remove" title="View"
+                  (click)="$event.stopPropagation(); viewDocument(doc.oId, doc.name, 'Passed Certificate')">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button type="button" mat-icon-button class="dz-remove" title="Download"
+                  (click)="$event.stopPropagation(); downloadDocument(doc.oId, doc.name)">
+                  <mat-icon>download</mat-icon>
+                </button>
+                <button type="button" mat-icon-button class="dz-remove" title="Delete"
+                  [disabled]="isDeletingDoc('certification')"
+                  (click)="$event.stopPropagation(); askDeleteDocument('certification', 'Passed Certificate')">
+                  <mat-icon>{{ isDeletingDoc('certification') ? 'hourglass_empty' : 'delete' }}</mat-icon>
+                </button>
+              </div>
             </div>
             } @else {
-            <div class="doc-row">
-              <div class="doc-info">
-                <div class="doc-icon" [class.filled]="!!rep.docs.certification"><mat-icon>{{ rep.docs.certification ?
-                    'check' : 'description' }}</mat-icon></div>
-                <div>
-                  <div class="doc-name">Passed Certificate</div>
-                  <div class="doc-status" [class.filled]="!!rep.docs.certification">
-                    {{ rep.docs.certification ?(rep.docs.certification.name + ' · ' +
-                    formatDate(rep.docs.certification.uploadedAt)) : 'Not uploaded' }}
-                  </div>
+            <mat-icon class="dz-ic">{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'cloud_upload'
+              }}</mat-icon>
+            <div class="dz-title">Drop the passed certificate here, or click to browse</div>
+            <div class="dz-hint">PDF or image</div>
+            }
+          </div>
+          } @else {
+          <div class="doc-row">
+            <div class="doc-info">
+              <div class="doc-icon" [class.filled]="!!rep.docs.certification"><mat-icon>{{ rep.docs.certification ?
+                  'check' : 'description' }}</mat-icon></div>
+              <div>
+                <div class="doc-name">Passed Certificate</div>
+                <div class="doc-status" [class.filled]="!!rep.docs.certification">
+                  {{ rep.docs.certification ?(rep.docs.certification.name + ' · ' +
+                  formatDate(rep.docs.certification.uploadedAt)) : 'Not uploaded' }}
                 </div>
               </div>
-              @if (rep.docs.certification; as doc) {
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <button type="button" mat-icon-button class="action-btn" title="View"
-                  (click)="viewDocument(doc.oId, doc.name, 'Passed Certificate')"><mat-icon>visibility</mat-icon></button>
-                <button type="button" mat-icon-button class="action-btn" title="Download"
-                  (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
-              </div>
-              }
+            </div>
+            @if (rep.docs.certification; as doc) {
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button type="button" mat-icon-button class="action-btn" title="View"
+                (click)="viewDocument(doc.oId, doc.name, 'Passed Certificate')"><mat-icon>visibility</mat-icon></button>
+              <button type="button" mat-icon-button class="action-btn" title="Download"
+                (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
             </div>
             }
+          </div>
+          }
           } @else {
           <p class="cert-doc-hint">Turn on "Passed certification" to upload the certificate.</p>
           }
@@ -711,8 +706,8 @@
               }}</mat-icon></div>
           <div>
             <div class="doc-name">{{ slot.label }}</div>
-            <div class="doc-status" [class.filled]="!!slot.resource">{{ slot.resource ? slot.resource.fileName : 'Not
-              uploaded yet'}} </div>
+            <div class="doc-status" [class.filled]="!!slot.resource">
+              {{ slot.resource ? slot.resource.fileName : 'Not uploaded yet'}} </div>
           </div>
         </div>
         @if (slot.resource; as res) {
@@ -727,13 +722,13 @@
       }
     </div>
 
-    <h3 class="hub-section-title">{{ rep.name || 'This rep' }}'s uploads</h3>
+    <!-- <h3 class="hub-section-title">{{ rep.name || 'This rep' }}'s uploads</h3>
     <h4 class="hub-lang-subtitle">English</h4>
     <ng-container
       *ngTemplateOutlet="hubLangGrid; context: { list: ownResourcesEnglish(), emptyMsg: (rep.name || 'This rep') + ' has not uploaded anything in English yet.' }"></ng-container>
     <h4 class="hub-lang-subtitle">Spanish</h4>
     <ng-container
-      *ngTemplateOutlet="hubLangGrid; context: { list: ownResourcesSpanish(), emptyMsg: (rep.name || 'This rep') + ' has not uploaded anything in Spanish yet.' }"></ng-container>
+      *ngTemplateOutlet="hubLangGrid; context: { list: ownResourcesSpanish(), emptyMsg: (rep.name || 'This rep') + ' has not uploaded anything in Spanish yet.' }"></ng-container> -->
   </div>
 </mat-card>
 

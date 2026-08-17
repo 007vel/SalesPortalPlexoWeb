@@ -25,9 +25,6 @@ export class RepLinks {
     const profile = this.repProfileStore.profile();
     return [
       { key: 'googleLink', label: 'Sales Leads link', hint: 'Business, Maps, or Drive link', icon: 'storefront', value: profile.googleLink },
-      { key: 'resourceLink', label: 'Knowledge Base', hint: 'Your personal doc share link', icon: 'menu_book', value: profile.resourceLink },
-      { key: 'pricingSheetLink', label: 'Pricing sheet link', hint: 'Current pricing sheet', icon: 'request_quote', value: profile.pricingSheetLink },
-      { key: 'powerPointLink', label: 'PowerPoint link', hint: 'Sales deck or presentation', icon: 'slideshow', value: profile.powerPointLink },
     ].map((row) => ({ ...row, href: this.toHref(row.value) }));
   });
 

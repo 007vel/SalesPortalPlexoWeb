@@ -67,6 +67,5 @@ describe('RepLinks', () => {
 
     const byKey = (key: string) => component.linkRows().find((row) => row.key === key)?.value;
     expect(byKey('googleLink')).toBe('https://maps.google.com/x');
-    expect(byKey('resourceLink')).toBe('https://hub.example.com/y');
   });
 });

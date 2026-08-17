@@ -149,28 +149,11 @@
 
       <form [formGroup]="linksForm">
         <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-          <mat-label>Google link</mat-label>
+          <mat-label>Sales Leads link </mat-label>
           <mat-icon matPrefix>link</mat-icon>
           <input matInput type="url" formControlName="googleLink">
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-          <mat-label>Resource link</mat-label>
-          <mat-icon matPrefix>link</mat-icon>
-          <input matInput type="url" formControlName="resourceLink">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-          <mat-label>Pricing sheet link</mat-label>
-          <mat-icon matPrefix>link</mat-icon>
-          <input matInput type="url" formControlName="pricingSheetLink">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-          <mat-label>PowerPoint link</mat-label>
-          <mat-icon matPrefix>link</mat-icon>
-          <input matInput type="url" formControlName="powerPointLink">
-        </mat-form-field>
 
         <div class="dropzone" [class.drag-active]="pricingSheetDragActive()" [class.has-file]="pricingSheetFileName()"
           (click)="pricingSheetFileInput.click()" (dragover)="onDocDragOver('pricingSheet', $event)"
