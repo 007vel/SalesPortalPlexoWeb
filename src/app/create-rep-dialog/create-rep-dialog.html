@@ -143,7 +143,7 @@
       </form>
     </mat-step>
 
-    <mat-step [stepControl]="linksForm" label="Links &amp; Documents" [optional]="true" [completed]="false">
+    <!-- <mat-step [stepControl]="linksForm" label="Links &amp; Documents" [optional]="true" [completed]="false">
       <p class="sub">Optional — the rep can add or change any of this later from their own Links and Documents
         pages.</p>
 
@@ -207,7 +207,7 @@
 
         @if (submitFailed()) { <p class="error">Couldn't create the rep. Please try again.</p> }
       </form>
-    </mat-step>
+    </mat-step> -->
 
   </mat-stepper>
 </mat-dialog-content>
@@ -231,13 +231,13 @@
     Next <mat-icon>arrow_forward</mat-icon>
   </button>
   }
-  @case (2) {
+  <!-- @case (2) {
   <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
   <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep4(stepper)">
     Next <mat-icon>arrow_forward</mat-icon>
   </button>
-  }
-  @case (3) {
+  } -->
+  @case (2) {
   <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
   <button mat-flat-button class="create-btn" [disabled]="submitting()" (click)="submit()">
     {{ submitting() ? 'Creating…' : 'Create rep' }}
