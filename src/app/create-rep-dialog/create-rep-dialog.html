@@ -6,7 +6,7 @@
 </div>
 
 <!-- Mobile-only compact stand-in for the horizontal stepper header, which has
-     no room for 3 icon+label steps on a phone width. Hidden on desktop. -->
+     no room for 4 icon+label steps on a phone width. Hidden on desktop. -->
 <div class="crd-mobile-progress">
   <span class="crd-mobile-progress-label">Step {{ stepper.selectedIndex + 1 }} of {{ stepTitles.length }} &middot;
     {{ stepTitles[stepper.selectedIndex] }}</span>
@@ -107,73 +107,6 @@
           <mat-icon matPrefix>pin_drop</mat-icon>
           <input matInput formControlName="zip">
         </mat-form-field>
-      </form>
-    </mat-step>
-
-    <mat-step [stepControl]="certForm" label="Certification" [completed]="false">
-      <p class="sub">Track where this rep stands on onboarding requirements.</p>
-
-      <form [formGroup]="certForm">
-        <div class="toggle-row">
-          <div class="toggle-label">
-            <b>Passed certification</b>
-            <span>Has this rep passed the required certification?</span>
-          </div>
-          <div class="toggle-control">
-            <span class="toggle-state">{{ certForm.controls.passedCertification.value ? 'Yes' : 'No' }}</span>
-            <mat-slide-toggle formControlName="passedCertification" color="primary"></mat-slide-toggle>
-          </div>
-        </div>
-
-        @if (certForm.controls.passedCertification.value) {
-        <div class="dropzone" [class.drag-active]="certDragActive()" [class.has-file]="certificateFileName()"
-          (click)="certFileInput.click()" (dragover)="onCertDragOver($event)" (dragleave)="onCertDragLeave()"
-          (drop)="onCertDrop($event)">
-          <input #certFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
-            (change)="handleCertificateFile($event)">
-
-          @if (!certificateFileName()) {
-          <mat-icon class="dz-ic">cloud_upload</mat-icon>
-          <div class="dz-title">Drop the certificate here, or click to browse</div>
-          <div class="dz-hint">PDF or image</div>
-          } @else {
-          <div class="dz-file">
-            <div class="dz-file-ic"><mat-icon>{{ certificateFileIcon() }}</mat-icon></div>
-            <div class="dz-file-txt">
-              <b>{{ certificateFileName() }}</b>
-              <span>{{ certificateFileSizeLabel() }}</span>
-            </div>
-            <button type="button" mat-icon-button class="dz-remove" title="Remove file"
-              (click)="clearCertificateFile($event)">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-          }
-        </div>
-        @if (missingCertificateFile()) { <p class="error">Upload the passed certificate, or turn the toggle off.</p> }
-        }
-
-        <div class="toggle-row">
-          <div class="toggle-label">
-            <b>Business cards sent</b>
-            <span>Have business cards been sent to this rep?</span>
-          </div>
-          <div class="toggle-control">
-            <span class="toggle-state">{{ certForm.controls.businessCardsSent.value ? 'Yes' : 'No' }}</span>
-            <mat-slide-toggle formControlName="businessCardsSent" color="primary"></mat-slide-toggle>
-          </div>
-        </div>
-
-        <div class="toggle-row">
-          <div class="toggle-label">
-            <b>Consultant fee paid</b>
-            <span>Has the consultant fee been paid?</span>
-          </div>
-          <div class="toggle-control">
-            <span class="toggle-state">{{ certForm.controls.consultantFeePaid.value ? 'Yes' : 'No' }}</span>
-            <mat-slide-toggle formControlName="consultantFeePaid" color="primary"></mat-slide-toggle>
-          </div>
-        </div>
       </form>
     </mat-step>
 
@@ -322,12 +255,6 @@
   </button>
   }
   @case (3) {
-  <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
-  <button mat-flat-button color="primary" type="button" class="next-btn" (click)="goToStep5(stepper)">
-    Next <mat-icon>arrow_forward</mat-icon>
-  </button>
-  }
-  @case (4) {
   <button mat-button type="button" [disabled]="submitting()" (click)="stepper.previous()">Back</button>
   <button mat-flat-button class="create-btn" [disabled]="submitting()" (click)="submit()">
     {{ submitting() ? 'Creating…' : 'Create rep' }}

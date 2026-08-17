@@ -283,29 +283,107 @@
     </mat-card>
 
     <mat-card class="section">
-      <div class="section-head">
-        <div class="eyebrow">Onboarding</div>
-        <h2>Certification</h2>
+      <div class="section-head editable">
+        <div>
+          <div class="eyebrow">Onboarding</div>
+          <h2>Certification</h2>
+        </div>
+        @if (!editingCertification()) {
+        <button type="button" mat-stroked-button class="edit-btn" (click)="startEditCertification()">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        }
       </div>
-      <div class="section-body cert-body">
-        <div class="cert-row">
-          <span>Passed certification</span>
-          <span class="badge" [class]="rep.passedCertification ? 'badge-active' : 'badge-inactive'">
-            <span class="badge-dot"></span>{{ rep.passedCertification ? 'Yes' : 'No' }}
-          </span>
+      <div class="section-body no-pad">
+        <div class="edit-form-pad">
+          @if (editingCertification()) {
+          <form [formGroup]="certificationForm" class="edit-form">
+            <div class="cert-row">
+              <span>Passed certification</span>
+              <mat-slide-toggle formControlName="passedCertification" color="tertiary"></mat-slide-toggle>
+            </div>
+            <div class="cert-row">
+              <span>Business cards sent</span>
+              <mat-slide-toggle formControlName="businessCardsSent" color="tertiary"></mat-slide-toggle>
+            </div>
+            <div class="cert-row">
+              <span>Consultant fee paid</span>
+              <mat-slide-toggle formControlName="consultantFeePaid" color="tertiary"></mat-slide-toggle>
+            </div>
+          </form>
+          } @else {
+          <div class="cert-body">
+            <div class="cert-row">
+              <span>Passed certification</span>
+              <span class="badge" [class]="rep.passedCertification ? 'badge-active' : 'badge-inactive'">
+                <span class="badge-dot"></span>{{ rep.passedCertification ? 'Yes' : 'No' }}
+              </span>
+            </div>
+            <div class="cert-row">
+              <span>Business cards sent</span>
+              <span class="badge" [class]="rep.businessCardsSent ? 'badge-active' : 'badge-inactive'">
+                <span class="badge-dot"></span>{{ rep.businessCardsSent ? 'Yes' : 'No' }}
+              </span>
+            </div>
+            <div class="cert-row">
+              <span>Consultant fee paid</span>
+              <span class="badge" [class]="rep.consultantFeePaid ? 'badge-active' : 'badge-inactive'">
+                <span class="badge-dot"></span>{{ rep.consultantFeePaid ? 'Yes' : 'No' }}
+              </span>
+            </div>
+          </div>
+          }
         </div>
-        <div class="cert-row">
-          <span>Business cards sent</span>
-          <span class="badge" [class]="rep.businessCardsSent ? 'badge-active' : 'badge-inactive'">
-            <span class="badge-dot"></span>{{ rep.businessCardsSent ? 'Yes' : 'No' }}
-          </span>
+
+        <div class="cert-doc">
+          @if (editingCertification() ? certificationForm.controls.passedCertification.value :
+          rep.passedCertification) {
+          <div class="dropzone" [class.drag-active]="certDragActive()" [class.has-file]="!!rep.docs.certification"
+            (click)="triggerCertificateUpload(certificationFileInput)" (dragover)="onCertDragOver($event)"
+            (dragleave)="onCertDragLeave()" (drop)="onCertDrop($event)">
+            <input #certificationFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
+              (change)="handleDocumentUpload('certification', 'Passed Certificate', $event)">
+
+            @if (rep.docs.certification; as doc) {
+            <div class="dz-file">
+              <div class="dz-file-ic">
+                <mat-icon>{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'picture_as_pdf' }}</mat-icon>
+              </div>
+              <div class="dz-file-txt">
+                <b>{{ doc.name }}</b>
+                <span>{{ formatDate(doc.uploadedAt) }} · Click to replace</span>
+              </div>
+              <div class="dz-file-actions">
+                <button type="button" mat-icon-button class="dz-remove" title="View"
+                  (click)="$event.stopPropagation(); viewDocument(doc.oId, doc.name, 'Passed Certificate')">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button type="button" mat-icon-button class="dz-remove" title="Download"
+                  (click)="$event.stopPropagation(); downloadDocument(doc.oId, doc.name)">
+                  <mat-icon>download</mat-icon>
+                </button>
+              </div>
+            </div>
+            } @else {
+            <mat-icon class="dz-ic">{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'cloud_upload'
+              }}</mat-icon>
+            <div class="dz-title">Drop the passed certificate here, or click to browse</div>
+            <div class="dz-hint">PDF or image</div>
+            }
+          </div>
+          } @else {
+          <p class="cert-doc-hint">Turn on "Passed certification" to upload the certificate.</p>
+          }
         </div>
-        <div class="cert-row">
-          <span>Consultant fee paid</span>
-          <span class="badge" [class]="rep.consultantFeePaid ? 'badge-active' : 'badge-inactive'">
-            <span class="badge-dot"></span>{{ rep.consultantFeePaid ? 'Yes' : 'No' }}
-          </span>
+
+        @if (editingCertification()) {
+        <div class="edit-actions">
+          <button type="button" mat-button [disabled]="savingCertification()"
+            (click)="cancelEditCertification()">Cancel</button>
+          <button type="button" mat-flat-button class="save-btn" [disabled]="savingCertification()"
+            (click)="saveCertification()">{{ savingCertification() ? 'Saving…' : 'Save' }}</button>
         </div>
+        }
       </div>
     </mat-card>
 
@@ -429,33 +507,6 @@
             </button>
             <input #w4FileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
               (change)="handleDocumentUpload('w4', 'W-4 Form', $event)">
-          </div>
-        </div>
-        <div class="doc-row">
-          <div class="doc-info">
-            <div class="doc-icon" [class.filled]="!!rep.docs.certification"><mat-icon>{{ rep.docs.certification ?
-                'check' : 'description' }}</mat-icon></div>
-            <div>
-              <div class="doc-name">Passed Certificate</div>
-              <div class="doc-status" [class.filled]="!!rep.docs.certification">{{ rep.docs.certification ?
-                (rep.docs.certification.name + ' · ' + formatDate(rep.docs.certification.uploadedAt)) : 'Not uploaded'
-                }}</div>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            @if (rep.docs.certification; as doc) {
-            <button type="button" mat-icon-button class="action-btn" title="View"
-              (click)="viewDocument(doc.oId, doc.name, 'Passed Certificate')"><mat-icon>visibility</mat-icon></button>
-            <button type="button" mat-icon-button class="action-btn" title="Download"
-              (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
-            }
-            <button type="button" mat-icon-button class="action-btn"
-              [title]="rep.docs.certification ? 'Replace file' : 'Upload file'"
-              [disabled]="isUploadingDoc('certification')" (click)="certificationFileInput.click()">
-              <mat-icon>{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
-            </button>
-            <input #certificationFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
-              (change)="handleDocumentUpload('certification', 'Passed Certificate', $event)">
           </div>
         </div>
         <div class="doc-row">

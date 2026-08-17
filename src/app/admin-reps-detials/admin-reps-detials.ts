@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { RepDirectoryStore, RepDocs, RepStatus, SalesRepType, portalLink, repStatusBadge, salesRepTypeLabel } from '../rep-directory-store/rep-directory-store';
 import { TrainingResource, TrainingResourceStore, detectFileKind, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
@@ -25,7 +26,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   selector: 'app-admin-reps-detials',
   imports: [
     RouterLink, ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule,
-    MatInputModule, MatProgressSpinnerModule, MatSelectModule, NgTemplateOutlet,
+    MatInputModule, MatProgressSpinnerModule, MatSelectModule, MatSlideToggleModule, NgTemplateOutlet,
   ],
   templateUrl: './admin-reps-detials.html',
   styleUrl: './admin-reps-detials.scss',
@@ -257,6 +258,51 @@ export class AdminRepsDetials {
       });
   }
 
+  // ----- certification edit -----
+  readonly editingCertification = signal(false);
+  readonly savingCertification = signal(false);
+  readonly certificationForm = this.fb.nonNullable.group({
+    passedCertification: [false],
+    businessCardsSent: [false],
+    consultantFeePaid: [false],
+  });
+
+  startEditCertification(): void {
+    const rep = this.rep();
+    if (!rep) return;
+    this.certificationForm.setValue({
+      passedCertification: rep.passedCertification,
+      businessCardsSent: rep.businessCardsSent,
+      consultantFeePaid: rep.consultantFeePaid,
+    });
+    this.editingCertification.set(true);
+  }
+
+  cancelEditCertification(): void {
+    this.editingCertification.set(false);
+  }
+
+  saveCertification(): void {
+    const rep = this.rep();
+    if (!rep) return;
+    const v = this.certificationForm.getRawValue();
+    this.savingCertification.set(true);
+    this.directory
+      .updateRep(rep.repId, {
+        passedCertification: v.passedCertification,
+        businessCardsSent: v.businessCardsSent,
+        consultantFeePaid: v.consultantFeePaid,
+      })
+      .pipe(finalize(() => this.savingCertification.set(false)))
+      .subscribe({
+        next: () => {
+          this.editingCertification.set(false);
+          this.toast.show('Certification updated');
+        },
+        error: () => this.toast.show('Failed to update certification'),
+      });
+  }
+
   // ----- contract wizard edit (admin-only, Rep Details page only) -----
   readonly editingContractWizard = signal(false);
   readonly savingContractWizard = signal(false);
@@ -389,11 +435,40 @@ export class AdminRepsDetials {
     return this.uploadingDocKinds().has(kind);
   }
 
-  /** Uploads (or replaces) a document slot — same generic `api/documents` upload the create-rep dialog and rep's own Documents page already use, just triggered from the admin Rep Details page instead. */
   handleDocumentUpload(kind: keyof RepDocs, label: string, event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (!file) return;
+    if (file) this.uploadDocument(kind, label, file);
+    input.value = '';
+  }
+
+  // ----- Passed Certificate dropzone (drag/drop mirrors the create-rep dialog's upload UI) -----
+  readonly certDragActive = signal(false);
+
+  /** Ignores clicks while an upload for this slot is already in flight, so a slow request can't be fired twice. */
+  triggerCertificateUpload(input: HTMLInputElement): void {
+    if (this.isUploadingDoc('certification')) return;
+    input.click();
+  }
+
+  onCertDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.certDragActive.set(true);
+  }
+
+  onCertDragLeave(): void {
+    this.certDragActive.set(false);
+  }
+
+  onCertDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.certDragActive.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file) this.uploadDocument('certification', 'Passed Certificate', file);
+  }
+
+  /** Uploads (or replaces) a document slot — same generic `api/documents` upload the create-rep dialog and rep's own Documents page already use, just triggered from the admin Rep Details page instead. */
+  private uploadDocument(kind: keyof RepDocs, label: string, file: File): void {
     const rep = this.rep();
     if (!rep) return;
 
@@ -413,7 +488,6 @@ export class AdminRepsDetials {
         next: () => this.toast.show(`${label} uploaded`),
         error: () => this.toast.show(`Failed to upload ${label}`),
       });
-    input.value = '';
   }
 
   downloadDocument(oId: number, fileName: string): void {

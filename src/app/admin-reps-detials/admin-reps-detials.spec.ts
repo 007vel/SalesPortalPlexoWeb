@@ -118,4 +118,37 @@ describe('AdminRepsDetials', () => {
     expect(req.request.body.repsId).toBe(1001);
     req.flush(repDto({ googleLink: 'https://maps.google.com/x' }));
   });
+
+  it('saveCertification() PUTs the toggled onboarding flags and exits edit mode', async () => {
+    const directory = TestBed.inject(RepDirectoryStore);
+    flushInitialReps();
+
+    directory
+      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false })
+      .subscribe();
+    httpMock.expectOne(apiUrl('reps')).flush(repDto({ passedCertification: false, businessCardsSent: false, consultantFeePaid: false }));
+
+    fixture = TestBed.createComponent(AdminRepsDetials);
+    fixture.componentRef.setInput('repId', '1001');
+    component = fixture.componentInstance;
+    await fixture.whenStable();
+
+    httpMock.expectOne(apiUrl('documents/rep/1001')).flush([]);
+    httpMock.expectOne(apiUrl('repbankdetails/rep/1001')).flush(null, { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne((r) => r.url === apiUrl('traininghub/filter') && r.params.get('roleId') === '1001').flush([]);
+    await fixture.whenStable();
+
+    component.startEditCertification();
+    component.certificationForm.setValue({ passedCertification: true, businessCardsSent: true, consultantFeePaid: false });
+    component.saveCertification();
+
+    const req = httpMock.expectOne(apiUrl('reps/1'));
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual(
+      expect.objectContaining({ passedCertification: true, businessCardsSent: true, consultantFeePaid: false }),
+    );
+    req.flush(repDto({ passedCertification: true, businessCardsSent: true, consultantFeePaid: false }));
+
+    expect(component.editingCertification()).toBe(false);
+  });
 });

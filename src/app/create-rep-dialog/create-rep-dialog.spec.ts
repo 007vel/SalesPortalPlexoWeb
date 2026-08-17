@@ -59,23 +59,9 @@ describe('CreateRepDialog', () => {
     expect(stepper.next).toHaveBeenCalled();
   });
 
-  it('goToStep4() blocks on a missing certificate file when passed certification is Yes', () => {
-    component.certForm.controls.passedCertification.setValue(true);
+  it('goToStep4() advances without validation — bank fields are all optional', () => {
     const stepper = stubStepper();
     component.goToStep4(stepper);
-    expect(stepper.next).not.toHaveBeenCalled();
-    expect(component.missingCertificateFile()).toBe(true);
-  });
-
-  it('goToStep4() advances when passed certification is No', () => {
-    const stepper = stubStepper();
-    component.goToStep4(stepper);
-    expect(stepper.next).toHaveBeenCalled();
-  });
-
-  it('goToStep5() advances without validation — bank fields are all optional', () => {
-    const stepper = stubStepper();
-    component.goToStep5(stepper);
     expect(stepper.next).toHaveBeenCalled();
   });
 
