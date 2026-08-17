@@ -53,7 +53,7 @@ export class AdminSettings {
   readonly typeLabel = trainingResourceTypeLabel;
   readonly documentColumns = ['rep', 'repId', 'document', 'actions'];
 
-  /** The 5 fixed hub slots, each matched to its uploaded file (if any) by category. */
+  /** The fixed hub slots, each matched to its uploaded file (if any) by category. */
   readonly hubSlots = computed<HubSlotView[]>(() => {
     const uploading = this.uploadingSlots();
     return matchHubSlots(this.resources()).map((slot) => ({ ...slot, uploading: uploading.has(slot.key) }));

@@ -74,7 +74,7 @@ export function detectFileKind(fileName: string): TrainingResourceType {
 }
 
 /**
- * The Training & Resource Hub's "Shared by Admin" material is a fixed set of 5 slots — not a
+ * The Training & Resource Hub's "Shared by Admin" material is a fixed set of slots — not a
  * free-form upload list — matched to whatever's actually been uploaded by `category`. Defined once
  * here so admin-settings (which can upload/replace), admin-reps-detials, and rep-training-hub (both
  * read-only) all agree on the same 5 slots instead of drifting.
@@ -91,6 +91,7 @@ export interface HubSlotDef {
 export const HUB_SLOTS: HubSlotDef[] = [
   { key: 'productVideoEn', label: 'Product Video (English)', category: 'Product Video (English)', language: 'English', accept: 'video/*', icon: 'movie' },
   { key: 'productVideoEs', label: 'Product Video (Spanish)', category: 'Product Video (Spanish)', language: 'Spanish', accept: 'video/*', icon: 'movie' },
+  { key: 'dashboardVideoEn', label: 'Dashboard Video (English)', category: 'Dashboard Video (English)', language: 'English', accept: 'video/*', icon: 'movie' },
   { key: 'dashboardVideoEs', label: 'Dashboard Video (Spanish)', category: 'Dashboard Video (Spanish)', language: 'Spanish', accept: 'video/*', icon: 'movie' },
   { key: 'trainingMaterial', label: 'Training Material (PDF)', category: 'Training Material', language: 'English', accept: '.pdf', icon: 'picture_as_pdf' },
   { key: 'faq', label: 'FAQ (PDF)', category: 'FAQ', language: 'English', accept: '.pdf', icon: 'picture_as_pdf' },
