@@ -9,47 +9,20 @@
   <mat-card class="stat-card hub-progress-card">
     <div class="hub-progress-top">
       <div>
-        <div class="num">{{ filledSlotCount() }}<span class="of">/{{ hubSlots().length }}</span></div>
+        <div class="num">{{ filledResourceCount() }}<span class="of">/{{ totalResourceCount() }}</span></div>
         <div class="lbl">Training resources uploaded</div>
       </div>
-      <div class="hub-progress-ring" [style.--pct]="(filledSlotCount() / hubSlots().length) * 100">
+      <div class="hub-progress-ring" [style.--pct]="(filledResourceCount() / totalResourceCount()) * 100">
         <mat-icon>school</mat-icon>
       </div>
     </div>
-    <div class="hub-progress-track"><div class="hub-progress-fill" [style.width.%]="(filledSlotCount() / hubSlots().length) * 100"></div></div>
+    <div class="hub-progress-track"><div class="hub-progress-fill" [style.width.%]="(filledResourceCount() / totalResourceCount()) * 100"></div></div>
   </mat-card>
 </div>
 
 <div class="section-header">
   <h3 class="section-title">Training &amp; resource hub</h3>
 </div>
-<mat-card class="table-card hub-slots-card">
-  @for (slot of hubSlots(); track slot.key) {
-  <div class="hub-slot-row">
-    <div class="hub-slot-info">
-      <div class="hub-slot-icon" [class.filled]="!!slot.resource"><mat-icon>{{ slot.resource ? 'check' : slot.icon }}</mat-icon></div>
-      <div>
-        <div class="hub-slot-name">{{ slot.label }}</div>
-        <div class="hub-slot-status" [class.filled]="!!slot.resource">{{ slot.resource ? slot.resource.fileName : 'Not uploaded yet' }}</div>
-      </div>
-    </div>
-    <div class="hub-slot-actions">
-      @if (slot.resource; as res) {
-      <button type="button" mat-icon-button class="action-btn menu-trigger" title="More actions" [disabled]="slot.uploading"
-        [matMenuTriggerFor]="slotMenu" [matMenuTriggerData]="{ slot: slot, res: res, fileInput: fileInput }">
-        <mat-icon>{{ slot.uploading ? 'hourglass_empty' : 'more_vert' }}</mat-icon>
-      </button>
-      } @else {
-      <button type="button" mat-icon-button class="action-btn upload-slot-btn" title="Upload file" [disabled]="slot.uploading" (click)="fileInput.click()">
-        <mat-icon>{{ slot.uploading ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
-      </button>
-      }
-      <input #fileInput type="file" [attr.accept]="slot.accept" class="hidden-file-input" (change)="handleSlotUpload(slot, $event)">
-    </div>
-  </div>
-  }
-</mat-card>
-
 <mat-card class="table-card video-links-card">
   <div class="section-head editable">
     <div>
@@ -105,6 +78,33 @@
     <ng-container *ngTemplateOutlet="field; context: {label:'Sales Leads', value: videoLinks()?.salesLeadLink}"></ng-container>
     }
   </div>
+</mat-card>
+
+<mat-card class="table-card hub-slots-card">
+  @for (slot of hubSlots(); track slot.key) {
+  <div class="hub-slot-row">
+    <div class="hub-slot-info">
+      <div class="hub-slot-icon" [class.filled]="!!slot.resource"><mat-icon>{{ slot.resource ? 'check' : slot.icon }}</mat-icon></div>
+      <div>
+        <div class="hub-slot-name">{{ slot.label }}</div>
+        <div class="hub-slot-status" [class.filled]="!!slot.resource">{{ slot.resource ? slot.resource.fileName : 'Not uploaded yet' }}</div>
+      </div>
+    </div>
+    <div class="hub-slot-actions">
+      @if (slot.resource; as res) {
+      <button type="button" mat-icon-button class="action-btn menu-trigger" title="More actions" [disabled]="slot.uploading"
+        [matMenuTriggerFor]="slotMenu" [matMenuTriggerData]="{ slot: slot, res: res, fileInput: fileInput }">
+        <mat-icon>{{ slot.uploading ? 'hourglass_empty' : 'more_vert' }}</mat-icon>
+      </button>
+      } @else {
+      <button type="button" mat-icon-button class="action-btn upload-slot-btn" title="Upload file" [disabled]="slot.uploading" (click)="fileInput.click()">
+        <mat-icon>{{ slot.uploading ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
+      </button>
+      }
+      <input #fileInput type="file" [attr.accept]="slot.accept" class="hidden-file-input" (change)="handleSlotUpload(slot, $event)">
+    </div>
+  </div>
+  }
 </mat-card>
 
 <ng-template #field let-label="label" let-value="value">
