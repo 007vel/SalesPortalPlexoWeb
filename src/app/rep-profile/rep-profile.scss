@@ -259,6 +259,131 @@
   }
 }
 
+// ---------- Business card card ----------
+.card-chip {
+  background: #FCEEED;
+
+  mat-icon {
+    color: #D64545;
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 13px;
+  border-radius: 999px;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.badge-active {
+  color: #1A8A5F;
+  background: #E4F7EE;
+
+  .badge-dot { background: #1A8A5F; }
+}
+
+.badge-pending {
+  color: #B36B0D;
+  background: #FDF1DD;
+
+  .badge-dot { background: #E0942A; }
+}
+
+.badge-inactive {
+  color: var(--muted);
+  background: #EEF1F5;
+
+  .badge-dot { background: #9AA6B8; }
+}
+
+.bc-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.approve-btn,
+.changes-btn {
+  flex: 1;
+  min-height: 44px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13.5px;
+
+  mat-icon {
+    margin-right: 6px;
+  }
+}
+
+.approve-btn {
+  color: #fff !important;
+  background-color: #1A8A5F !important;
+
+  &:disabled {
+    background-color: #9AC9B4 !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+
+  mat-progress-spinner {
+    display: inline-block;
+    margin-right: 6px;
+    --mdc-circular-progress-active-indicator-color: #fff;
+    --mat-progress-spinner-active-indicator-color: #fff;
+  }
+
+  ::ng-deep .mat-mdc-progress-spinner circle {
+    stroke: #fff !important;
+  }
+}
+
+.approved-indicator {
+  flex: 1;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: #1A8A5F;
+  background: #E4F7EE;
+  border: 1.5px solid #C9EBDA;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.changes-btn {
+  color: var(--text) !important;
+  border-color: #E1E6ED !important;
+
+  &:hover {
+    background: #F5F7FA;
+    border-color: #D6DDE7 !important;
+  }
+}
+
+.bc-empty-hint {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
 // ---------- Contract wizard card ----------
 .wizard-chip {
   background: #E8F1FC;
@@ -399,6 +524,10 @@
   .rp-pwr-doc-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .bc-actions {
+    flex-direction: column;
   }
 
   .rep-page-head h1 {

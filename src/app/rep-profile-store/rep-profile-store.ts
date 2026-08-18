@@ -1,7 +1,7 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { Auth } from '../auth/auth';
-import { RepDirectoryStore, RepDocRecord, RepDocs, RepRecord, CommissionDay, SalesRepType } from '../rep-directory-store/rep-directory-store';
+import { RepDirectoryStore, RepDocRecord, RepDocs, RepRecord, CommissionDay, SalesRepType, BusinessCardStatus } from '../rep-directory-store/rep-directory-store';
 
 export interface RepProfileData {
   name: string;
@@ -17,7 +17,7 @@ export interface RepProfileData {
   pricingSheetLink: string;
   powerPointLink: string;
   passedCertification: boolean;
-  businessCardsSent: boolean;
+  businessCardStatus: BusinessCardStatus;
   consultantFeePaid: boolean;
   docs: RepDocs;
   commissions: CommissionDay[];
@@ -45,7 +45,7 @@ function emptyRepProfile(): RepProfileData {
     pricingSheetLink: '',
     powerPointLink: '',
     passedCertification: false,
-    businessCardsSent: false,
+    businessCardStatus: 'notSent',
     consultantFeePaid: false,
     docs: { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null, businessCards: null },
     commissions: [],
@@ -74,7 +74,7 @@ function toProfileData(rep: RepRecord | undefined): RepProfileData {
     pricingSheetLink: rep.pricingSheetLink,
     powerPointLink: rep.powerPointLink,
     passedCertification: rep.passedCertification,
-    businessCardsSent: rep.businessCardsSent,
+    businessCardStatus: rep.businessCardStatus,
     consultantFeePaid: rep.consultantFeePaid,
     docs: rep.docs,
     commissions: rep.commissions,
@@ -108,5 +108,11 @@ export class RepProfileStore {
     const repId = this.auth.session()?.repId;
     if (!repId) return throwError(() => new Error('Not signed in'));
     return this.directory.setDocument(repId, kind, file);
+  }
+
+  approveBusinessCard(): Observable<RepRecord> {
+    const repId = this.auth.session()?.repId;
+    if (!repId) return throwError(() => new Error('Not signed in'));
+    return this.directory.updateRep(repId, { businessCardStatus: 'approved' });
   }
 }

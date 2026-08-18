@@ -18,7 +18,7 @@ function repDto(overrides: Partial<Record<string, unknown>> = {}) {
     resourceLink: null,
     status: 1,
     passedCertification: false,
-    businessCardsSent: false,
+    businessCardStatus: 0,
     consultantFeePaid: false,
     createdAt: '2026-08-05T00:00:00Z',
     updatedAt: '2026-08-05T00:00:00Z',
@@ -50,7 +50,7 @@ describe('RepDirectoryStore', () => {
   it('createRep posts to the API and adds the returned rep with sensible defaults', () => {
     let created: ReturnType<typeof store.findByRepId>;
     store
-      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false })
+      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardStatus: 'notSent', consultantFeePaid: false })
       .subscribe((r) => (created = r));
 
     const req = httpMock.expectOne(apiUrl('reps'));
@@ -67,7 +67,7 @@ describe('RepDirectoryStore', () => {
   });
 
   it('updateStatus PUTs the full record (status translated to its API enum) and updates the matching rep', () => {
-    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false }).subscribe();
+    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardStatus: 'notSent', consultantFeePaid: false }).subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
     let updatedStatus: string | undefined;
@@ -83,7 +83,7 @@ describe('RepDirectoryStore', () => {
   });
 
   it('updateLinksByRepId POSTs just the link fields to api/reps/link, identifying the rep by its plain RepId', () => {
-    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false }).subscribe();
+    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardStatus: 'notSent', consultantFeePaid: false }).subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
     store
@@ -110,7 +110,7 @@ describe('RepDirectoryStore', () => {
   });
 
   it('setDocument uploads the file and records it under the given slot, leaving the other slot untouched', () => {
-    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false }).subscribe();
+    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardStatus: 'notSent', consultantFeePaid: false }).subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
     const file = new File(['contents'], 'signed.pdf');
@@ -130,7 +130,7 @@ describe('RepDirectoryStore', () => {
   });
 
   it('loadDocuments GETs api/documents/rep/{repId} and fills in the agreement/w4 slots by kind', () => {
-    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false }).subscribe();
+    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardStatus: 'notSent', consultantFeePaid: false }).subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
     store.loadDocuments('1001').subscribe();
@@ -148,7 +148,7 @@ describe('RepDirectoryStore', () => {
   });
 
   it('setDocument deletes the previously uploaded file for that slot', () => {
-    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false }).subscribe();
+    store.createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardStatus: 'notSent', consultantFeePaid: false }).subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
     store.setDocument('1001', 'agreement', new File(['a'], 'first.pdf')).subscribe();

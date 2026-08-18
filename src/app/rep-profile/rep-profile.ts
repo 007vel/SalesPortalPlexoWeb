@@ -6,8 +6,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../auth/auth';
 import { RepProfileStore } from '../rep-profile-store/rep-profile-store';
-import { RepDirectoryStore, salesRepTypeLabel } from '../rep-directory-store/rep-directory-store';
+import { RepDirectoryStore, businessCardStatusBadge, salesRepTypeLabel } from '../rep-directory-store/rep-directory-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
+import { BusinessCardFeedbackDialog } from '../business-card-feedback-dialog/business-card-feedback-dialog';
 import { detectFileKind } from '../training-resource-store/training-resource-store';
 import { formatDateMDY } from '../shared/format-date';
 import { Toast } from '../toast/toast';
@@ -44,7 +45,9 @@ export class RepProfile {
   private static readonly MIN_VIEWING_MS = 200;
 
   readonly viewing = signal(false);
+  readonly approvingBusinessCard = signal(false);
   readonly formatDate = formatDateMDY;
+  readonly cardStatusBadge = businessCardStatusBadge;
 
   constructor() {
     // Docs live in RepDirectoryStore's in-memory list, keyed by rep — fetch them once the
@@ -80,10 +83,12 @@ export class RepProfile {
     const p = this.repProfileStore.profile();
     return [
       { key: 'passedCertification', label: 'Passed certification', passed: p.passedCertification },
-      { key: 'businessCardsSent', label: 'Business cards sent', passed: p.businessCardsSent },
       { key: 'consultantFeePaid', label: 'Consultant fee paid', passed: p.consultantFeePaid },
     ];
   });
+
+  readonly businessCardStatus = computed(() => this.repProfileStore.profile().businessCardStatus);
+  readonly businessCardSample = computed(() => this.repProfileStore.profile().docs.businessCards);
 
   readonly isMarketingConsultant = computed(() => this.repProfileStore.profile().salesRepType === 'marketingConsultant');
   readonly pwrRewardsRows = computed<ProfileRow[]>(() => {
@@ -123,8 +128,8 @@ export class RepProfile {
     });
   }
 
-  /** Opens the instructions PDF in the in-app viewer instead of forcing a download. */
-  viewDocument(oId: number, fileName: string): void {
+  /** Opens a document in the in-app viewer instead of forcing a download. */
+  viewDocument(oId: number, fileName: string, label = 'Access instructions'): void {
     this.viewing.set(true);
     const startedAt = Date.now();
     this.directory.downloadDocument(oId).subscribe({
@@ -134,7 +139,7 @@ export class RepProfile {
           const url = URL.createObjectURL(blob);
           this.dialog
             .open(MediaViewerDialog, {
-              data: { title: 'Access instructions', type: detectFileKind(fileName), url, fileName },
+              data: { title: label, type: detectFileKind(fileName), url, fileName },
               maxWidth: '90vw',
               panelClass: 'media-viewer-panel',
             })
@@ -142,8 +147,33 @@ export class RepProfile {
             .subscribe(() => URL.revokeObjectURL(url));
         });
       },
-      error: () => this.stopViewing(startedAt, () => this.toast.show('Failed to open instructions')),
+      error: () => this.stopViewing(startedAt, () => this.toast.show(`Failed to open ${label}`)),
     });
+  }
+
+  approveBusinessCard(): void {
+    if (this.approvingBusinessCard()) return;
+    this.approvingBusinessCard.set(true);
+    this.repProfileStore.approveBusinessCard().subscribe({
+      next: () => {
+        this.approvingBusinessCard.set(false);
+        this.toast.show('Marked as approved');
+      },
+      error: () => {
+        this.approvingBusinessCard.set(false);
+        this.toast.show('Failed to update status');
+      },
+    });
+  }
+
+  openBusinessCardFeedback(): void {
+    if (this.dialog.openDialogs.length) return;
+    this.dialog
+      .open(BusinessCardFeedbackDialog, { width: 'min(660px, 94vw)', maxWidth: '94vw', panelClass: 'bcf-dialog-panel' })
+      .afterClosed()
+      .subscribe((sent) => {
+        if (sent) this.toast.show("Feedback sent — we'll follow up");
+      });
   }
 
   /** Keeps the loading overlay up for at least MIN_VIEWING_MS so it doesn't flash on fast/mocked responses. */

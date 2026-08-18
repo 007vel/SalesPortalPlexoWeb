@@ -75,12 +75,12 @@ describe('CreateRepDialog', () => {
     const createReq = httpMock.expectOne(apiUrl('reps'));
     expect(createReq.request.method).toBe('POST');
     expect(createReq.request.body).toEqual(
-      expect.objectContaining({ passedCertification: false, businessCardsSent: false, consultantFeePaid: false }),
+      expect.objectContaining({ passedCertification: false, businessCardStatus: 0, consultantFeePaid: false }),
     );
     createReq.flush({
       oId: 1, repId: '1001', fullName: 'Jordan Reyes', businessName: null, email: 'jordan@example.com', phone: null,
       salesRepType: 0, address: null, city: null, state: null, zip: null, googleLink: null, resourceLink: null, status: 1,
-      passedCertification: false, businessCardsSent: false, consultantFeePaid: false,
+      passedCertification: false, businessCardStatus: 0, consultantFeePaid: false,
       createdAt: '2026-08-06T00:00:00Z', updatedAt: '2026-08-06T00:00:00Z',
     });
 
@@ -108,7 +108,7 @@ describe('CreateRepDialog', () => {
     createReq.flush({
       oId: 1, repId: '1001', fullName: 'Jordan Reyes', businessName: null, email: 'jordan@example.com', phone: null,
       salesRepType: 0, address: null, city: null, state: null, zip: null, googleLink: null, resourceLink: null, status: 1,
-      passedCertification: false, businessCardsSent: false, consultantFeePaid: false,
+      passedCertification: false, businessCardStatus: 0, consultantFeePaid: false,
       createdAt: '2026-08-06T00:00:00Z', updatedAt: '2026-08-06T00:00:00Z',
     });
 

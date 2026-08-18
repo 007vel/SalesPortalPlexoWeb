@@ -67,6 +67,67 @@
   </div>
 </mat-card>
 
+<mat-card class="rp-profile-card">
+  <div class="head-row">
+    <div class="head-title">
+      <div class="eyebrow">Onboarding</div>
+      <div class="title-line">
+        <span class="icon-chip card-chip"><mat-icon>badge</mat-icon></span>
+        <h2>Business card</h2>
+      </div>
+    </div>
+    <span class="badge" [class]="cardStatusBadge(businessCardStatus()).cssClass">
+      <span class="badge-dot"></span>{{ cardStatusBadge(businessCardStatus()).label }}
+    </span>
+  </div>
+
+  <div class="rp-card-body">
+    @if (businessCardSample(); as doc) {
+    <div class="rp-pwr-doc">
+      <div class="rp-pwr-doc-info">
+        <div class="doc-icon filled"><mat-icon>perm_media</mat-icon></div>
+        <div>
+          <div class="doc-name">Sample card</div>
+          <div class="doc-status filled">{{ doc.name }} · {{ formatDate(doc.uploadedAt) }}</div>
+        </div>
+      </div>
+      <div class="rp-pwr-doc-actions">
+        <button type="button" mat-stroked-button class="ghost-btn"
+          (click)="viewDocument(doc.oId, doc.name, 'Business card sample')">
+          <mat-icon>visibility</mat-icon> View
+        </button>
+        <button type="button" mat-stroked-button class="ghost-btn" (click)="downloadDocument(doc.oId, doc.name)">
+          <mat-icon>download</mat-icon> Download
+        </button>
+      </div>
+    </div>
+
+    <div class="bc-actions">
+      @if (businessCardStatus() === 'approved') {
+      <div class="approved-indicator">
+        <mat-icon>check_circle</mat-icon> You approved this
+      </div>
+      } @else {
+      <button type="button" mat-flat-button class="approve-btn" [disabled]="approvingBusinessCard()"
+        (click)="approveBusinessCard()">
+        @if (approvingBusinessCard()) {
+        <mat-progress-spinner mode="indeterminate" diameter="18" strokeWidth="3"></mat-progress-spinner>
+        } @else {
+        <mat-icon>check_circle</mat-icon>
+        }
+        Approve
+      </button>
+      }
+      <button type="button" mat-stroked-button class="changes-btn" (click)="openBusinessCardFeedback()">
+        <mat-icon>edit_note</mat-icon> Request changes
+      </button>
+    </div>
+    } @else {
+    <p class="bc-empty-hint">Your admin hasn't uploaded a sample card yet — check back soon.</p>
+    }
+  </div>
+</mat-card>
+
 @if (isMarketingConsultant()) {
 <mat-card class="rp-profile-card">
   <div class="head-row">

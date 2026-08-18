@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, switchMap } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,7 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { RepDirectoryStore, RepDocs, RepStatus, SalesRepType, portalLink, repStatusBadge, salesRepTypeLabel } from '../rep-directory-store/rep-directory-store';
+import { BusinessCardStatus, RepDirectoryStore, RepDocs, RepStatus, SalesRepType, businessCardStatusBadge, portalLink, repStatusBadge, salesRepTypeLabel } from '../rep-directory-store/rep-directory-store';
 import { TrainingResource, TrainingResourceStore, detectFileKind, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { TrainingHubLinksStore, videoLinkRows } from '../training-hub-links-store/training-hub-links-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
@@ -26,7 +27,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 @Component({
   selector: 'app-admin-reps-detials',
   imports: [
-    RouterLink, ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule,
+    RouterLink, ReactiveFormsModule, MatButtonModule, MatButtonToggleModule, MatCardModule, MatFormFieldModule, MatIconModule,
     MatInputModule, MatProgressSpinnerModule, MatSelectModule, MatSlideToggleModule, NgTemplateOutlet,
   ],
   templateUrl: './admin-reps-detials.html',
@@ -59,6 +60,7 @@ export class AdminRepsDetials {
 
   readonly portalLink = portalLink;
   readonly statusBadge = repStatusBadge;
+  readonly cardStatusBadge = businessCardStatusBadge;
   readonly formatDate = formatDateMDY;
   readonly repTypeLabel = salesRepTypeLabel;
 
@@ -275,7 +277,7 @@ export class AdminRepsDetials {
   readonly savingCertification = signal(false);
   readonly certificationForm = this.fb.nonNullable.group({
     passedCertification: [false],
-    businessCardsSent: [false],
+    businessCardStatus: ['notSent' as BusinessCardStatus],
     consultantFeePaid: [false],
   });
 
@@ -284,7 +286,7 @@ export class AdminRepsDetials {
     if (!rep) return;
     this.certificationForm.setValue({
       passedCertification: rep.passedCertification,
-      businessCardsSent: rep.businessCardsSent,
+      businessCardStatus: rep.businessCardStatus,
       consultantFeePaid: rep.consultantFeePaid,
     });
     this.editingCertification.set(true);
@@ -302,7 +304,7 @@ export class AdminRepsDetials {
     this.directory
       .updateRep(rep.repId, {
         passedCertification: v.passedCertification,
-        businessCardsSent: v.businessCardsSent,
+        businessCardStatus: v.businessCardStatus,
         consultantFeePaid: v.consultantFeePaid,
       })
       .pipe(finalize(() => this.savingCertification.set(false)))
@@ -645,7 +647,13 @@ export class AdminRepsDetials {
         ),
       )
       .subscribe({
-        next: () => this.toast.show(`${label} uploaded`),
+        next: () => {
+          this.toast.show(`${label} uploaded`);
+          // A fresh sample always needs fresh review, regardless of whatever status it was in before.
+          if (kind === 'businessCards') {
+            this.directory.updateRep(rep.repId, { businessCardStatus: 'waitingApproval' }).subscribe();
+          }
+        },
         error: () => this.toast.show(`Failed to upload ${label}`),
       });
   }

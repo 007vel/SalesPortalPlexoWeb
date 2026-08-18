@@ -253,7 +253,7 @@ export class CreateRepDialog {
         zip: address.zip.trim(),
         status: info.status,
         passedCertification: false,
-        businessCardsSent: false,
+        businessCardStatus: 'notSent',
         consultantFeePaid: false,
         googleLink: links.googleLink.trim(),
         resourceLink: links.resourceLink.trim(),

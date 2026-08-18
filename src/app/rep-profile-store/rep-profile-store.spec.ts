@@ -27,7 +27,7 @@ function repDto(overrides: Partial<Record<string, unknown>> = {}) {
 
 function createAndSignIn(directory: RepDirectoryStore, auth: Auth, httpMock: HttpTestingController): void {
   directory
-    .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '(401) 555-0148', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false })
+    .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '(401) 555-0148', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardStatus: 'notSent', consultantFeePaid: false })
     .subscribe();
   httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
