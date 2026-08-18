@@ -116,6 +116,8 @@ export class AdminReps {
     return this.deletingIds().has(oId);
   }
 
+  readonly anyDeleting = computed(() => this.deletingIds().size > 0);
+
   askDelete(rep: RepRecord, event: Event): void {
     event.stopPropagation();
     if (this.dialog.openDialogs.length) return;

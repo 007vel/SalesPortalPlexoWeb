@@ -169,18 +169,6 @@
     margin-right: 2px;
   }
 
-  mat-progress-spinner {
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 6px;
-    --mdc-circular-progress-active-indicator-color: var(--danger);
-    --mat-progress-spinner-active-indicator-color: var(--danger);
-  }
-
-  ::ng-deep .mat-mdc-progress-spinner circle {
-    stroke: var(--danger) !important;
-  }
-
   &:hover {
     background: #FDF1F0;
   }

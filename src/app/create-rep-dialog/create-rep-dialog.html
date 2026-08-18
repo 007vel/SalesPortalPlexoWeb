@@ -206,7 +206,7 @@
           }
         </div>
 
-        @if (submitFailed()) { <p class="error">Couldn't create the rep. Please try again.</p> }
+        @if (submitError(); as message) { <p class="error">{{ message }}</p> }
       </form>
     </mat-step>
 

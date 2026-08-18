@@ -27,9 +27,7 @@
       </mat-select>
     </mat-form-field>
     <button type="button" mat-stroked-button class="delete-rep-btn" [disabled]="deleting()" (click)="askDelete()">
-      @if (deleting()) {
-      <mat-progress-spinner mode="indeterminate" diameter="18" strokeWidth="2"></mat-progress-spinner>
-      } @else {
+      @if (!deleting()) {
       <mat-icon>delete</mat-icon>
       }
       @if (deleting()) {
@@ -861,7 +859,7 @@
 <p class="not-found">Rep not found.</p>
 }
 
-@if (viewing()) {
+@if (viewing() || deleting()) {
 <div class="ard-loading-overlay">
   <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
 </div>
