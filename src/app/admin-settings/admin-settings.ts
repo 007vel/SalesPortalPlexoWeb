@@ -115,12 +115,17 @@ export class AdminSettings {
   constructor() {
     this.trainingResourceStore.loadAdminUploads().subscribe();
     this.directory.loadAllDocuments().subscribe((docs) => this.documentsSignal.set(docs));
-    this.trainingHubLinksStore.load().subscribe();
+    this.trainingHubLinksStore.load().subscribe({
+      error: () => this.toast.show('Failed to load training links'),
+    });
   }
 
   startEditVideoLinks(): void {
     const links = this.videoLinks();
-    if (!links) return;
+    if (!links) {
+      this.toast.show('Training links are still loading — try again in a moment.');
+      return;
+    }
     this.videoLinksForm.setValue({
       productVideoEnglishLink: links.productVideoEnglishLink ?? '',
       productVideoSpanishLink: links.productVideoSpanishLink ?? '',
