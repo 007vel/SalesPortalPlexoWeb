@@ -27,9 +27,7 @@
       </mat-select>
     </mat-form-field>
     <button type="button" mat-stroked-button class="delete-rep-btn" [disabled]="deleting()" (click)="askDelete()">
-      @if (deleting()) {
-      <mat-progress-spinner mode="indeterminate" diameter="18" strokeWidth="2"></mat-progress-spinner>
-      } @else {
+      @if (!deleting()) {
       <mat-icon>delete</mat-icon>
       }
       @if (deleting()) {
@@ -96,12 +94,347 @@
             </mat-select>
           </mat-form-field>
 
-          @if (contactForm.controls.salesRepType.value === 'marketingConsultant') {
+          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>Address</mat-label>
+            <input matInput formControlName="address">
+          </mat-form-field>
+          <div class="field-row">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>City</mat-label>
+              <input matInput formControlName="city">
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>State</mat-label>
+              <input matInput formControlName="state">
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>Zip</mat-label>
+            <input matInput formControlName="zip">
+
+          </mat-form-field>
+
+          <div class="edit-actions">
+            <button type="button" mat-button [disabled]="savingContact()" (click)="cancelEditContact()">Cancel</button>
+            <button type="button" mat-flat-button class="save-btn" [disabled]="savingContact()"
+              (click)="saveContact()">{{ savingContact() ? 'Saving…' : 'Save' }}</button>
+          </div>
+        </form>
+
+        }
+        @else {
+        <ng-container *ngTemplateOutlet="field; context: {label:'Full name', value: rep.name}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Business name', value: rep.businessName}"></ng-container>
+
+        <ng-container *ngTemplateOutlet="field; context: {label:'Phone', value: rep.phone}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Email', value: rep.email, isEmail: true}"></ng-container>
+
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Sales rep type', value: repTypeLabel(rep.salesRepType)}"></ng-container>
+
+        <div class="address-box">
+          <div class="address-box-label"><mat-icon>home</mat-icon> Address</div>
+          <div class="address-box-value" [class.empty]="!fullAddress()">{{ fullAddress() || 'Not provided' }}</div>
+        </div>
+
+        }
+      </div>
+    </mat-card>
+
+
+    <mat-card class="section">
+      <div class="section-head editable">
+        <div>
+          <div class="eyebrow">Links</div>
+          <h2>Sales Leads</h2>
+        </div>
+        @if (!editingLinks()) {
+        <button type="button" mat-stroked-button class="edit-btn" (click)="startEditLinks()">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        }
+      </div>
+      <div class="section-body">
+        @if (editingLinks()) {
+        <form [formGroup]="linksForm" class="edit-form">
+          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>Sales Leads link</mat-label>
+            <input matInput type="url" formControlName="googleLink">
+          </mat-form-field>
+
+          <!-- <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>Pricing sheet link</mat-label>
+            <input matInput type="url" formControlName="pricingSheetLink">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+            <mat-label>PowerPoint link</mat-label>
+            <input matInput type="url" formControlName="powerPointLink">
+          </mat-form-field> -->
+
+          <div class="edit-actions">
+            <button type="button" mat-button [disabled]="savingLinks()" (click)="cancelEditLinks()">Cancel</button>
+            <button type="button" mat-flat-button class="save-btn" [disabled]="savingLinks()" (click)="saveLinks()">{{
+              savingLinks() ? 'Saving…' : 'Save' }}</button>
+          </div>
+        </form>
+        } @else {
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Sales Leads', value: rep.googleLink, isLink: true}"></ng-container>
+        <!-- <ng-container
+          *ngTemplateOutlet="field; context: {label:'Pricing sheet link', value: rep.pricingSheetLink, isLink: true}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'PowerPoint link', value: rep.powerPointLink, isLink: true}"></ng-container> -->
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="section">
+      <div class="section-head editable">
+        <div>
+          <div class="eyebrow">Onboarding</div>
+          <h2>Certification</h2>
+        </div>
+        @if (!editingCertification()) {
+        <button type="button" mat-stroked-button class="edit-btn" (click)="startEditCertification()">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        }
+      </div>
+      <div class="section-body no-pad">
+        <div class="edit-form-pad">
+          @if (editingCertification()) {
+          <form [formGroup]="certificationForm" class="edit-form">
+            <div class="cert-row">
+              <span>Passed certification</span>
+              <mat-slide-toggle formControlName="passedCertification" color="tertiary"></mat-slide-toggle>
+            </div>
+
+            <div class="cert-doc">
+              @if (certificationForm.controls.passedCertification.value) {
+              <div class="dropzone" [class.drag-active]="certDragActive()" [class.has-file]="!!rep.docs.certification"
+                (click)="triggerCertificateUpload(certificationFileInput)" (dragover)="onCertDragOver($event)"
+                (dragleave)="onCertDragLeave()" (drop)="onCertDrop($event)">
+                <input #certificationFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
+                  (change)="handleDocumentUpload('certification', 'Passed Certificate', $event)">
+
+                @if (rep.docs.certification; as doc) {
+                <div class="dz-file">
+                  <div class="dz-file-ic">
+                    <mat-icon>{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'picture_as_pdf' }}</mat-icon>
+                  </div>
+                  <div class="dz-file-txt">
+                    <b>{{ doc.name }}</b>
+                    <span>{{ formatDate(doc.uploadedAt) }} · Click to replace</span>
+                  </div>
+                  <div class="dz-file-actions">
+                    <button type="button" mat-icon-button class="dz-remove" title="View"
+                      (click)="$event.stopPropagation(); viewDocument(doc.oId, doc.name, 'Passed Certificate')">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button type="button" mat-icon-button class="dz-remove" title="Download"
+                      (click)="$event.stopPropagation(); downloadDocument(doc.oId, doc.name)">
+                      <mat-icon>download</mat-icon>
+                    </button>
+                    <button type="button" mat-icon-button class="dz-remove" title="Delete"
+                      [disabled]="isDeletingDoc('certification')"
+                      (click)="$event.stopPropagation(); askDeleteDocument('certification', 'Passed Certificate')">
+                      <mat-icon>{{ isDeletingDoc('certification') ? 'hourglass_empty' : 'delete' }}</mat-icon>
+                    </button>
+                  </div>
+                </div>
+                } @else {
+                <mat-icon class="dz-ic">{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'cloud_upload'
+                  }}</mat-icon>
+                <div class="dz-title">Drop the passed certificate here, or click to browse</div>
+                <div class="dz-hint">PDF or image</div>
+                }
+              </div>
+              } @else {
+              <p class="cert-doc-hint">Turn on "Passed certification" to upload the certificate.</p>
+              }
+            </div>
+
+            <div class="cert-row cert-row-wrap">
+              <span>Business card status</span>
+              <mat-button-toggle-group formControlName="businessCardStatus" aria-label="Business card status"
+                hideSingleSelectionIndicator class="status-toggle-group">
+                <mat-button-toggle value="notSent">Not sent</mat-button-toggle>
+                <mat-button-toggle value="waitingApproval">Waiting for approval</mat-button-toggle>
+                <mat-button-toggle value="approved">Approved</mat-button-toggle>
+              </mat-button-toggle-group>
+            </div>
+
+            <div class="cert-doc">
+              @if (certificationForm.controls.businessCardStatus.value !== 'notSent') {
+              <div class="dropzone" [class.drag-active]="businessCardsDragActive()"
+                [class.has-file]="!!rep.docs.businessCards" (click)="triggerBusinessCardsUpload(businessCardsFileInput)"
+                (dragover)="onBusinessCardsDragOver($event)" (dragleave)="onBusinessCardsDragLeave()"
+                (drop)="onBusinessCardsDrop($event)">
+                <input #businessCardsFileInput type="file" accept="image/*,video/*,.pdf" class="hidden-file-input"
+                  (change)="handleDocumentUpload('businessCards', 'Business Card Sample', $event)">
+
+                @if (rep.docs.businessCards; as doc) {
+                <div class="dz-file">
+                  <div class="dz-file-ic">
+                    <mat-icon>{{ isUploadingDoc('businessCards') ? 'hourglass_empty' : 'perm_media' }}</mat-icon>
+                  </div>
+                  <div class="dz-file-txt">
+                    <b>{{ doc.name }}</b>
+                    <span>{{ formatDate(doc.uploadedAt) }} · Click to replace</span>
+                  </div>
+                  <div class="dz-file-actions">
+                    <button type="button" mat-icon-button class="dz-remove" title="View"
+                      (click)="$event.stopPropagation(); viewDocument(doc.oId, doc.name, 'Business Card Sample')">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button type="button" mat-icon-button class="dz-remove" title="Download"
+                      (click)="$event.stopPropagation(); downloadDocument(doc.oId, doc.name)">
+                      <mat-icon>download</mat-icon>
+                    </button>
+                    <button type="button" mat-icon-button class="dz-remove" title="Delete"
+                      [disabled]="isDeletingDoc('businessCards')"
+                      (click)="$event.stopPropagation(); askDeleteDocument('businessCards', 'Business Card Sample')">
+                      <mat-icon>{{ isDeletingDoc('businessCards') ? 'hourglass_empty' : 'delete' }}</mat-icon>
+                    </button>
+                  </div>
+                </div>
+                } @else {
+                <mat-icon class="dz-ic">{{ isUploadingDoc('businessCards') ? 'hourglass_empty' : 'cloud_upload'
+                  }}</mat-icon>
+                <div class="dz-title">Drop the sample business card here, or click to browse</div>
+                <div class="dz-hint">Image, video, or PDF — uploading sets status to "Waiting for approval"</div>
+                }
+              </div>
+              } @else {
+              <p class="cert-doc-hint">Set status to "Waiting for approval" to upload the sample card.</p>
+              }
+            </div>
+
+            <div class="cert-row">
+              <span>Consultant fee paid</span>
+              <mat-slide-toggle formControlName="consultantFeePaid" color="tertiary"></mat-slide-toggle>
+            </div>
+          </form>
+          } @else {
+          <div class="cert-body">
+            <div class="cert-row">
+              <span>Passed certification</span>
+              <span class="badge" [class]="rep.passedCertification ? 'badge-active' : 'badge-inactive'">
+                <span class="badge-dot"></span>{{ rep.passedCertification ? 'Yes' : 'No' }}
+              </span>
+            </div>
+
+            <div class="cert-doc">
+              @if (rep.passedCertification) {
+              <div class="doc-row">
+                <div class="doc-info">
+                  <div class="doc-icon" [class.filled]="!!rep.docs.certification"><mat-icon>{{ rep.docs.certification ?
+                      'check' : 'description' }}</mat-icon></div>
+                  <div>
+                    <div class="doc-name">Passed Certificate</div>
+                    <div class="doc-status" [class.filled]="!!rep.docs.certification">
+                      {{ rep.docs.certification ?(rep.docs.certification.name + ' · ' +
+                      formatDate(rep.docs.certification.uploadedAt)) : 'Not uploaded' }}
+                    </div>
+                  </div>
+                </div>
+                @if (rep.docs.certification; as doc) {
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <button type="button" mat-icon-button class="action-btn" title="View"
+                    (click)="viewDocument(doc.oId, doc.name, 'Passed Certificate')"><mat-icon>visibility</mat-icon></button>
+                  <button type="button" mat-icon-button class="action-btn" title="Download"
+                    (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+                </div>
+                }
+              </div>
+              } @else {
+              <p class="cert-doc-hint">Turn on "Passed certification" to upload the certificate.</p>
+              }
+            </div>
+
+            <div class="cert-row">
+              <span>Business card status</span>
+              <span class="badge" [class]="cardStatusBadge(rep.businessCardStatus).cssClass">
+                <span class="badge-dot"></span>{{ cardStatusBadge(rep.businessCardStatus).label }}
+              </span>
+            </div>
+
+            <div class="cert-doc">
+              @if (rep.businessCardStatus !== 'notSent') {
+              <div class="doc-row">
+                <div class="doc-info">
+                  <div class="doc-icon" [class.filled]="!!rep.docs.businessCards"><mat-icon>{{ rep.docs.businessCards ?
+                      'check' : 'description' }}</mat-icon></div>
+                  <div>
+                    <div class="doc-name">Business Card Sample</div>
+                    <div class="doc-status" [class.filled]="!!rep.docs.businessCards">
+                      {{ rep.docs.businessCards ?(rep.docs.businessCards.name + ' · ' +
+                      formatDate(rep.docs.businessCards.uploadedAt)) : 'Not uploaded' }}
+                    </div>
+                  </div>
+                </div>
+                @if (rep.docs.businessCards; as doc) {
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <button type="button" mat-icon-button class="action-btn" title="View"
+                    (click)="viewDocument(doc.oId, doc.name, 'Business Card Sample')"><mat-icon>visibility</mat-icon></button>
+                  <button type="button" mat-icon-button class="action-btn" title="Download"
+                    (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+                </div>
+                }
+              </div>
+              } @else {
+              <p class="cert-doc-hint">Set status to "Waiting for approval" to upload the sample card.</p>
+              }
+            </div>
+
+            <div class="cert-row">
+              <span>Consultant fee paid</span>
+              <span class="badge" [class]="rep.consultantFeePaid ? 'badge-active' : 'badge-inactive'">
+                <span class="badge-dot"></span>{{ rep.consultantFeePaid ? 'Yes' : 'No' }}
+              </span>
+            </div>
+          </div>
+          }
+        </div>
+
+        @if (editingCertification()) {
+        <div class="edit-actions">
+          <button type="button" mat-button [disabled]="savingCertification()"
+            (click)="cancelEditCertification()">Cancel</button>
+          <button type="button" mat-flat-button class="save-btn" [disabled]="savingCertification()"
+            (click)="saveCertification()">{{ savingCertification() ? 'Saving…' : 'Save' }}</button>
+        </div>
+        }
+      </div>
+    </mat-card>
+
+  </div>
+
+  <div>
+
+
+    <mat-card class="section">
+      <div class="section-head editable">
+        <div>
+          <div class="eyebrow">Onboarding</div>
+          <h2>PWR Rewards email</h2>
+        </div>
+        @if (!editingPwrRewards()) {
+        <button type="button" mat-stroked-button class="edit-btn" (click)="startEditPwrRewards()">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        }
+      </div>
+      <div class="section-body">
+        @if (editingPwrRewards()) {
+        <form [formGroup]="pwrRewardsForm" class="edit-form">
           <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
             <mat-label>Plexo email</mat-label>
             <input matInput type="email" formControlName="pwrRewardsEmail">
-            @if (contactForm.controls.pwrRewardsEmail.touched &&
-            contactForm.controls.pwrRewardsEmail.hasError('pattern')) {
+            @if (pwrRewardsForm.controls.pwrRewardsEmail.touched &&
+            pwrRewardsForm.controls.pwrRewardsEmail.hasError('pattern')) {
             <mat-error>Enter a valid email address</mat-error> }
           </mat-form-field>
           <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
@@ -157,49 +490,15 @@
             <div class="dz-hint">PDF</div>
             }
           </div>
-          }
-
-          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-            <mat-label>Address</mat-label>
-            <input matInput formControlName="address">
-          </mat-form-field>
-          <div class="field-row">
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>City</mat-label>
-              <input matInput formControlName="city">
-            </mat-form-field>
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>State</mat-label>
-              <input matInput formControlName="state">
-            </mat-form-field>
-          </div>
-          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-            <mat-label>Zip</mat-label>
-            <input matInput formControlName="zip">
-
-          </mat-form-field>
 
           <div class="edit-actions">
-            <button type="button" mat-button [disabled]="savingContact()" (click)="cancelEditContact()">Cancel</button>
-            <button type="button" mat-flat-button class="save-btn" [disabled]="savingContact()"
-              (click)="saveContact()">{{ savingContact() ? 'Saving…' : 'Save' }}</button>
+            <button type="button" mat-button [disabled]="savingPwrRewards()"
+              (click)="cancelEditPwrRewards()">Cancel</button>
+            <button type="button" mat-flat-button class="save-btn" [disabled]="savingPwrRewards()"
+              (click)="savePwrRewards()">{{ savingPwrRewards() ? 'Saving…' : 'Save' }}</button>
           </div>
         </form>
-
-        }
-        @else {
-        <ng-container *ngTemplateOutlet="field; context: {label:'Full name', value: rep.name}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Business name', value: rep.businessName}"></ng-container>
-
-        <ng-container *ngTemplateOutlet="field; context: {label:'Phone', value: rep.phone}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Email', value: rep.email, isEmail: true}"></ng-container>
-
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Sales rep type', value: repTypeLabel(rep.salesRepType)}"></ng-container>
-
-        @if (rep.salesRepType === 'marketingConsultant') {
+        } @else {
         <ng-container
           *ngTemplateOutlet="field; context: {label:'Plexo email', value: rep.pwrRewardsEmail}"></ng-container>
         <ng-container
@@ -228,262 +527,8 @@
           }
         </div>
         }
-
-        <div class="address-box">
-          <div class="address-box-label"><mat-icon>home</mat-icon> Address</div>
-          <div class="address-box-value" [class.empty]="!fullAddress()">{{ fullAddress() || 'Not provided' }}</div>
-        </div>
-
-        }
       </div>
     </mat-card>
-
-    <!-- <mat-card class="section">
-      <div class="section-head editable">
-        <div>
-          <div class="eyebrow">Links</div>
-          <h2>Sales Leads</h2>
-        </div>
-        @if (!editingLinks()) {
-        <button type="button" mat-stroked-button class="edit-btn" (click)="startEditLinks()">
-          <mat-icon>edit</mat-icon> Edit
-        </button>
-        }
-      </div>
-      <div class="section-body">
-        @if (editingLinks()) {
-        <form [formGroup]="linksForm" class="edit-form">
-          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-            <mat-label>Sales Leads link</mat-label>
-            <input matInput type="url" formControlName="googleLink">
-          </mat-form-field> -->
-
-    <!-- <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-            <mat-label>Pricing sheet link</mat-label>
-            <input matInput type="url" formControlName="pricingSheetLink">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-            <mat-label>PowerPoint link</mat-label>
-            <input matInput type="url" formControlName="powerPointLink">
-          </mat-form-field> -->
-
-    <!-- <div class="edit-actions">
-            <button type="button" mat-button [disabled]="savingLinks()" (click)="cancelEditLinks()">Cancel</button>
-            <button type="button" mat-flat-button class="save-btn" [disabled]="savingLinks()" (click)="saveLinks()">{{
-              savingLinks() ? 'Saving…' : 'Save' }}</button>
-          </div>
-        </form>
-        } @else {
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Sales Leads', value: rep.googleLink, isLink: true}"></ng-container> -->
-    <!-- <ng-container
-          *ngTemplateOutlet="field; context: {label:'Pricing sheet link', value: rep.pricingSheetLink, isLink: true}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'PowerPoint link', value: rep.powerPointLink, isLink: true}"></ng-container> -->
-    <!-- }
-      </div>
-    </mat-card> -->
-
-    <mat-card class="section">
-      <div class="section-head editable">
-        <div>
-          <div class="eyebrow">Onboarding</div>
-          <h2>Certification</h2>
-        </div>
-        @if (!editingCertification()) {
-        <button type="button" mat-stroked-button class="edit-btn" (click)="startEditCertification()">
-          <mat-icon>edit</mat-icon> Edit
-        </button>
-        }
-      </div>
-      <div class="section-body no-pad">
-        <div class="edit-form-pad">
-          @if (editingCertification()) {
-          <form [formGroup]="certificationForm" class="edit-form">
-            <div class="cert-row">
-              <span>Passed certification</span>
-              <mat-slide-toggle formControlName="passedCertification" color="tertiary"></mat-slide-toggle>
-            </div>
-            <div class="cert-row">
-              <span>Business cards sent</span>
-              <mat-slide-toggle formControlName="businessCardsSent" color="tertiary"></mat-slide-toggle>
-            </div>
-            <div class="cert-row">
-              <span>Consultant fee paid</span>
-              <mat-slide-toggle formControlName="consultantFeePaid" color="tertiary"></mat-slide-toggle>
-            </div>
-          </form>
-          } @else {
-          <div class="cert-body">
-            <div class="cert-row">
-              <span>Passed certification</span>
-              <span class="badge" [class]="rep.passedCertification ? 'badge-active' : 'badge-inactive'">
-                <span class="badge-dot"></span>{{ rep.passedCertification ? 'Yes' : 'No' }}
-              </span>
-            </div>
-            <div class="cert-row">
-              <span>Business cards sent</span>
-              <span class="badge" [class]="rep.businessCardsSent ? 'badge-active' : 'badge-inactive'">
-                <span class="badge-dot"></span>{{ rep.businessCardsSent ? 'Yes' : 'No' }}
-              </span>
-            </div>
-            <div class="cert-row">
-              <span>Consultant fee paid</span>
-              <span class="badge" [class]="rep.consultantFeePaid ? 'badge-active' : 'badge-inactive'">
-                <span class="badge-dot"></span>{{ rep.consultantFeePaid ? 'Yes' : 'No' }}
-              </span>
-            </div>
-          </div>
-          }
-        </div>
-
-        <div class="cert-doc">
-          @if (editingCertification() ? certificationForm.controls.passedCertification.value :
-          rep.passedCertification) {
-          @if (editingCertification()) {
-          <div class="dropzone" [class.drag-active]="certDragActive()" [class.has-file]="!!rep.docs.certification"
-            (click)="triggerCertificateUpload(certificationFileInput)" (dragover)="onCertDragOver($event)"
-            (dragleave)="onCertDragLeave()" (drop)="onCertDrop($event)">
-            <input #certificationFileInput type="file" accept=".pdf,image/*" class="hidden-file-input"
-              (change)="handleDocumentUpload('certification', 'Passed Certificate', $event)">
-
-            @if (rep.docs.certification; as doc) {
-            <div class="dz-file">
-              <div class="dz-file-ic">
-                <mat-icon>{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'picture_as_pdf' }}</mat-icon>
-              </div>
-              <div class="dz-file-txt">
-                <b>{{ doc.name }}</b>
-                <span>{{ formatDate(doc.uploadedAt) }} · Click to replace</span>
-              </div>
-              <div class="dz-file-actions">
-                <button type="button" mat-icon-button class="dz-remove" title="View"
-                  (click)="$event.stopPropagation(); viewDocument(doc.oId, doc.name, 'Passed Certificate')">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button type="button" mat-icon-button class="dz-remove" title="Download"
-                  (click)="$event.stopPropagation(); downloadDocument(doc.oId, doc.name)">
-                  <mat-icon>download</mat-icon>
-                </button>
-                <button type="button" mat-icon-button class="dz-remove" title="Delete"
-                  [disabled]="isDeletingDoc('certification')"
-                  (click)="$event.stopPropagation(); askDeleteDocument('certification', 'Passed Certificate')">
-                  <mat-icon>{{ isDeletingDoc('certification') ? 'hourglass_empty' : 'delete' }}</mat-icon>
-                </button>
-              </div>
-            </div>
-            } @else {
-            <mat-icon class="dz-ic">{{ isUploadingDoc('certification') ? 'hourglass_empty' : 'cloud_upload'
-              }}</mat-icon>
-            <div class="dz-title">Drop the passed certificate here, or click to browse</div>
-            <div class="dz-hint">PDF or image</div>
-            }
-          </div>
-          } @else {
-          <div class="doc-row">
-            <div class="doc-info">
-              <div class="doc-icon" [class.filled]="!!rep.docs.certification"><mat-icon>{{ rep.docs.certification ?
-                  'check' : 'description' }}</mat-icon></div>
-              <div>
-                <div class="doc-name">Passed Certificate</div>
-                <div class="doc-status" [class.filled]="!!rep.docs.certification">
-                  {{ rep.docs.certification ?(rep.docs.certification.name + ' · ' +
-                  formatDate(rep.docs.certification.uploadedAt)) : 'Not uploaded' }}
-                </div>
-              </div>
-            </div>
-            @if (rep.docs.certification; as doc) {
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <button type="button" mat-icon-button class="action-btn" title="View"
-                (click)="viewDocument(doc.oId, doc.name, 'Passed Certificate')"><mat-icon>visibility</mat-icon></button>
-              <button type="button" mat-icon-button class="action-btn" title="Download"
-                (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
-            </div>
-            }
-          </div>
-          }
-          } @else {
-          <p class="cert-doc-hint">Turn on "Passed certification" to upload the certificate.</p>
-          }
-        </div>
-
-        @if (editingCertification()) {
-        <div class="edit-actions">
-          <button type="button" mat-button [disabled]="savingCertification()"
-            (click)="cancelEditCertification()">Cancel</button>
-          <button type="button" mat-flat-button class="save-btn" [disabled]="savingCertification()"
-            (click)="saveCertification()">{{ savingCertification() ? 'Saving…' : 'Save' }}</button>
-        </div>
-        }
-      </div>
-    </mat-card>
-    <mat-card class="section">
-      <div class="section-head editable">
-        <div>
-          <div class="eyebrow">Payouts</div>
-          <h2>Bank details</h2>
-        </div>
-        @if (!editingBankDetails()) {
-        <button type="button" mat-stroked-button class="edit-btn" (click)="startEditBankDetails()">
-          <mat-icon>edit</mat-icon> Edit
-        </button>
-        }
-      </div>
-      <div class="section-body">
-        @if (editingBankDetails()) {
-        <form [formGroup]="bankDetailsForm" class="edit-form">
-          <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-            <mat-label>Bank name</mat-label>
-            <input matInput formControlName="bankName">
-          </mat-form-field>
-
-          <div class="field-row">
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Routing number</mat-label>
-              <input matInput formControlName="routingNumber" inputmode="numeric" autocomplete="off">
-            </mat-form-field>
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Account number</mat-label>
-              <input matInput [type]="bankAccountNumberVisible() ? 'text' : 'password'" formControlName="accountNumber"
-                inputmode="numeric" autocomplete="off">
-              <mat-icon matSuffix role="button" tabindex="0" (click)="toggleBankAccountNumberVisibility()"
-                (keydown.enter)="toggleBankAccountNumberVisibility()"
-                (keydown.space)="toggleBankAccountNumberVisibility()"
-                [attr.aria-label]="bankAccountNumberVisible() ? 'Hide account number' : 'Show account number'"
-                [attr.aria-pressed]="bankAccountNumberVisible()">
-                {{ bankAccountNumberVisible() ? 'visibility_off' : 'visibility' }}
-              </mat-icon>
-            </mat-form-field>
-          </div>
-
-          <div class="edit-actions">
-            <button type="button" mat-button [disabled]="savingBankDetails()"
-              (click)="cancelEditBankDetails()">Cancel</button>
-            <button type="button" mat-flat-button class="save-btn" [disabled]="savingBankDetails()"
-              (click)="saveBankDetails()">{{ savingBankDetails() ? 'Saving…' : 'Save' }}</button>
-          </div>
-        </form>
-        } @else {
-        @if (rep.bankDetails; as bank) {
-        <ng-container *ngTemplateOutlet="field; context: {label:'Bank name', value: bank.bankName}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Routing number', value: bank.routingNumber}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Account number', value: bank.accountNumber}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Last updated', value: formatDate(bank.updatedAt)}"></ng-container>
-        } @else {
-        <div class="hub-empty">
-          <mat-icon>account_balance</mat-icon>
-          <div>No bank details on file yet.</div>
-        </div>
-        }
-        }
-      </div>
-    </mat-card>
-  </div>
-
-  <div>
 
     <mat-card class="section">
       <div class="section-head editable">
@@ -673,9 +718,72 @@
           *ngTemplateOutlet="field; context: {label:'Created', value: formatDate(rep.createdAt)}"></ng-container>
       </div>
     </mat-card>
+
   </div>
 </div>
+<mat-card class="section">
+  <div class="section-head editable">
+    <div>
+      <div class="eyebrow">Payouts</div>
+      <h2>Bank details</h2>
+    </div>
+    @if (!editingBankDetails()) {
+    <button type="button" mat-stroked-button class="edit-btn" (click)="startEditBankDetails()">
+      <mat-icon>edit</mat-icon> Edit
+    </button>
+    }
+  </div>
+  <div class="section-body">
+    @if (editingBankDetails()) {
+    <form [formGroup]="bankDetailsForm" class="edit-form">
+      <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+        <mat-label>Bank name</mat-label>
+        <input matInput formControlName="bankName">
+      </mat-form-field>
 
+      <div class="field-row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Routing number</mat-label>
+          <input matInput formControlName="routingNumber" inputmode="numeric" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Account number</mat-label>
+          <input matInput [type]="bankAccountNumberVisible() ? 'text' : 'password'" formControlName="accountNumber"
+            inputmode="numeric" autocomplete="off">
+          <mat-icon matSuffix role="button" tabindex="0" (click)="toggleBankAccountNumberVisibility()"
+            (keydown.enter)="toggleBankAccountNumberVisibility()" (keydown.space)="toggleBankAccountNumberVisibility()"
+            [attr.aria-label]="bankAccountNumberVisible() ? 'Hide account number' : 'Show account number'"
+            [attr.aria-pressed]="bankAccountNumberVisible()">
+            {{ bankAccountNumberVisible() ? 'visibility_off' : 'visibility' }}
+          </mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="edit-actions">
+        <button type="button" mat-button [disabled]="savingBankDetails()"
+          (click)="cancelEditBankDetails()">Cancel</button>
+        <button type="button" mat-flat-button class="save-btn" [disabled]="savingBankDetails()"
+          (click)="saveBankDetails()">{{ savingBankDetails() ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </form>
+    } @else {
+    @if (rep.bankDetails; as bank) {
+    <ng-container *ngTemplateOutlet="field; context: {label:'Bank name', value: bank.bankName}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Routing number', value: bank.routingNumber}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Account number', value: bank.accountNumber}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Last updated', value: formatDate(bank.updatedAt)}"></ng-container>
+    } @else {
+    <div class="hub-empty">
+      <mat-icon>account_balance</mat-icon>
+      <div>No bank details on file yet.</div>
+    </div>
+    }
+    }
+  </div>
+</mat-card>
 <mat-card class="section training-section">
   <div class="section-head">
     <div class="eyebrow">Training hub</div>
@@ -695,10 +803,17 @@
         @if (row.url) {
         <div style="display: flex; align-items: center; gap: 10px;">
           <button type="button" mat-icon-button class="action-btn" title="Open"
-            (click)="openVideoLink(row.url)"><mat-icon>open_in_new</mat-icon></button>
+            (click)="openVideoLink(row.url, row.label)"><mat-icon>open_in_new</mat-icon></button>
         </div>
         }
       </div>
+      @if (youtubeThumbnail(row.url); as thumb) {
+      <button type="button" class="hub-video-thumb-btn" title="Open {{ row.label }}"
+        (click)="openVideoLink(row.url, row.label)">
+        <img [src]="thumb" [alt]="row.label" class="hub-video-thumb">
+        <mat-icon class="hub-video-thumb-play">play_circle</mat-icon>
+      </button>
+      }
       }
       @for (slot of adminHubSlots(); track slot.key) {
       <div class="doc-row">
@@ -751,7 +866,7 @@
 <p class="not-found">Rep not found.</p>
 }
 
-@if (viewing()) {
+@if (viewing() || deleting()) {
 <div class="ard-loading-overlay">
   <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
 </div>

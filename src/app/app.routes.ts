@@ -7,12 +7,14 @@ import { RepLinks } from './rep-links/rep-links';
 import { RepDocuments } from './rep-documents/rep-documents';
 import { RepCommission } from './rep-commission/rep-commission';
 import { RepTrainingHub } from './rep-training-hub/rep-training-hub';
+import { RepContactUs } from './rep-contact-us/rep-contact-us';
 import { authGuard } from './auth/auth-guard';
 import { AdminReps } from './admin-reps/admin-reps';
 import { AdminRepsDetials } from './admin-reps-detials/admin-reps-detials';
 import { AdminSettings } from './admin-settings/admin-settings';
 import { adminAuthGuard } from './admin-auth/admin-auth-guard';
-
+import { MarketingHubAdmin } from './marketing-hub-admin/marketing-hub-admin';
+import { MarketingHubRep } from './marketing-hub-rep/marketing-hub-rep';
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
   { path: 'login', component: Login },
@@ -29,6 +31,8 @@ export const routes: Routes = [
       { path: 'documents', component: RepDocuments },
       { path: 'commission', component: RepCommission },
       { path: 'training', component: RepTrainingHub },
+      { path: 'contact-us', component: RepContactUs },
+      { path: 'marketing-hub', component: MarketingHubRep },
     ],
   },
   {
@@ -41,6 +45,7 @@ export const routes: Routes = [
       { path: 'reps', component: AdminReps },
       { path: 'reps/:repId', component: AdminRepsDetials },
       { path: 'settings', component: AdminSettings },
+      { path: 'marketing-hub', component: MarketingHubAdmin },  
     ],
   },
   { path: ':portalRepId', component: Login },

@@ -38,6 +38,50 @@
   border: 0;
 }
 
+.mv-youtube {
+  position: relative;
+  width: min(80vw, 900px);
+  aspect-ratio: 16 / 9;
+}
+
+.mv-youtube-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mv-youtube-spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+
+  mat-progress-spinner {
+    --mdc-circular-progress-active-indicator-color: var(--orange);
+    --mat-progress-spinner-active-indicator-color: var(--orange);
+  }
+
+  ::ng-deep .mat-mdc-progress-spinner circle {
+    stroke: var(--orange) !important;
+  }
+}
+
+.mv-youtube-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+
+  &.hidden {
+    visibility: hidden;
+  }
+}
+
 .mv-unsupported {
   display: flex;
   flex-direction: column;

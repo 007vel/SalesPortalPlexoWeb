@@ -4,70 +4,46 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { TrainingResource, TrainingResourceStore, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
-import { TrainingHubLinksStore, videoLinkRows } from '../training-hub-links-store/training-hub-links-store';
-import { Toast } from '../toast/toast';
+import { TrainingResource, TrainingResourceStore, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
-import { Auth } from '../auth/auth';
-import { extractYouTubeId, youTubeThumbnailUrl } from '../shared/youtube';
+import { Toast } from '../toast/toast';
+
+const ALL_CATEGORIES = 'all';
 
 @Component({
-  selector: 'app-rep-training-hub',
+  selector: 'app-marketing-hub-rep',
   imports: [MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule],
-  templateUrl: './rep-training-hub.html',
-  styleUrl: './rep-training-hub.scss',
+  templateUrl: './marketing-hub-rep.html',
+  styleUrl: './marketing-hub-rep.scss',
 })
-export class RepTrainingHub {
+export class MarketingHubRep {
   private readonly dialog = inject(MatDialog);
-  private readonly auth = inject(Auth);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
-  private readonly trainingHubLinksStore = inject(TrainingHubLinksStore);
   private readonly toast = inject(Toast);
+
   private static readonly MIN_VIEWING_MS = 200;
+
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
   readonly resources = this.trainingResourceStore.resources;
+  readonly loaded = signal(false);
   readonly viewing = signal(false);
-  readonly adminHubSlots = computed(() => matchHubSlots(this.resources().filter((r) => r.uploadedBy === 'Admin')));
-  readonly videoRows = computed(() => {
-    const links = this.trainingHubLinksStore.links();
-    return links ? videoLinkRows(links) : [];
-  });
 
-  readonly resourceLinkRows = computed(() => {
-    const links = this.trainingHubLinksStore.links();
-    if (!links) return [];
-    return [
-      { key: 'knowledgeBase', label: 'Knowledge Base', icon: 'menu_book', url: links.knowledgeBaseLink ?? '' }
-    ];
+  readonly categoryFilter = signal<string>(ALL_CATEGORIES);
+  readonly categories = computed(() => [...new Set(this.resources().map((r) => r.category))].sort((a, b) => a.localeCompare(b)));
+  readonly filteredResources = computed(() => {
+    const category = this.categoryFilter();
+    const list = this.resources();
+    return category === ALL_CATEGORIES ? list : list.filter((r) => r.category === category);
   });
-
-  readonly featured = computed(() => this.resources().find((r) => r.featured));
 
   constructor() {
-    const repId = this.auth.session()?.repId;
-    if (repId) {
-      this.trainingResourceStore.loadForRoleWithAdmin(repId).subscribe();
-    }
-    this.trainingHubLinksStore.load().subscribe();
-  }
-
-  openLink(url: string): void {
-    window.open(url, '_blank', 'noopener');
-  }
-
-  /** The thumbnail shown under each video row, kept visible at all times rather than just inside the viewer dialog. */
-  youtubeThumbnail(url: string): string | null {
-    const id = extractYouTubeId(url);
-    return id ? youTubeThumbnailUrl(id) : null;
-  }
-
-  openVideoLink(url: string, title: string): void {
-    if (this.dialog.openDialogs.length) return;
-    this.dialog.open(MediaViewerDialog, {
-      data: { title, type: 'youtube', url, fileName: title },
-      maxWidth: '90vw',
-      panelClass: 'media-viewer-panel',
+    this.trainingResourceStore.loadMarketing().subscribe({
+      next: () => this.loaded.set(true),
+      error: () => {
+        this.loaded.set(true);
+        this.toast.show('Failed to load Marketing Hub');
+      },
     });
   }
 
@@ -120,8 +96,8 @@ export class RepTrainingHub {
     });
   }
 
-   private stopViewing(startedAt: number, after: () => void): void {
-    const remaining = RepTrainingHub.MIN_VIEWING_MS - (Date.now() - startedAt);
+  private stopViewing(startedAt: number, after: () => void): void {
+    const remaining = MarketingHubRep.MIN_VIEWING_MS - (Date.now() - startedAt);
     setTimeout(() => {
       this.viewing.set(false);
       after();

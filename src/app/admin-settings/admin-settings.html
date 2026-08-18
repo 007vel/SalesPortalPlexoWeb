@@ -1,22 +1,29 @@
 <div class="admin-topbar">
   <div>
-    <h1>Training Admin </h1>
+    <h1>Training Hub Admin </h1>
     <p>Controls that apply to every rep across the portal.</p>
   </div>
 </div>
 
 <div class="stat-row">
   <mat-card class="stat-card hub-progress-card">
+
     <div class="hub-progress-top">
+
       <div>
         <div class="num">{{ filledResourceCount() }}<span class="of">/{{ totalResourceCount() }}</span></div>
         <div class="lbl">Training resources uploaded</div>
       </div>
+
       <div class="hub-progress-ring" [style.--pct]="(filledResourceCount() / totalResourceCount()) * 100">
         <mat-icon>school</mat-icon>
       </div>
     </div>
-    <div class="hub-progress-track"><div class="hub-progress-fill" [style.width.%]="(filledResourceCount() / totalResourceCount()) * 100"></div></div>
+
+    <div class="hub-progress-track">
+      <div class="hub-progress-fill" [style.width.%]="(filledResourceCount() / totalResourceCount()) * 100"></div>
+    </div>
+
   </mat-card>
 </div>
 
@@ -24,16 +31,20 @@
   <h3 class="section-title">Training &amp; resource hub</h3>
 </div>
 <mat-card class="table-card video-links-card">
+
   <div class="section-head editable">
+
     <div>
       <div class="eyebrow">Links</div>
       <h2>Training links</h2>
     </div>
+
     @if (!editingVideoLinks()) {
     <button type="button" mat-stroked-button class="edit-btn" (click)="startEditVideoLinks()">
       <mat-icon>edit</mat-icon> Edit
     </button>
     }
+
   </div>
   <div class="section-body">
     @if (editingVideoLinks()) {
@@ -42,40 +53,47 @@
         <mat-label>Product Video (English)</mat-label>
         <input matInput type="url" formControlName="productVideoEnglishLink">
       </mat-form-field>
+
       <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
         <mat-label>Product Video (Spanish)</mat-label>
         <input matInput type="url" formControlName="productVideoSpanishLink">
       </mat-form-field>
+
       <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
         <mat-label>Dashboard Video (English)</mat-label>
         <input matInput type="url" formControlName="dashboardVideoEnglishLink">
       </mat-form-field>
+
       <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
         <mat-label>Dashboard Video (Spanish)</mat-label>
         <input matInput type="url" formControlName="dashboardVideoSpanishLink">
       </mat-form-field>
+
       <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
         <mat-label>Knowledge Base</mat-label>
         <input matInput type="url" formControlName="knowledgeBaseLink">
       </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-        <mat-label>Sales Leads</mat-label>
-        <input matInput type="url" formControlName="salesLeadLink">
-      </mat-form-field>
+
 
       <div class="edit-actions">
-        <button type="button" mat-button [disabled]="savingVideoLinks()" (click)="cancelEditVideoLinks()">Cancel</button>
-        <button type="button" mat-flat-button class="save-btn" [disabled]="savingVideoLinks()" (click)="saveVideoLinks()">{{
+        <button type="button" mat-button [disabled]="savingVideoLinks()"
+          (click)="cancelEditVideoLinks()">Cancel</button>
+        <button type="button" mat-flat-button class="save-btn" [disabled]="savingVideoLinks()"
+          (click)="saveVideoLinks()">{{
           savingVideoLinks() ? 'Saving…' : 'Save' }}</button>
       </div>
     </form>
     } @else {
-    <ng-container *ngTemplateOutlet="field; context: {label:'Product Video (English)', value: videoLinks()?.productVideoEnglishLink}"></ng-container>
-    <ng-container *ngTemplateOutlet="field; context: {label:'Product Video (Spanish)', value: videoLinks()?.productVideoSpanishLink}"></ng-container>
-    <ng-container *ngTemplateOutlet="field; context: {label:'Dashboard Video (English)', value: videoLinks()?.dashboardVideoEnglishLink}"></ng-container>
-    <ng-container *ngTemplateOutlet="field; context: {label:'Dashboard Video (Spanish)', value: videoLinks()?.dashboardVideoSpanishLink}"></ng-container>
-    <ng-container *ngTemplateOutlet="field; context: {label:'Knowledge Base', value: videoLinks()?.knowledgeBaseLink}"></ng-container>
-    <ng-container *ngTemplateOutlet="field; context: {label:'Sales Leads', value: videoLinks()?.salesLeadLink}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Product Video (English)', value: videoLinks()?.productVideoEnglishLink, isVideo: true}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Product Video (Spanish)', value: videoLinks()?.productVideoSpanishLink, isVideo: true}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Dashboard Video (English)', value: videoLinks()?.dashboardVideoEnglishLink, isVideo: true}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Dashboard Video (Spanish)', value: videoLinks()?.dashboardVideoSpanishLink, isVideo: true}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Knowledge Base', value: videoLinks()?.knowledgeBaseLink}"></ng-container>
     }
   </div>
 </mat-card>
@@ -84,34 +102,47 @@
   @for (slot of hubSlots(); track slot.key) {
   <div class="hub-slot-row">
     <div class="hub-slot-info">
-      <div class="hub-slot-icon" [class.filled]="!!slot.resource"><mat-icon>{{ slot.resource ? 'check' : slot.icon }}</mat-icon></div>
+      <div class="hub-slot-icon" [class.filled]="!!slot.resource"><mat-icon>{{ slot.resource ? 'check' : slot.icon
+          }}</mat-icon></div>
       <div>
         <div class="hub-slot-name">{{ slot.label }}</div>
-        <div class="hub-slot-status" [class.filled]="!!slot.resource">{{ slot.resource ? slot.resource.fileName : 'Not uploaded yet' }}</div>
+        <div class="hub-slot-status" [class.filled]="!!slot.resource">{{ slot.resource ? slot.resource.fileName : 'Not
+          uploaded yet' }}</div>
       </div>
     </div>
     <div class="hub-slot-actions">
       @if (slot.resource; as res) {
-      <button type="button" mat-icon-button class="action-btn menu-trigger" title="More actions" [disabled]="slot.uploading"
-        [matMenuTriggerFor]="slotMenu" [matMenuTriggerData]="{ slot: slot, res: res, fileInput: fileInput }">
+      <button type="button" mat-icon-button class="action-btn menu-trigger" title="More actions"
+        [disabled]="slot.uploading" [matMenuTriggerFor]="slotMenu"
+        [matMenuTriggerData]="{ slot: slot, res: res, fileInput: fileInput }">
         <mat-icon>{{ slot.uploading ? 'hourglass_empty' : 'more_vert' }}</mat-icon>
       </button>
       } @else {
-      <button type="button" mat-icon-button class="action-btn upload-slot-btn" title="Upload file" [disabled]="slot.uploading" (click)="fileInput.click()">
+      <button type="button" mat-icon-button class="action-btn upload-slot-btn" title="Upload file"
+        [disabled]="slot.uploading" (click)="fileInput.click()">
         <mat-icon>{{ slot.uploading ? 'hourglass_empty' : 'upload_file' }}</mat-icon>
       </button>
       }
-      <input #fileInput type="file" [attr.accept]="slot.accept" class="hidden-file-input" (change)="handleSlotUpload(slot, $event)">
+      <input #fileInput type="file" [attr.accept]="slot.accept" class="hidden-file-input"
+        (change)="handleSlotUpload(slot, $event)">
     </div>
   </div>
   }
 </mat-card>
 
-<ng-template #field let-label="label" let-value="value">
+<ng-template #field let-label="label" let-value="value" let-isVideo="isVideo">
   <div class="readonly-field">
     <div class="rl">{{ label }}</div>
     @if (!value) {
     <div class="rv empty">Not set</div>
+    } @else if (isVideo) {
+    <div class="rv"><button type="button" class="link-btn" (click)="openVideoLink(value, label)">{{ value }}</button></div>
+    @if (youtubeThumbnail(value); as thumb) {
+    <button type="button" class="as-video-thumb-btn" title="Open {{ label }}" (click)="openVideoLink(value, label)">
+      <img [src]="thumb" [alt]="label" class="as-video-thumb">
+      <mat-icon class="as-video-thumb-play">play_circle</mat-icon>
+    </button>
+    }
     } @else {
     <div class="rv"><a [href]="value" target="_blank" rel="noopener">{{ value }}</a></div>
     }

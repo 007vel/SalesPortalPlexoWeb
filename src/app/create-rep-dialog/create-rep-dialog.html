@@ -1,6 +1,7 @@
-<div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid rgba(0, 0, 0, 0.12);">
+<div
+  style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid rgba(0, 0, 0, 0.12);">
   <h2 mat-dialog-title>Create new rep</h2>
- <button mat-icon-button aria-label="Close" (click)="cancel()">
+  <button mat-icon-button aria-label="Close" (click)="cancel()">
     <mat-icon>close</mat-icon>
   </button>
 </div>
@@ -148,11 +149,11 @@
         pages.</p>
 
       <form [formGroup]="linksForm">
-        <!-- <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
           <mat-label>Sales Leads link </mat-label>
           <mat-icon matPrefix>link</mat-icon>
           <input matInput type="url" formControlName="googleLink">
-        </mat-form-field> -->
+        </mat-form-field>
 
 
         <div class="dropzone" [class.drag-active]="pricingSheetDragActive()" [class.has-file]="pricingSheetFileName()"
@@ -205,7 +206,7 @@
           }
         </div>
 
-        @if (submitFailed()) { <p class="error">Couldn't create the rep. Please try again.</p> }
+        @if (submitError(); as message) { <p class="error">{{ message }}</p> }
       </form>
     </mat-step>
 

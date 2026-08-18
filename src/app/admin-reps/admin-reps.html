@@ -136,11 +136,7 @@
           (click)="copyLink(rep.portalLink)"><mat-icon>content_copy</mat-icon></button>
         <button type="button" mat-icon-button class="delete-btn" [title]="isDeleting(rep.oId) ? 'Deleting…' : 'Delete rep'"
           [disabled]="isDeleting(rep.oId)" (click)="askDelete(rep, $event)">
-          @if (isDeleting(rep.oId)) {
-          <mat-progress-spinner mode="indeterminate" diameter="18" strokeWidth="2"></mat-progress-spinner>
-          } @else {
           <mat-icon>delete</mat-icon>
-          }
         </button>
       </td>
     </ng-container>
@@ -151,3 +147,9 @@
   </table>
   }
 </mat-card>
+
+@if (anyDeleting()) {
+<div class="ar-loading-overlay">
+  <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
+</div>
+}

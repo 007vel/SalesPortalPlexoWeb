@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, switchMap } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,7 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { RepDirectoryStore, RepDocs, RepStatus, SalesRepType, portalLink, repStatusBadge, salesRepTypeLabel } from '../rep-directory-store/rep-directory-store';
+import { BusinessCardStatus, RepDirectoryStore, RepDocs, RepStatus, SalesRepType, businessCardStatusBadge, portalLink, repStatusBadge, salesRepTypeLabel } from '../rep-directory-store/rep-directory-store';
 import { TrainingResource, TrainingResourceStore, detectFileKind, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
 import { TrainingHubLinksStore, videoLinkRows } from '../training-hub-links-store/training-hub-links-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
@@ -20,13 +21,14 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { Toast } from '../toast/toast';
 import { formatDateMDY } from '../shared/format-date';
 import { PHONE_PATTERN, formatPhoneInput } from '../shared/format-phone';
+import { extractYouTubeId, youTubeThumbnailUrl } from '../shared/youtube';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 @Component({
   selector: 'app-admin-reps-detials',
   imports: [
-    RouterLink, ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule,
+    RouterLink, ReactiveFormsModule, MatButtonModule, MatButtonToggleModule, MatCardModule, MatFormFieldModule, MatIconModule,
     MatInputModule, MatProgressSpinnerModule, MatSelectModule, MatSlideToggleModule, NgTemplateOutlet,
   ],
   templateUrl: './admin-reps-detials.html',
@@ -59,6 +61,7 @@ export class AdminRepsDetials {
 
   readonly portalLink = portalLink;
   readonly statusBadge = repStatusBadge;
+  readonly cardStatusBadge = businessCardStatusBadge;
   readonly formatDate = formatDateMDY;
   readonly repTypeLabel = salesRepTypeLabel;
 
@@ -68,7 +71,7 @@ export class AdminRepsDetials {
 
   /** The same fixed Training & Resource Hub slots admin manages from Settings — read-only here, matched by category so this never shows stale free-form uploads from before that redesign. */
   readonly adminHubSlots = computed(() => matchHubSlots(this.adminResources()));
-  /** The 4 product/dashboard videos — plain YouTube links, not uploaded files, so they open in a new tab. */
+  /** The 4 product/dashboard videos — plain YouTube links, not uploaded files, so they open in the media viewer dialog. */
   readonly videoRows = computed(() => {
     const links = this.trainingHubLinksStore.links();
     return links ? videoLinkRows(links) : [];
@@ -78,8 +81,19 @@ export class AdminRepsDetials {
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
 
-  openVideoLink(url: string): void {
-    window.open(url, '_blank', 'noopener');
+  openVideoLink(url: string, title: string): void {
+    if (this.dialog.openDialogs.length) return;
+    this.dialog.open(MediaViewerDialog, {
+      data: { title, type: 'youtube', url, fileName: title },
+      maxWidth: '90vw',
+      panelClass: 'media-viewer-panel',
+    });
+  }
+
+  /** The thumbnail shown under each video row, kept visible at all times rather than just inside the viewer dialog. */
+  youtubeThumbnail(url: string): string | null {
+    const id = extractYouTubeId(url);
+    return id ? youTubeThumbnailUrl(id) : null;
   }
 
   constructor() {
@@ -126,7 +140,7 @@ export class AdminRepsDetials {
       .open(ConfirmDialog, {
         data: {
           title: 'Delete this rep?',
-          message: `"${rep.name || rep.repId}" and their records will be permanently removed. This can't be undone.`,
+          message: `Are you sure you want to delete?`,
           confirmLabel: 'Delete',
         },
       })
@@ -160,8 +174,6 @@ export class AdminRepsDetials {
     city: [''],
     state: [''],
     zip: [''],
-    pwrRewardsEmail: ['', Validators.pattern(EMAIL_PATTERN)],
-    pwrRewardsEmailPassword: [''],
   });
 
   /** Reformats the phone field as the admin types — strips non-digits and caps at 10 (`xxx-xxx-xxxx`). */
@@ -183,8 +195,6 @@ export class AdminRepsDetials {
       city: rep.city,
       state: rep.state,
       zip: rep.zip,
-      pwrRewardsEmail: rep.pwrRewardsEmail,
-      pwrRewardsEmailPassword: rep.pwrRewardsEmailPassword,
     });
     this.editingContact.set(true);
   }
@@ -214,8 +224,6 @@ export class AdminRepsDetials {
         city: v.city.trim(),
         state: v.state.trim(),
         zip: v.zip.trim(),
-        pwrRewardsEmail: v.pwrRewardsEmail.trim(),
-        pwrRewardsEmailPassword: v.pwrRewardsEmailPassword.trim(),
       })
       .pipe(finalize(() => this.savingContact.set(false)))
       .subscribe({
@@ -281,7 +289,7 @@ export class AdminRepsDetials {
   readonly savingCertification = signal(false);
   readonly certificationForm = this.fb.nonNullable.group({
     passedCertification: [false],
-    businessCardsSent: [false],
+    businessCardStatus: ['notSent' as BusinessCardStatus],
     consultantFeePaid: [false],
   });
 
@@ -290,7 +298,7 @@ export class AdminRepsDetials {
     if (!rep) return;
     this.certificationForm.setValue({
       passedCertification: rep.passedCertification,
-      businessCardsSent: rep.businessCardsSent,
+      businessCardStatus: rep.businessCardStatus,
       consultantFeePaid: rep.consultantFeePaid,
     });
     this.editingCertification.set(true);
@@ -308,7 +316,7 @@ export class AdminRepsDetials {
     this.directory
       .updateRep(rep.repId, {
         passedCertification: v.passedCertification,
-        businessCardsSent: v.businessCardsSent,
+        businessCardStatus: v.businessCardStatus,
         consultantFeePaid: v.consultantFeePaid,
       })
       .pipe(finalize(() => this.savingCertification.set(false)))
@@ -429,10 +437,55 @@ export class AdminRepsDetials {
       });
   }
 
-  // ----- PWR Rewards email (part of the Contact information form/card) + instructions PDF dropzone (drag/drop mirrors the create-rep dialog's upload UI) -----
+  // ----- PWR Rewards email edit (its own card/form, separate from Contact information) + instructions PDF dropzone (drag/drop mirrors the create-rep dialog's upload UI) -----
+  readonly editingPwrRewards = signal(false);
+  readonly savingPwrRewards = signal(false);
   readonly pwrRewardsPasswordVisible = signal(false);
   readonly uploadingPwrInstructions = signal(false);
   readonly pwrInstructionsDragActive = signal(false);
+  readonly pwrRewardsForm = this.fb.nonNullable.group({
+    pwrRewardsEmail: ['', Validators.pattern(EMAIL_PATTERN)],
+    pwrRewardsEmailPassword: [''],
+  });
+
+  startEditPwrRewards(): void {
+    const rep = this.rep();
+    if (!rep) return;
+    this.pwrRewardsForm.setValue({
+      pwrRewardsEmail: rep.pwrRewardsEmail,
+      pwrRewardsEmailPassword: rep.pwrRewardsEmailPassword,
+    });
+    this.editingPwrRewards.set(true);
+  }
+
+  cancelEditPwrRewards(): void {
+    this.editingPwrRewards.set(false);
+  }
+
+  savePwrRewards(): void {
+    this.pwrRewardsForm.markAllAsTouched();
+    if (this.pwrRewardsForm.invalid) {
+      this.toast.show('Fix the highlighted fields before saving.');
+      return;
+    }
+    const rep = this.rep();
+    if (!rep) return;
+    const v = this.pwrRewardsForm.getRawValue();
+    this.savingPwrRewards.set(true);
+    this.directory
+      .updateRep(rep.repId, {
+        pwrRewardsEmail: v.pwrRewardsEmail.trim(),
+        pwrRewardsEmailPassword: v.pwrRewardsEmailPassword.trim(),
+      })
+      .pipe(finalize(() => this.savingPwrRewards.set(false)))
+      .subscribe({
+        next: () => {
+          this.editingPwrRewards.set(false);
+          this.toast.show('PWR Rewards email updated');
+        },
+        error: () => this.toast.show('Failed to update PWR Rewards email'),
+      });
+  }
 
   togglePwrRewardsPasswordVisibility(): void {
     this.pwrRewardsPasswordVisible.update((visible) => !visible);
@@ -563,6 +616,31 @@ export class AdminRepsDetials {
     if (file) this.uploadDocument('certification', 'Passed Certificate', file);
   }
 
+  // ----- Business cards dropzone (drag/drop mirrors the Passed Certificate dropzone above) -----
+  readonly businessCardsDragActive = signal(false);
+
+  /** Ignores clicks while an upload for this slot is already in flight, so a slow request can't be fired twice. */
+  triggerBusinessCardsUpload(input: HTMLInputElement): void {
+    if (this.isUploadingDoc('businessCards')) return;
+    input.click();
+  }
+
+  onBusinessCardsDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.businessCardsDragActive.set(true);
+  }
+
+  onBusinessCardsDragLeave(): void {
+    this.businessCardsDragActive.set(false);
+  }
+
+  onBusinessCardsDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.businessCardsDragActive.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file) this.uploadDocument('businessCards', 'Business Cards', file);
+  }
+
   /** Uploads (or replaces) a document slot — same generic `api/documents` upload the create-rep dialog and rep's own Documents page already use, just triggered from the admin Rep Details page instead. */
   private uploadDocument(kind: keyof RepDocs, label: string, file: File): void {
     const rep = this.rep();
@@ -581,7 +659,13 @@ export class AdminRepsDetials {
         ),
       )
       .subscribe({
-        next: () => this.toast.show(`${label} uploaded`),
+        next: () => {
+          this.toast.show(`${label} uploaded`);
+          // A fresh sample always needs fresh review, regardless of whatever status it was in before.
+          if (kind === 'businessCards') {
+            this.directory.updateRep(rep.repId, { businessCardStatus: 'waitingApproval' }).subscribe();
+          }
+        },
         error: () => this.toast.show(`Failed to upload ${label}`),
       });
   }

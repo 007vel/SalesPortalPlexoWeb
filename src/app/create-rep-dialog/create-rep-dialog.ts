@@ -129,7 +129,7 @@ export class CreateRepDialog {
   readonly powerPointFileSizeLabel = computed(() => fileSizeLabel(this.docSlots.powerPoint.size()));
 
   readonly submitting = signal(false);
-  readonly submitFailed = signal(false);
+  readonly submitError = signal<string | null>(null);
 
   cancel(): void {
     this.dialogRef.close(undefined);
@@ -237,7 +237,7 @@ export class CreateRepDialog {
     const pricingSheetFile = this.docSlots.pricingSheet.file();
     const powerPointFile = this.docSlots.powerPoint.file();
 
-    this.submitFailed.set(false);
+    this.submitError.set(null);
     this.submitting.set(true);
 
     this.directory
@@ -253,7 +253,7 @@ export class CreateRepDialog {
         zip: address.zip.trim(),
         status: info.status,
         passedCertification: false,
-        businessCardsSent: false,
+        businessCardStatus: 'notSent',
         consultantFeePaid: false,
         googleLink: links.googleLink.trim(),
         resourceLink: links.resourceLink.trim(),
@@ -289,12 +289,36 @@ export class CreateRepDialog {
       .subscribe({
         next: (rep) => this.dialogRef.close(rep),
         error: (err: HttpErrorResponse) => {
+          const message = extractApiErrorMessage(err);
           if (err.status === 409) {
-            this.toast.show(typeof err.error === 'string' ? err.error : `Email '${info.email}' is already in use.`);
+            this.toast.show(message ?? `Email '${info.email}' is already in use.`);
             return;
           }
-          this.submitFailed.set(true);
+          this.submitError.set(message ?? "Couldn't create the rep. Please try again.");
         },
       });
   }
+}
+
+/** Pulls a human-readable message out of a failed HTTP response, covering the shapes the API returns:
+ * a plain string body, ASP.NET's ValidationProblemDetails ({ errors: { field: [msg] } }), a
+ * ProblemDetails-style { title, detail }, or a generic { message }. */
+function extractApiErrorMessage(err: HttpErrorResponse): string | null {
+  const body = err.error;
+  if (typeof body === 'string' && body.trim()) return body;
+
+  if (body && typeof body === 'object') {
+    if (body.errors && typeof body.errors === 'object') {
+      const messages = Object.values(body.errors as Record<string, unknown>)
+        .flat()
+        .filter((m): m is string => typeof m === 'string' && !!m);
+      if (messages.length) return messages.join(' ');
+    }
+    if (typeof body.detail === 'string' && body.detail.trim()) return body.detail;
+    if (typeof body.message === 'string' && body.message.trim()) return body.message;
+    if (typeof body.title === 'string' && body.title.trim()) return body.title;
+  }
+
+  if (typeof err.message === 'string' && err.message.trim()) return err.message;
+  return null;
 }

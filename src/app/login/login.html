@@ -47,6 +47,13 @@
 <div class="lg-panel">
   <div class="lg-card">
 
+    @if (portalRedirect()) {
+    <div class="lg-portal-loading">
+      <mat-progress-spinner mode="indeterminate" diameter="48" strokeWidth="4"></mat-progress-spinner>
+      <p>Signing you in…</p>
+    </div>
+    } @else {
+
     @if (submitting() || adminSubmitting()) {
     <div class="lg-loading-overlay">
       <mat-progress-spinner mode="indeterminate" diameter="48" strokeWidth="4"></mat-progress-spinner>
@@ -159,5 +166,6 @@
 
     <div class="lg-foot">Can't find your Rep ID? <a href="#" (click)="$event.preventDefault(); askAdmin()">Ask your admin</a></div>
 
+    }
   </div>
 </div>

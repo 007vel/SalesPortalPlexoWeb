@@ -116,14 +116,16 @@ export class AdminReps {
     return this.deletingIds().has(oId);
   }
 
+  readonly anyDeleting = computed(() => this.deletingIds().size > 0);
+
   askDelete(rep: RepRecord, event: Event): void {
     event.stopPropagation();
     if (this.dialog.openDialogs.length) return;
     this.dialog
       .open(ConfirmDialog, {
         data: {
-          title: 'Delete this rep?',
-          message: `"${rep.name || rep.repId}" and their records will be permanently removed. This can't be undone.`,
+          title: '',
+          message: `Are you sure you want to delete?`,
           confirmLabel: 'Delete',
         },
       })

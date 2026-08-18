@@ -17,6 +17,7 @@ import { RepDirectoryStore, RepDocumentRecord } from '../rep-directory-store/rep
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { Toast } from '../toast/toast';
+import { extractYouTubeId, youTubeThumbnailUrl } from '../shared/youtube';
 
 const DOC_KIND_LABEL: Record<string, string> = { agreement: 'Representative Agreement', w4: 'W-4 Form' };
 
@@ -115,12 +116,17 @@ export class AdminSettings {
   constructor() {
     this.trainingResourceStore.loadAdminUploads().subscribe();
     this.directory.loadAllDocuments().subscribe((docs) => this.documentsSignal.set(docs));
-    this.trainingHubLinksStore.load().subscribe();
+    this.trainingHubLinksStore.load().subscribe({
+      error: () => this.toast.show('Failed to load training links'),
+    });
   }
 
   startEditVideoLinks(): void {
     const links = this.videoLinks();
-    if (!links) return;
+    if (!links) {
+      this.toast.show('Training links are still loading — try again in a moment.');
+      return;
+    }
     this.videoLinksForm.setValue({
       productVideoEnglishLink: links.productVideoEnglishLink ?? '',
       productVideoSpanishLink: links.productVideoSpanishLink ?? '',
@@ -134,6 +140,22 @@ export class AdminSettings {
 
   cancelEditVideoLinks(): void {
     this.editingVideoLinks.set(false);
+  }
+
+  openVideoLink(url: string, title: string): void {
+    if (this.dialog.openDialogs.length) return;
+    this.dialog.open(MediaViewerDialog, {
+      data: { title, type: 'youtube', url, fileName: title },
+      maxWidth: '90vw',
+      panelClass: 'media-viewer-panel',
+    });
+  }
+
+  /** The thumbnail shown under each video link, kept visible at all times rather than just inside the viewer dialog. */
+  youtubeThumbnail(url: string | null | undefined): string | null {
+    if (!url) return null;
+    const id = extractYouTubeId(url);
+    return id ? youTubeThumbnailUrl(id) : null;
   }
 
   saveVideoLinks(): void {

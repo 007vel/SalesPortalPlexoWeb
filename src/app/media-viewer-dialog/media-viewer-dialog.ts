@@ -1,9 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TrainingResourceType } from '../training-resource-store/training-resource-store';
+import { extractYouTubeId, youTubeEmbedUrl, youTubeThumbnailUrl } from '../shared/youtube';
 
 export interface MediaViewerDialogData {
   title: string;
@@ -19,7 +21,7 @@ export interface MediaViewerDialogData {
 
 @Component({
   selector: 'app-media-viewer-dialog',
-  imports: [MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [MatDialogModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './media-viewer-dialog.html',
   styleUrl: './media-viewer-dialog.scss',
 })
@@ -30,6 +32,14 @@ export class MediaViewerDialog {
 
   /** Only iframe (`pdf`) needs a resource-url trust bypass — img/video src accept blob: URLs directly. */
   readonly safeUrl: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.data.url);
+
+  private readonly youtubeId = this.data.type === 'youtube' ? extractYouTubeId(this.data.url) : null;
+  readonly youtubeThumbnailUrl = this.youtubeId ? youTubeThumbnailUrl(this.youtubeId) : null;
+  readonly youtubeEmbedUrl: SafeResourceUrl | null = this.youtubeId
+    ? this.sanitizer.bypassSecurityTrustResourceUrl(youTubeEmbedUrl(this.youtubeId))
+    : null;
+  /** Shows the thumbnail as a fast-loading placeholder until the (slower) YouTube iframe reports it's ready. */
+  readonly youtubeReady = signal(false);
 
   close(): void {
     this.dialogRef.close();

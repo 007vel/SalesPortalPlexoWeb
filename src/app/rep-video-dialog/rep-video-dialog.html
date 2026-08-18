@@ -1,9 +1,13 @@
 <h2 mat-dialog-title>
-  <mat-icon class="title-ic">cloud_upload</mat-icon>
-  Add training material
+  <mat-icon class="title-ic">{{ isEditMode ? 'edit' : 'cloud_upload' }}</mat-icon>
+  {{ isEditMode ? 'Edit resource' : 'Add training material' }}
 </h2>
 <mat-dialog-content>
+  @if (isEditMode) {
+  <p class="sub">Update this resource's details, or replace the file.</p>
+  } @else {
   <p class="sub">Share a video, image, or PDF with the team. It appears in the Training &amp; Resource Hub for everyone.</p>
+  }
 
   <div class="dropzone" [class.drag-active]="dragActive()" [class.has-file]="pendingFileName()"
     (click)="fileInput.click()" (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)">
@@ -19,7 +23,7 @@
       <div class="dz-file-ic {{ pendingFileKind() }}"><mat-icon>{{ pendingFileIcon() }}</mat-icon></div>
       <div class="dz-file-txt">
         <b>{{ pendingFileName() }}</b>
-        <span>{{ pendingFileSizeLabel() }}</span>
+        <span>{{ pendingFileSizeLabel() || (isEditMode ? 'Current file — click to replace' : '') }}</span>
       </div>
       <button type="button" mat-icon-button class="dz-remove" title="Remove file" (click)="clearFile($event)">
         <mat-icon>close</mat-icon>
@@ -76,11 +80,11 @@
     <mat-progress-spinner mode="indeterminate" diameter="24" strokeWidth="3"></mat-progress-spinner>
     }
     @if (uploaded()) {
-    <span>Added</span>
+    <span>{{ isEditMode ? 'Saved' : 'Added' }}</span>
     } @else if (submitting()) {
-    <span>Adding…</span>
+    <span>{{ isEditMode ? 'Saving…' : 'Adding…' }}</span>
     } @else {
-    <span>Add to hub</span>
+    <span>{{ isEditMode ? 'Save changes' : 'Add to hub' }}</span>
     }
   </button>
 </mat-dialog-actions>

@@ -8,6 +8,8 @@ export type RepStatus = 'active' | 'pending' | 'inactive';
 
 export type SalesRepType = 'referralAgent' | 'marketingConsultant';
 
+export type BusinessCardStatus = 'notSent' | 'waitingApproval' | 'approved';
+
 export interface RepDocRecord {
   oId: number;
   name: string;
@@ -22,9 +24,11 @@ export interface RepDocs {
   powerPoint: RepDocRecord | null;
   /** How-to-access instructions for the rep's PWR Rewards email — admin-uploaded PDF, details view only. */
   pwrInstructions: RepDocRecord | null;
+  /** Proof (photo/video) that business cards were sent — admin-uploaded, only shown once "Business cards sent" is Yes. */
+  businessCards: RepDocRecord | null;
 }
 
-const EMPTY_DOCS: RepDocs = { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null };
+const EMPTY_DOCS: RepDocs = { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null, businessCards: null };
 
 /** A single document row across every rep — used by admin oversight views. */
 export interface RepDocumentRecord {
@@ -59,7 +63,7 @@ export interface RepRecord {
   portalLink: string;
   status: RepStatus;
   passedCertification: boolean;
-  businessCardsSent: boolean;
+  businessCardStatus: BusinessCardStatus;
   consultantFeePaid: boolean;
   docs: RepDocs;
   bankDetails: RepBankDetails | null;
@@ -87,7 +91,7 @@ export interface NewRepInput {
   zip: string;
   status: RepStatus;
   passedCertification: boolean;
-  businessCardsSent: boolean;
+  businessCardStatus: BusinessCardStatus;
   consultantFeePaid: boolean;
   googleLink?: string;
   resourceLink?: string;
@@ -129,7 +133,7 @@ interface RepDto {
   portalLink: string | null;
   status: number;
   passedCertification: boolean;
-  businessCardsSent: boolean;
+  businessCardStatus: number;
   consultantFeePaid: boolean;
   createdAt: string;
   updatedAt: string;
@@ -158,7 +162,7 @@ interface RepWriteDto {
   powerPointLink: string;
   status: number;
   passedCertification: boolean;
-  businessCardsSent: boolean;
+  businessCardStatus: number;
   consultantFeePaid: boolean;
 }
 
@@ -222,6 +226,9 @@ const STATUS_FROM_API: RepStatus[] = ['inactive', 'pending', 'active'];
 const SALES_REP_TYPE_TO_API: Record<SalesRepType, number> = { referralAgent: 0, marketingConsultant: 1 };
 const SALES_REP_TYPE_FROM_API: SalesRepType[] = ['referralAgent', 'marketingConsultant'];
 
+const BUSINESS_CARD_STATUS_TO_API: Record<BusinessCardStatus, number> = { notSent: 0, waitingApproval: 1, approved: 2 };
+const BUSINESS_CARD_STATUS_FROM_API: BusinessCardStatus[] = ['notSent', 'waitingApproval', 'approved'];
+
 /** Last `days` calendar days ending today, each credited $0 — nothing's been credited yet. */
 export function emptyCommissionHistory(days: number): CommissionDay[] {
   const out: CommissionDay[] = [];
@@ -247,6 +254,17 @@ export function repStatusBadge(status: RepStatus): { cssClass: string; label: st
 
 export function salesRepTypeLabel(type: SalesRepType): string {
   return type === 'marketingConsultant' ? 'Marketing Consultant' : 'Referral Agent';
+}
+
+export function businessCardStatusBadge(status: BusinessCardStatus): { cssClass: string; label: string } {
+  switch (status) {
+    case 'approved':
+      return { cssClass: 'badge-active', label: 'Approved' };
+    case 'waitingApproval':
+      return { cssClass: 'badge-pending', label: 'Waiting for approval' };
+    case 'notSent':
+      return { cssClass: 'badge-inactive', label: 'Not sent' };
+  }
 }
 
 export function docsComplete(rep: Pick<RepRecord, 'docs'>): boolean {
@@ -326,7 +344,7 @@ export class RepDirectoryStore {
       powerPointLink: input.powerPointLink ?? '',
       status: STATUS_TO_API[input.status],
       passedCertification: input.passedCertification,
-      businessCardsSent: input.businessCardsSent,
+      businessCardStatus: BUSINESS_CARD_STATUS_TO_API[input.businessCardStatus],
       consultantFeePaid: input.consultantFeePaid,
     };
     return this.api.post<RepDto>('reps', body).pipe(
@@ -418,7 +436,7 @@ export class RepDirectoryStore {
       map((dtos): RepDocs => {
         const docs: RepDocs = { ...EMPTY_DOCS };
         for (const dto of dtos) {
-          if (dto.kind === 'agreement' || dto.kind === 'w4' || dto.kind === 'certification' || dto.kind === 'pricingSheet' || dto.kind === 'powerPoint' || dto.kind === 'pwrInstructions') {
+          if (dto.kind === 'agreement' || dto.kind === 'w4' || dto.kind === 'certification' || dto.kind === 'pricingSheet' || dto.kind === 'powerPoint' || dto.kind === 'pwrInstructions' || dto.kind === 'businessCards') {
             docs[dto.kind] = { oId: dto.oId, name: dto.fileName, uploadedAt: dto.uploadedAt.slice(0, 10) };
           }
         }
@@ -469,7 +487,7 @@ export class RepDirectoryStore {
       powerPointLink: merged.powerPointLink,
       status: STATUS_TO_API[merged.status],
       passedCertification: merged.passedCertification,
-      businessCardsSent: merged.businessCardsSent,
+      businessCardStatus: BUSINESS_CARD_STATUS_TO_API[merged.businessCardStatus],
       consultantFeePaid: merged.consultantFeePaid,
       contractWizardLink: merged.contractWizardLink,
       contractWizardUsername: merged.contractWizardUsername,
@@ -506,7 +524,7 @@ export class RepDirectoryStore {
       portalLink: dto.portalLink ?? '',
       status: STATUS_FROM_API[dto.status] ?? 'pending',
       passedCertification: dto.passedCertification,
-      businessCardsSent: dto.businessCardsSent,
+      businessCardStatus: BUSINESS_CARD_STATUS_FROM_API[dto.businessCardStatus] ?? 'notSent',
       consultantFeePaid: dto.consultantFeePaid,
       docs: existing?.docs ?? { ...EMPTY_DOCS },
       bankDetails: existing?.bankDetails ?? null,

@@ -63,7 +63,7 @@ describe('AdminRepsDetials', () => {
     flushInitialReps();
 
     directory
-      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false })
+      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardStatus: 'notSent', consultantFeePaid: false })
       .subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
@@ -103,7 +103,7 @@ describe('AdminRepsDetials', () => {
     flushInitialReps();
 
     directory
-      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false })
+      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardStatus: 'notSent', consultantFeePaid: false })
       .subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 
@@ -142,9 +142,9 @@ describe('AdminRepsDetials', () => {
     flushInitialReps();
 
     directory
-      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false })
+      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardStatus: 'notSent', consultantFeePaid: false })
       .subscribe();
-    httpMock.expectOne(apiUrl('reps')).flush(repDto({ passedCertification: false, businessCardsSent: false, consultantFeePaid: false }));
+    httpMock.expectOne(apiUrl('reps')).flush(repDto({ passedCertification: false, businessCardStatus: 0, consultantFeePaid: false }));
 
     fixture = TestBed.createComponent(AdminRepsDetials);
     fixture.componentRef.setInput('repId', '1001');
@@ -163,15 +163,15 @@ describe('AdminRepsDetials', () => {
     await fixture.whenStable();
 
     component.startEditCertification();
-    component.certificationForm.setValue({ passedCertification: true, businessCardsSent: true, consultantFeePaid: false });
+    component.certificationForm.setValue({ passedCertification: true, businessCardStatus: 'waitingApproval', consultantFeePaid: false });
     component.saveCertification();
 
     const req = httpMock.expectOne(apiUrl('reps/1'));
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(
-      expect.objectContaining({ passedCertification: true, businessCardsSent: true, consultantFeePaid: false }),
+      expect.objectContaining({ passedCertification: true, businessCardStatus: 1, consultantFeePaid: false }),
     );
-    req.flush(repDto({ passedCertification: true, businessCardsSent: true, consultantFeePaid: false }));
+    req.flush(repDto({ passedCertification: true, businessCardStatus: 1, consultantFeePaid: false }));
 
     expect(component.editingCertification()).toBe(false);
   });
@@ -181,7 +181,7 @@ describe('AdminRepsDetials', () => {
     flushInitialReps();
 
     directory
-      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardsSent: false, consultantFeePaid: false })
+      .createRep({ name: 'Jordan Reyes', email: 'jordan@example.com', phone: '', salesRepType: 'referralAgent', address: '', city: '', state: '', zip: '', status: 'pending', passedCertification: false, businessCardStatus: 'notSent', consultantFeePaid: false })
       .subscribe();
     httpMock.expectOne(apiUrl('reps')).flush(repDto());
 

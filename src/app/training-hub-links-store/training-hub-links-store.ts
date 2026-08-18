@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, of, switchMap, tap } from 'rxjs';
 import { Api } from '../api/api';
 
 export interface TrainingHubLinks {
@@ -41,10 +41,14 @@ export class TrainingHubLinksStore {
 
   readonly links = this.linksSignal.asReadonly();
 
-  /** Fetches the single links row — there's always exactly one (seeded by the backend). */
+  /**
+   * Fetches the single links row — normally seeded once by the backend deployment script, but
+   * falls back to creating it here if that seed never ran (e.g. a fresh/unseeded database),
+   * so the admin isn't stuck with a permanently-empty row that can't be edited.
+   */
   load(): Observable<TrainingHubLinks> {
     return this.api.get<TrainingHubLinks[]>('traininghublinks').pipe(
-      map((rows) => rows[0]),
+      switchMap((rows) => (rows[0] ? of(rows[0]) : this.create())),
       tap((links) => this.linksSignal.set(links)),
     );
   }
@@ -53,5 +57,16 @@ export class TrainingHubLinksStore {
     return this.api.put<TrainingHubLinks>(`traininghublinks/${oId}`, input).pipe(
       tap((links) => this.linksSignal.set(links)),
     );
+  }
+
+  private create(): Observable<TrainingHubLinks> {
+    return this.api.post<TrainingHubLinks>('traininghublinks', {
+      productVideoEnglishLink: '',
+      productVideoSpanishLink: '',
+      dashboardVideoEnglishLink: '',
+      dashboardVideoSpanishLink: '',
+      knowledgeBaseLink: '',
+      salesLeadLink: '',
+    });
   }
 }
