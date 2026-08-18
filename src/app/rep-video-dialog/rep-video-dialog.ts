@@ -9,7 +9,15 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../auth/auth';
 import { Toast } from '../toast/toast';
-import { TrainingResourceStore, TrainingResourceType, detectFileKind } from '../training-resource-store/training-resource-store';
+import { HubType, TrainingResource, TrainingResourceStore, TrainingResourceType, detectFileKind } from '../training-resource-store/training-resource-store';
+
+export interface RepVideoDialogData {
+  mode?: 'admin';
+  /** Passed through to uploadDocument() when creating — omit for Training Hub, 'Marketing' for Marketing Hub. */
+  hubType?: HubType;
+  /** Presence switches the dialog into edit mode, pre-filling the form from this resource. */
+  edit?: TrainingResource;
+}
 
 @Component({
   selector: 'app-rep-video-dialog',
@@ -32,14 +40,19 @@ export class RepVideoDialog {
   private readonly toast = inject(Toast);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
   private readonly dialogRef = inject(MatDialogRef<RepVideoDialog, boolean>);
-  private readonly data = inject<{ mode?: 'admin' } | null>(MAT_DIALOG_DATA, { optional: true });
+  private readonly data = inject<RepVideoDialogData | null>(MAT_DIALOG_DATA, { optional: true });
 
   readonly isAdminUpload = this.data?.mode === 'admin';
+  readonly editing = this.data?.edit ?? null;
+  readonly isEditMode = !!this.editing;
 
   private pendingFile: File | null = null;
 
-  readonly pendingFileName = signal<string | null>(null);
-  readonly pendingFileKind = signal<TrainingResourceType | null>(null);
+  // Pre-populated from the resource being edited so the dropzone shows "current file — click to
+  // replace" instead of an empty state. `pendingFile` (the actual File to upload) stays null until
+  // the admin explicitly picks a replacement — submit() only sends a file when one was chosen.
+  readonly pendingFileName = signal<string | null>(this.editing?.fileName ?? null);
+  readonly pendingFileKind = signal<TrainingResourceType | null>(this.editing?.type ?? null);
   readonly pendingFileSize = signal<number | null>(null);
   readonly isVideo = computed(() => this.pendingFileKind() === 'video');
   readonly submitting = signal(false);
@@ -71,11 +84,11 @@ export class RepVideoDialog {
   private static readonly SUCCESS_DELAY_MS = 900;
 
   readonly form = this.fb.nonNullable.group({
-    title: [''],
-    category: [''],
-    duration: [''],
-    description: [''],
-    language: ['English' as 'English' | 'Spanish'],
+    title: [this.editing?.title ?? ''],
+    category: [this.editing?.category ?? ''],
+    duration: [this.editing?.duration ?? ''],
+    description: [this.editing?.description ?? ''],
+    language: [(this.editing?.language ?? 'English') as 'English' | 'Spanish'],
   });
 
   handleFile(event: Event): void {
@@ -139,8 +152,35 @@ export class RepVideoDialog {
       this.toast.show('Give it a category');
       return;
     }
-    if (!file) {
+    if (!this.isEditMode && !file) {
       this.toast.show('Choose a file to upload');
+      return;
+    }
+
+    if (this.isEditMode) {
+      this.submitting.set(true);
+      this.trainingResourceStore
+        .updateDocument(
+          this.editing!.oId,
+          {
+            title: trimmedTitle,
+            category: trimmedCategory,
+            length: this.isVideo() ? duration.trim() : '',
+            description: description.trim() || `Uploaded file: ${file?.name ?? this.editing!.fileName}`,
+            language,
+          },
+          file ?? undefined,
+        )
+        .subscribe({
+          next: () => {
+            this.uploaded.set(true);
+            setTimeout(() => this.dialogRef.close(true), RepVideoDialog.SUCCESS_DELAY_MS);
+          },
+          error: () => {
+            this.submitting.set(false);
+            this.toast.show('Save failed — try again');
+          },
+        });
       return;
     }
 
@@ -160,12 +200,13 @@ export class RepVideoDialog {
           title: trimmedTitle,
           category: trimmedCategory,
           length: this.isVideo() ? duration.trim() : '',
-          description: description.trim() || `Uploaded file: ${file.name}`,
+          description: description.trim() || `Uploaded file: ${file!.name}`,
           roleId,
           uploadedBy: this.isAdminUpload ? 'Admin' : 'Rep',
           language,
+          hubType: this.data?.hubType,
         },
-        file,
+        file!,
       )
       .subscribe({
         next: () => {

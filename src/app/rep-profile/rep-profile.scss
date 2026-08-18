@@ -241,10 +241,30 @@
       font-weight: 400;
       font-size: 13px;
     }
+
+    a {
+      color: var(--navy);
+      font-weight: 600;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 
   &.wide {
     grid-column: 1 / -1;
+  }
+}
+
+// ---------- Contract wizard card ----------
+.wizard-chip {
+  background: #E8F1FC;
+
+  mat-icon {
+    color: var(--navy);
   }
 }
 

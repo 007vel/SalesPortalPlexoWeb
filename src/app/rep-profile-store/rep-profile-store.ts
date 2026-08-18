@@ -24,6 +24,10 @@ export interface RepProfileData {
   /** Assigned once the rep becomes a Marketing Consultant — only meaningful when salesRepType is 'marketingConsultant'. */
   pwrRewardsEmail: string;
   pwrRewardsEmailPassword: string;
+  contractWizardLink: string;
+  contractWizardUsername: string;
+  contractWizardPassword: string;
+  contractWizardInstructionsLink: string;
 }
 
 function emptyRepProfile(): RepProfileData {
@@ -43,10 +47,14 @@ function emptyRepProfile(): RepProfileData {
     passedCertification: false,
     businessCardsSent: false,
     consultantFeePaid: false,
-    docs: { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null },
+    docs: { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null, businessCards: null },
     commissions: [],
     pwrRewardsEmail: '',
     pwrRewardsEmailPassword: '',
+    contractWizardLink: '',
+    contractWizardUsername: '',
+    contractWizardPassword: '',
+    contractWizardInstructionsLink: '',
   };
 }
 
@@ -72,6 +80,10 @@ function toProfileData(rep: RepRecord | undefined): RepProfileData {
     commissions: rep.commissions,
     pwrRewardsEmail: rep.pwrRewardsEmail,
     pwrRewardsEmailPassword: rep.pwrRewardsEmailPassword,
+    contractWizardLink: rep.contractWizardLink,
+    contractWizardUsername: rep.contractWizardUsername,
+    contractWizardPassword: rep.contractWizardPassword,
+    contractWizardInstructionsLink: rep.contractWizardInstructionsLink,
   };
 }
 

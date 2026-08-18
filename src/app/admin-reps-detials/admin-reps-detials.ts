@@ -602,6 +602,31 @@ export class AdminRepsDetials {
     if (file) this.uploadDocument('certification', 'Passed Certificate', file);
   }
 
+  // ----- Business cards dropzone (drag/drop mirrors the Passed Certificate dropzone above) -----
+  readonly businessCardsDragActive = signal(false);
+
+  /** Ignores clicks while an upload for this slot is already in flight, so a slow request can't be fired twice. */
+  triggerBusinessCardsUpload(input: HTMLInputElement): void {
+    if (this.isUploadingDoc('businessCards')) return;
+    input.click();
+  }
+
+  onBusinessCardsDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.businessCardsDragActive.set(true);
+  }
+
+  onBusinessCardsDragLeave(): void {
+    this.businessCardsDragActive.set(false);
+  }
+
+  onBusinessCardsDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.businessCardsDragActive.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file) this.uploadDocument('businessCards', 'Business Cards', file);
+  }
+
   /** Uploads (or replaces) a document slot — same generic `api/documents` upload the create-rep dialog and rep's own Documents page already use, just triggered from the admin Rep Details page instead. */
   private uploadDocument(kind: keyof RepDocs, label: string, file: File): void {
     const rep = this.rep();

@@ -1,0 +1,62 @@
+<div class="rep-page-head">
+  <div class="eyebrow">Marketing Hub</div>
+  <h1>Brochures &amp; marketing assets</h1>
+  <p>Shared by admin — browse, view, or download anything here.</p>
+</div>
+
+@if (loaded() && resources().length > 0) {
+<div class="filter-bar">
+  <div class="category-filter" role="tablist" aria-label="Filter by category">
+    <button type="button" class="pill" role="tab" [class.active]="categoryFilter() === 'all'"
+      [attr.aria-selected]="categoryFilter() === 'all'" (click)="categoryFilter.set('all')">All</button>
+    @for (category of categories(); track category) {
+    <button type="button" class="pill" role="tab" [class.active]="categoryFilter() === category"
+      [attr.aria-selected]="categoryFilter() === category" (click)="categoryFilter.set(category)">{{ category
+      }}</button>
+    }
+  </div>
+</div>
+}
+
+@if (!loaded()) {
+<div class="th-empty">
+  <mat-progress-spinner mode="indeterminate" diameter="32" strokeWidth="3"></mat-progress-spinner>
+</div>
+} @else if (resources().length === 0) {
+<div class="th-empty">
+  <mat-icon>campaign</mat-icon>
+  <div>Nothing here yet. Check back soon.</div>
+</div>
+} @else if (filteredResources().length === 0) {
+<div class="th-empty">
+  <mat-icon>search_off</mat-icon>
+  <div>No items in this category.</div>
+</div>
+} @else {
+<div class="th-grid">
+  @for (res of filteredResources(); track res.id) {
+  <div class="th-card">
+    <div class="th-card-top">
+      <div class="th-type-ic {{ res.type }}"><mat-icon>{{ typeIcon(res.type) }}</mat-icon></div>
+      <div class="th-card-actions">
+        <div class="th-lang-badge">{{ res.language }}</div>
+        @if (res.duration) { <div class="th-duration">{{ res.duration }}</div> }
+      </div>
+    </div>
+    <div class="th-card-body">
+      <div class="th-cat">{{ res.category }}</div>
+      <h4>{{ res.title }}</h4>
+      <p>{{ res.description }}</p>
+    </div>
+    <button type="button" mat-stroked-button class="open-link-btn" (click)="view(res)">{{ typeLabel(res.type)
+      }} &middot; Open <mat-icon>open_in_new</mat-icon></button>
+  </div>
+  }
+</div>
+}
+
+@if (viewing()) {
+<div class="th-loading-overlay">
+  <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
+</div>
+}

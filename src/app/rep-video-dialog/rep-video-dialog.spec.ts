@@ -4,7 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { RepVideoDialog } from './rep-video-dialog';
 import { Auth } from '../auth/auth';
 import { Toast } from '../toast/toast';
-import { TrainingResourceStore } from '../training-resource-store/training-resource-store';
+import { TrainingResource, TrainingResourceStore } from '../training-resource-store/training-resource-store';
 import { provideTestHttp, apiUrl } from '../testing/http-test-helpers';
 
 describe('RepVideoDialog', () => {
@@ -100,10 +100,14 @@ describe('RepVideoDialog', () => {
     expect(body.get('category')).toBe('Team Uploads');
     expect(body.get('language')).toBe('English');
 
+    vi.useFakeTimers();
     req.flush({
       oId: 1, roleId: '1001', title: 'renewal-pitch', category: 'Team Uploads', description: '',
       fileType: 'Video', fileName: 'renewal-pitch.mp4', length: '', uploadedBy: 'Rep', uploadedAt: '2026-08-06T00:00:00Z', language: 'English',
     });
+    // The dialog holds a brief "Added" confirmation before closing — advance past that delay.
+    vi.advanceTimersByTime(1000);
+    vi.useRealTimers();
 
     expect(trainingResourceStore.resources().length).toBe(1);
     expect(dialogRef.close).toHaveBeenCalledWith(true);
@@ -155,11 +159,126 @@ describe('RepVideoDialog (admin mode)', () => {
     expect(body.get('roleId')).toBeNull();
     expect(body.get('uploadedBy')).toBe('Admin');
 
+    vi.useFakeTimers();
     req.flush({
       oId: 2, roleId: null, title: 'onboarding-guide', category: 'Team Uploads', description: '',
       fileType: 'Pdf', fileName: 'onboarding-guide.pdf', length: null, uploadedBy: 'Admin', uploadedAt: '2026-08-06T00:00:00Z', language: 'English',
     });
+    vi.advanceTimersByTime(1000);
+    vi.useRealTimers();
 
     expect(dialogRef.close).toHaveBeenCalledWith(true);
+  });
+});
+
+describe('RepVideoDialog (admin mode, Marketing Hub)', () => {
+  let component: RepVideoDialog;
+  let fixture: ComponentFixture<RepVideoDialog>;
+  let httpMock: HttpTestingController;
+
+  beforeEach(async () => {
+    localStorage.clear();
+
+    await TestBed.configureTestingModule({
+      imports: [RepVideoDialog],
+      providers: [
+        { provide: MatDialogRef, useValue: { close: vi.fn() } },
+        { provide: MAT_DIALOG_DATA, useValue: { mode: 'admin', hubType: 'Marketing' } },
+        provideTestHttp(),
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(RepVideoDialog);
+    component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
+    vi.spyOn(TestBed.inject(Toast), 'show').mockImplementation(() => {});
+    await fixture.whenStable();
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('submit() passes hubType through to the upload', () => {
+    component.form.controls.title.setValue('Flyer');
+    component.form.controls.category.setValue('Flyers');
+    const file = new File(['contents'], 'flyer.pdf');
+    component.handleFile({ target: { files: [file], value: '' } } as unknown as Event);
+    component.submit();
+
+    const req = httpMock.expectOne(apiUrl('traininghub'));
+    const body = req.request.body as FormData;
+    expect(body.get('hubType')).toBe('Marketing');
+  });
+});
+
+describe('RepVideoDialog (edit mode)', () => {
+  let component: RepVideoDialog;
+  let fixture: ComponentFixture<RepVideoDialog>;
+  let dialogRef: { close: ReturnType<typeof vi.fn> };
+  let httpMock: HttpTestingController;
+
+  const editingResource: TrainingResource = {
+    id: 'doc-9', oId: 9, repId: '', uploadedBy: 'Admin', title: 'Old title', category: 'Flyers',
+    type: 'pdf', duration: '', featured: false, description: 'Old description', url: '',
+    fileName: 'old-flyer.pdf', language: 'English',
+  };
+
+  beforeEach(async () => {
+    localStorage.clear();
+    dialogRef = { close: vi.fn() };
+
+    await TestBed.configureTestingModule({
+      imports: [RepVideoDialog],
+      providers: [
+        { provide: MatDialogRef, useValue: dialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: { mode: 'admin', hubType: 'Marketing', edit: editingResource } },
+        provideTestHttp(),
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(RepVideoDialog);
+    component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
+    vi.spyOn(TestBed.inject(Toast), 'show').mockImplementation(() => {});
+    await fixture.whenStable();
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('pre-fills the form from the resource being edited', () => {
+    expect(component.form.getRawValue()).toEqual({
+      title: 'Old title', category: 'Flyers', duration: '', description: 'Old description', language: 'English',
+    });
+    expect(component.pendingFileName()).toBe('old-flyer.pdf');
+  });
+
+  it('submit() without picking a new file PUTs metadata only, with no file entry', () => {
+    component.form.controls.title.setValue('New title');
+    component.submit();
+
+    const req = httpMock.expectOne(apiUrl('traininghub/9'));
+    expect(req.request.method).toBe('PUT');
+    const body = req.request.body as FormData;
+    expect(body.get('title')).toBe('New title');
+    expect(body.get('file')).toBeNull();
+
+    req.flush({
+      oId: 9, roleId: null, title: 'New title', category: 'Flyers', description: 'Old description',
+      fileType: 'Pdf', fileName: 'old-flyer.pdf', length: null, uploadedBy: 'Admin', uploadedAt: '2026-08-06T00:00:00Z', language: 'English',
+    });
+  });
+
+  it('submit() with a replacement file includes it in the PUT body', () => {
+    const file = new File(['contents'], 'new-flyer.pdf');
+    component.handleFile({ target: { files: [file], value: '' } } as unknown as Event);
+    component.submit();
+
+    const req = httpMock.expectOne(apiUrl('traininghub/9'));
+    const body = req.request.body as FormData;
+    expect(body.get('file')).toBe(file);
+
+    req.flush({
+      oId: 9, roleId: null, title: 'Old title', category: 'Flyers', description: 'Old description',
+      fileType: 'Pdf', fileName: 'new-flyer.pdf', length: null, uploadedBy: 'Admin', uploadedAt: '2026-08-06T00:00:00Z', language: 'English',
+    });
   });
 });

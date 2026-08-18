@@ -1,0 +1,394 @@
+:host {
+  display: block;
+}
+
+// ---------- top bar ----------
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+  gap: 20px;
+
+  h1 {
+    font-size: 23px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  p {
+    color: var(--muted);
+    font-size: 13.5px;
+    margin-top: 5px;
+  }
+}
+
+.add-media-btn {
+  flex-shrink: 0;
+  background: var(--orange) !important;
+  color: #fff !important;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 13.5px;
+  height: 40px;
+  padding: 0 18px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-right: 2px;
+  }
+}
+
+// ---------- full-page loading overlay (shown while opening a resource) ----------
+.as-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(1px);
+
+  mat-progress-spinner {
+    --mdc-circular-progress-active-indicator-color: var(--orange);
+    --mat-progress-spinner-active-indicator-color: var(--orange);
+  }
+
+  ::ng-deep .mat-mdc-progress-spinner circle {
+    stroke: var(--orange) !important;
+  }
+}
+
+// ---------- filter bar ----------
+.filter-bar {
+  margin-bottom: 16px;
+}
+
+.category-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.pill {
+  flex-shrink: 0;
+  appearance: none;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 9px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+
+  &:hover {
+    border-color: #C7D0DE;
+    color: var(--text);
+    background: #F8FAFC;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: 2px;
+  }
+
+  &.active {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+    box-shadow: 0 4px 10px -4px rgba(19, 51, 89, .45);
+  }
+}
+
+// ---------- card grid ----------
+.table-card {
+  padding: 20px !important;
+  border-radius: 16px;
+  border: 1px solid #EEF1F6;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.hub-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--muted);
+
+  mat-icon {
+    font-size: 28px;
+    height: 28px;
+    width: 28px;
+    margin-bottom: 8px;
+  }
+}
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.hub-card {
+  padding: 18px !important;
+  border-radius: 14px;
+  border: 1px solid #D6DDE7;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition: transform .15s ease, box-shadow .15s ease;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px -12px rgba(16, 24, 40, 0.16);
+  }
+}
+
+.hub-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.hub-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hub-lang-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  background: #F1F3F7;
+  border-radius: 999px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.hub-duration {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--faint, #9AA6B8);
+  white-space: nowrap;
+  padding-top: 3px;
+}
+
+.hub-type-ic {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+  }
+
+  &.video {
+    background: #FCEEED;
+    color: #D64545;
+  }
+
+  &.pdf {
+    background: #EEF3F9;
+    color: var(--navy);
+  }
+
+  &.image {
+    background: #EEF3F9;
+    color: var(--navy);
+  }
+
+  &.doc {
+    background: #E5F5EC;
+    color: #1A8A5F;
+  }
+
+  &.link {
+    background: #FCF1DD;
+    color: #B36B0D;
+  }
+}
+
+.hub-card-body {
+  flex: 1;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+
+.hub-cat {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 5px;
+}
+
+.hub-card h4 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 5px;
+  overflow-wrap: anywhere;
+}
+
+.hub-card p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.hub-open-btn {
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  height: 34px;
+  border-color: #E1E6ED !important;
+  color: var(--text) !important;
+  width: 100%;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    margin-left: 4px;
+  }
+
+  &:hover {
+    background: #F5F7FA;
+    border-color: #D6DDE7 !important;
+  }
+}
+
+// ---------- per-card "more actions" menu trigger ----------
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #E5E9F0;
+  border-radius: 8px;
+  color: var(--muted);
+
+  mat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: #F5F7FA;
+  }
+}
+
+// MatMenu renders its panel into the CDK overlay, outside this component's DOM subtree,
+// so the panel-level rules need ::ng-deep; the menu items themselves are declared in this
+// component's template (via matMenuContent) and stay style-scoped normally.
+::ng-deep .hub-slot-menu.mat-mdc-menu-panel {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  min-width: 196px;
+
+  .mat-mdc-menu-content {
+    padding: 6px;
+  }
+
+  .mat-mdc-menu-item {
+    border-radius: 8px;
+    min-height: 38px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+
+    .mat-icon {
+      color: var(--muted);
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+    }
+
+    &:hover:not([disabled]) {
+      background: var(--bg);
+    }
+  }
+}
+
+.menu-item-danger {
+  margin-top: 4px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid var(--border);
+  color: var(--danger) !important;
+
+  .mat-icon {
+    color: var(--danger) !important;
+  }
+
+  &:hover {
+    background: #FBEAEA !important;
+  }
+}
+
+@media (min-width: 1500px) {
+  .hub-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1180px) {
+  .hub-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .hub-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-media-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

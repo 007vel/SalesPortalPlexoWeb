@@ -1,0 +1,93 @@
+<div class="admin-topbar">
+  <div>
+    <h1>Marketing Hub</h1>
+    <p>Brochures, decks, and marketing assets shared with every rep.</p>
+  </div>
+  <button type="button" mat-flat-button color="primary" class="add-media-btn" (click)="openAddDialog()">
+    <mat-icon>add</mat-icon> Add media
+  </button>
+</div>
+
+@if (loaded() && resources().length > 0) {
+<div class="filter-bar">
+  <div class="category-filter" role="tablist" aria-label="Filter by category">
+    <button type="button" class="pill" role="tab" [class.active]="categoryFilter() === 'all'"
+      [attr.aria-selected]="categoryFilter() === 'all'" (click)="categoryFilter.set('all')">All</button>
+    @for (category of categories(); track category) {
+    <button type="button" class="pill" role="tab" [class.active]="categoryFilter() === category"
+      [attr.aria-selected]="categoryFilter() === category" (click)="categoryFilter.set(category)">{{ category
+      }}</button>
+    }
+  </div>
+</div>
+}
+
+<mat-card class="table-card hub-grid-card">
+  @if (!loaded()) {
+  <div class="hub-empty">
+    <mat-progress-spinner mode="indeterminate" diameter="32" strokeWidth="3"></mat-progress-spinner>
+  </div>
+  } @else if (resources().length === 0) {
+  <div class="hub-empty">
+    <mat-icon>campaign</mat-icon>
+    <div>No marketing material yet. Add the first item to share it with every rep.</div>
+  </div>
+  } @else if (filteredResources().length === 0) {
+  <div class="hub-empty">
+    <mat-icon>search_off</mat-icon>
+    <div>No items in this category.</div>
+  </div>
+  } @else {
+  <div class="hub-grid">
+    @for (res of filteredResources(); track res.id) {
+    <div class="hub-card">
+      <div class="hub-card-top">
+        <div class="hub-type-ic {{ res.type }}"><mat-icon>{{ typeIcon(res.type) }}</mat-icon></div>
+        <div class="hub-card-actions">
+          <div class="hub-lang-badge">{{ res.language }}</div>
+          @if (res.duration) { <div class="hub-duration">{{ res.duration }}</div> }
+          <button type="button" mat-icon-button class="action-btn menu-trigger" title="More actions"
+            [disabled]="deletingId() === res.id" [matMenuTriggerFor]="cardMenu" [matMenuTriggerData]="{ res: res }">
+            <mat-icon>{{ deletingId() === res.id ? 'hourglass_empty' : 'more_vert' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+      <div class="hub-card-body">
+        <div class="hub-cat">{{ res.category }}</div>
+        <h4>{{ res.title }}</h4>
+        <p>{{ res.description }}</p>
+      </div>
+      <button type="button" mat-stroked-button class="hub-open-btn" (click)="viewResource(res)">{{ typeLabel(res.type)
+        }} &middot; Open <mat-icon>open_in_new</mat-icon></button>
+    </div>
+    }
+  </div>
+  }
+</mat-card>
+
+<mat-menu #cardMenu="matMenu" class="hub-slot-menu" xPosition="before">
+  <ng-template matMenuContent let-res="res">
+    <button type="button" mat-menu-item (click)="viewResource(res)">
+      <mat-icon>visibility</mat-icon>
+      <span>View</span>
+    </button>
+    <button type="button" mat-menu-item (click)="downloadResource(res.oId, res.fileName)">
+      <mat-icon>download</mat-icon>
+      <span>Download</span>
+    </button>
+    <button type="button" mat-menu-item (click)="openEditDialog(res)">
+      <mat-icon>edit</mat-icon>
+      <span>Edit</span>
+    </button>
+    <button type="button" mat-menu-item class="menu-item-danger" (click)="askDeleteResource(res)">
+      <mat-icon>delete_outline</mat-icon>
+      <span>Delete</span>
+    </button>
+  </ng-template>
+</mat-menu>
+
+@if (viewing()) {
+<div class="as-loading-overlay">
+  <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
+</div>
+}

@@ -28,7 +28,13 @@
       @for (row of rows(); track row.key) {
       <div class="rp-ro-item" [class.wide]="row.wide">
         <div class="rl">{{ row.label }}</div>
-        <div class="rv" [class.empty]="!row.value">{{ row.value || 'Not provided — ask your admin to add it' }}</div>
+        @if (!row.value) {
+        <div class="rv empty">Not provided — ask your admin to add it</div>
+        } @else if (row.isLink) {
+        <div class="rv"><a [href]="row.value" target="_blank" rel="noopener">{{ row.value }}</a></div>
+        } @else {
+        <div class="rv">{{ row.value }}</div>
+        }
       </div>
       }
     </div>
@@ -79,7 +85,13 @@
       @for (row of pwrRewardsRows(); track row.key) {
       <div class="rp-ro-item" [class.wide]="row.wide">
         <div class="rl">{{ row.label }}</div>
-        <div class="rv" [class.empty]="!row.value">{{ row.value || 'Not provided — ask your admin to add it' }}</div>
+        @if (!row.value) {
+        <div class="rv empty">Not provided — ask your admin to add it</div>
+        } @else if (row.isLink) {
+        <div class="rv"><a [href]="row.value" target="_blank" rel="noopener">{{ row.value }}</a></div>
+        } @else {
+        <div class="rv">{{ row.value }}</div>
+        }
       </div>
       }
     </div>
@@ -107,6 +119,36 @@
   </div>
 </mat-card>
 }
+
+<mat-card class="rp-profile-card">
+  <div class="head-row">
+    <div class="head-title">
+      <div class="eyebrow">Onboarding</div>
+      <div class="title-line">
+        <span class="icon-chip wizard-chip"><mat-icon>fact_check</mat-icon></span>
+        <h2>Contract wizard</h2>
+      </div>
+    </div>
+    <span class="ro-badge"><span class="ro-dot"></span>Read only</span>
+  </div>
+
+  <div class="rp-card-body">
+    <div class="rp-readonly">
+      @for (row of contractWizardRows(); track row.key) {
+      <div class="rp-ro-item" [class.wide]="row.wide">
+        <div class="rl">{{ row.label }}</div>
+        @if (!row.value) {
+        <div class="rv empty">Not provided — ask your admin to add it</div>
+        } @else if (row.isLink) {
+        <div class="rv"><a [href]="row.value" target="_blank" rel="noopener">{{ row.value }}</a></div>
+        } @else {
+        <div class="rv">{{ row.value }}</div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+</mat-card>
 
 @if (viewing()) {
 <div class="rp-loading-overlay">

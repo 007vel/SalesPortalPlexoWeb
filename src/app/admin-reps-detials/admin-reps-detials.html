@@ -317,6 +317,76 @@
           }
         </div>
 
+        <div class="cert-doc">
+          @if (editingCertification() ? certificationForm.controls.businessCardsSent.value :
+          rep.businessCardsSent) {
+          @if (editingCertification()) {
+          <div class="dropzone" [class.drag-active]="businessCardsDragActive()" [class.has-file]="!!rep.docs.businessCards"
+            (click)="triggerBusinessCardsUpload(businessCardsFileInput)" (dragover)="onBusinessCardsDragOver($event)"
+            (dragleave)="onBusinessCardsDragLeave()" (drop)="onBusinessCardsDrop($event)">
+            <input #businessCardsFileInput type="file" accept="image/*,video/*,.pdf" class="hidden-file-input"
+              (change)="handleDocumentUpload('businessCards', 'Business Cards', $event)">
+
+            @if (rep.docs.businessCards; as doc) {
+            <div class="dz-file">
+              <div class="dz-file-ic">
+                <mat-icon>{{ isUploadingDoc('businessCards') ? 'hourglass_empty' : 'perm_media' }}</mat-icon>
+              </div>
+              <div class="dz-file-txt">
+                <b>{{ doc.name }}</b>
+                <span>{{ formatDate(doc.uploadedAt) }} · Click to replace</span>
+              </div>
+              <div class="dz-file-actions">
+                <button type="button" mat-icon-button class="dz-remove" title="View"
+                  (click)="$event.stopPropagation(); viewDocument(doc.oId, doc.name, 'Business Cards')">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button type="button" mat-icon-button class="dz-remove" title="Download"
+                  (click)="$event.stopPropagation(); downloadDocument(doc.oId, doc.name)">
+                  <mat-icon>download</mat-icon>
+                </button>
+                <button type="button" mat-icon-button class="dz-remove" title="Delete"
+                  [disabled]="isDeletingDoc('businessCards')"
+                  (click)="$event.stopPropagation(); askDeleteDocument('businessCards', 'Business Cards')">
+                  <mat-icon>{{ isDeletingDoc('businessCards') ? 'hourglass_empty' : 'delete' }}</mat-icon>
+                </button>
+              </div>
+            </div>
+            } @else {
+            <mat-icon class="dz-ic">{{ isUploadingDoc('businessCards') ? 'hourglass_empty' : 'cloud_upload'
+              }}</mat-icon>
+            <div class="dz-title">Drop a photo or video of the sent business cards here, or click to browse</div>
+            <div class="dz-hint">Image, video, or PDF</div>
+            }
+          </div>
+          } @else {
+          <div class="doc-row">
+            <div class="doc-info">
+              <div class="doc-icon" [class.filled]="!!rep.docs.businessCards"><mat-icon>{{ rep.docs.businessCards ?
+                  'check' : 'description' }}</mat-icon></div>
+              <div>
+                <div class="doc-name">Business Cards</div>
+                <div class="doc-status" [class.filled]="!!rep.docs.businessCards">
+                  {{ rep.docs.businessCards ?(rep.docs.businessCards.name + ' · ' +
+                  formatDate(rep.docs.businessCards.uploadedAt)) : 'Not uploaded' }}
+                </div>
+              </div>
+            </div>
+            @if (rep.docs.businessCards; as doc) {
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button type="button" mat-icon-button class="action-btn" title="View"
+                (click)="viewDocument(doc.oId, doc.name, 'Business Cards')"><mat-icon>visibility</mat-icon></button>
+              <button type="button" mat-icon-button class="action-btn" title="Download"
+                (click)="downloadDocument(doc.oId, doc.name)"><mat-icon>download</mat-icon></button>
+            </div>
+            }
+          </div>
+          }
+          } @else {
+          <p class="cert-doc-hint">Turn on "Business cards sent" to upload proof.</p>
+          }
+        </div>
+
         @if (editingCertification()) {
         <div class="edit-actions">
           <button type="button" mat-button [disabled]="savingCertification()"

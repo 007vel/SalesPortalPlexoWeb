@@ -17,6 +17,7 @@ interface ProfileRow {
   label: string;
   value: string;
   wide: boolean;
+  isLink?: boolean;
 }
 
 interface CertificationRow {
@@ -93,6 +94,17 @@ export class RepProfile {
     ];
   });
   readonly pwrInstructions = computed(() => this.repProfileStore.profile().docs.pwrInstructions);
+
+  /** Set by admin from the Rep Details page — always shown here read-only, same as the rest of the profile. */
+  readonly contractWizardRows = computed<ProfileRow[]>(() => {
+    const p = this.repProfileStore.profile();
+    return [
+      { key: 'contractWizardLink', label: 'Link to contract wizard', value: p.contractWizardLink, wide: true, isLink: true },
+      { key: 'contractWizardUsername', label: 'Username', value: p.contractWizardUsername, wide: false },
+      { key: 'contractWizardPassword', label: 'Password', value: p.contractWizardPassword, wide: false },
+      { key: 'contractWizardInstructionsLink', label: 'Wizard instructions', value: p.contractWizardInstructionsLink, wide: true, isLink: true },
+    ];
+  });
 
   downloadDocument(oId: number, fileName: string): void {
     this.directory.downloadDocument(oId).subscribe({

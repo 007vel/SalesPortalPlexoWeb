@@ -61,7 +61,7 @@ describe('RepDirectoryStore', () => {
     req.flush(repDto());
 
     expect(created?.repId).toBe('1001');
-    expect(created?.docs).toEqual({ agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null });
+    expect(created?.docs).toEqual({ agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null, businessCards: null });
     expect(created?.commissions.length).toBe(14);
     expect(store.reps().length).toBe(1);
   });
@@ -120,7 +120,7 @@ describe('RepDirectoryStore', () => {
     expect(req.request.method).toBe('POST');
     expect(req.request.body instanceof FormData).toBe(true);
     const body = req.request.body as FormData;
-    expect(body.get('repId')).toBe('1');
+    expect(body.get('repId')).toBe('1001');
     expect(body.get('kind')).toBe('agreement');
     req.flush({ oId: 5, repId: 1, kind: 'agreement', fileName: 'signed.pdf', uploadedAt: '2026-08-06T00:00:00Z' });
 
@@ -171,8 +171,8 @@ describe('RepDirectoryStore', () => {
   });
 
   it('docsComplete is true only when both docs are present', () => {
-    expect(docsComplete({ docs: { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null } })).toBe(false);
-    expect(docsComplete({ docs: { agreement: { oId: 1, name: 'a', uploadedAt: '2026-08-05' }, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null } })).toBe(false);
+    expect(docsComplete({ docs: { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null, businessCards: null } })).toBe(false);
+    expect(docsComplete({ docs: { agreement: { oId: 1, name: 'a', uploadedAt: '2026-08-05' }, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null, businessCards: null } })).toBe(false);
     expect(
       docsComplete({
         docs: {
@@ -182,6 +182,7 @@ describe('RepDirectoryStore', () => {
           pricingSheet: null,
           powerPoint: null,
           pwrInstructions: null,
+          businessCards: null,
         },
       }),
     ).toBe(true);

@@ -4,6 +4,7 @@ import { Api } from '../api/api';
 
 export type TrainingResourceType = 'video' | 'image' | 'pdf' | 'doc' | 'link';
 export type TrainingResourceLanguage = 'English' | 'Spanish';
+export type HubType = 'Training' | 'Marketing';
 
 export interface TrainingResource {
   id: string;
@@ -33,6 +34,16 @@ export interface NewTrainingHubUpload {
   /** Who uploaded this — the backend requires it to be 'Rep' or 'Admin'. */
   uploadedBy: 'Admin' | 'Rep';
   language: TrainingResourceLanguage;
+  /** Omit for Training Hub uploads (server defaults to 'Training'); pass 'Marketing' for Marketing Hub uploads. */
+  hubType?: HubType;
+}
+
+export interface TrainingHubEdit {
+  title: string;
+  category: string;
+  length: string;
+  description: string;
+  language: TrainingResourceLanguage;
 }
 
 /** Shape returned by POST/GET api/traininghub (PlexoRepPortal.Models.TrainingHubDocumentDto). */
@@ -48,6 +59,7 @@ interface TrainingHubDocumentDto {
   uploadedBy: string;
   uploadedAt: string;
   language: string;
+  hubType: string;
 }
 
 const TYPE_ICON: Record<TrainingResourceType, string> = { video: 'movie', image: 'image', pdf: 'description', doc: 'article', link: 'link' };
@@ -145,6 +157,14 @@ export class TrainingResourceStore {
     );
   }
 
+  /** Fetches every Marketing Hub resource — always admin-uploaded, visible to every rep. Used by both Marketing Hub Admin and Marketing Hub Rep. */
+  loadMarketing(): Observable<TrainingResource[]> {
+    return this.api.get<TrainingHubDocumentDto[]>('traininghub', { hubType: 'Marketing' }).pipe(
+      map((dtos) => dtos.map((dto) => this.mapDto(dto))),
+      tap((docs) => this.resourcesSignal.set(docs)),
+    );
+  }
+
   /** Uploads a real file (video/image/pdf/etc) to api/traininghub and adds it to the hub. */
   uploadDocument(input: NewTrainingHubUpload, file: File): Observable<TrainingResource> {
     const formData = new FormData();
@@ -157,11 +177,32 @@ export class TrainingResourceStore {
     formData.append('length', input.length);
     formData.append('uploadedBy', input.uploadedBy);
     formData.append('language', input.language);
+    if (input.hubType) {
+      formData.append('hubType', input.hubType);
+    }
     formData.append('file', file);
 
     return this.api.post<TrainingHubDocumentDto>('traininghub', formData).pipe(
       map((dto) => this.mapDto(dto)),
       tap((resource) => this.resourcesSignal.update((list) => [resource, ...list])),
+    );
+  }
+
+  /** Edits a resource's metadata via PUT api/traininghub/{oId}, optionally swapping its file. */
+  updateDocument(oId: number, patch: TrainingHubEdit, file?: File): Observable<TrainingResource> {
+    const formData = new FormData();
+    formData.append('title', patch.title);
+    formData.append('category', patch.category);
+    formData.append('description', patch.description);
+    formData.append('length', patch.length);
+    formData.append('language', patch.language);
+    if (file) {
+      formData.append('file', file);
+    }
+
+    return this.api.put<TrainingHubDocumentDto>(`traininghub/${oId}`, formData).pipe(
+      map((dto) => this.mapDto(dto)),
+      tap((resource) => this.resourcesSignal.update((list) => list.map((r) => (r.oId === oId ? resource : r)))),
     );
   }
 

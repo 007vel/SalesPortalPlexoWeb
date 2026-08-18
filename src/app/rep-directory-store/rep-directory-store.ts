@@ -22,9 +22,11 @@ export interface RepDocs {
   powerPoint: RepDocRecord | null;
   /** How-to-access instructions for the rep's PWR Rewards email — admin-uploaded PDF, details view only. */
   pwrInstructions: RepDocRecord | null;
+  /** Proof (photo/video) that business cards were sent — admin-uploaded, only shown once "Business cards sent" is Yes. */
+  businessCards: RepDocRecord | null;
 }
 
-const EMPTY_DOCS: RepDocs = { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null };
+const EMPTY_DOCS: RepDocs = { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null, businessCards: null };
 
 /** A single document row across every rep — used by admin oversight views. */
 export interface RepDocumentRecord {
@@ -418,7 +420,7 @@ export class RepDirectoryStore {
       map((dtos): RepDocs => {
         const docs: RepDocs = { ...EMPTY_DOCS };
         for (const dto of dtos) {
-          if (dto.kind === 'agreement' || dto.kind === 'w4' || dto.kind === 'certification' || dto.kind === 'pricingSheet' || dto.kind === 'powerPoint' || dto.kind === 'pwrInstructions') {
+          if (dto.kind === 'agreement' || dto.kind === 'w4' || dto.kind === 'certification' || dto.kind === 'pricingSheet' || dto.kind === 'powerPoint' || dto.kind === 'pwrInstructions' || dto.kind === 'businessCards') {
             docs[dto.kind] = { oId: dto.oId, name: dto.fileName, uploadedAt: dto.uploadedAt.slice(0, 10) };
           }
         }
