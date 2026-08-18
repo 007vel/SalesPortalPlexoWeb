@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-import { finalize } from 'rxjs';
+import { finalize, switchMap } from 'rxjs';
 import { Api } from '../api/api';
 import { Auth } from '../auth/auth';
 import { AdminAuth } from '../admin-auth/admin-auth';
@@ -46,6 +46,9 @@ export class Login implements OnInit {
 
   readonly activeTabIndex = signal(0);
 
+  /** True while arriving via a portal link (plexopro.com/1234) — hides the login form entirely so the rep's email/RepId are never shown, and auto-signs in straight to /rep. */
+  readonly portalRedirect = signal(false);
+
   readonly submitting = signal(false);
   readonly loginFailed = signal(false);
 
@@ -67,18 +70,20 @@ export class Login implements OnInit {
     const portalRepId = this.route.snapshot.paramMap.get('portalRepId');
     if (!portalRepId) return;
 
+    this.portalRedirect.set(true);
     this.submitting.set(true);
-    this.api.get<RepValidateResponseDto>(`reps/validate/${portalRepId}`).subscribe({
-      next: (rep) => {
-        this.form.patchValue({ email: rep.email, repId: rep.repId });
-        this.submitting.set(false);
-        this.submit();
-      },
-      error: () => {
-        this.submitting.set(false);
-        this.loginFailed.set(true);
-      },
-    });
+    this.api
+      .get<RepValidateResponseDto>(`reps/validate/${portalRepId}`)
+      .pipe(switchMap((rep) => this.auth.login(rep.email, rep.repId)))
+      .subscribe({
+        next: () => this.router.navigateByUrl('/rep'),
+        error: () => {
+          // Couldn't auto-sign in off the portal link — fall back to the manual login form.
+          this.submitting.set(false);
+          this.portalRedirect.set(false);
+          this.loginFailed.set(true);
+        },
+      });
   }
 
   submit(): void {
