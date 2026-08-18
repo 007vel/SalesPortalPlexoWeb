@@ -21,6 +21,7 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { Toast } from '../toast/toast';
 import { formatDateMDY } from '../shared/format-date';
 import { PHONE_PATTERN, formatPhoneInput } from '../shared/format-phone';
+import { extractYouTubeId, youTubeThumbnailUrl } from '../shared/youtube';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -70,7 +71,7 @@ export class AdminRepsDetials {
 
   /** The same fixed Training & Resource Hub slots admin manages from Settings — read-only here, matched by category so this never shows stale free-form uploads from before that redesign. */
   readonly adminHubSlots = computed(() => matchHubSlots(this.adminResources()));
-  /** The 4 product/dashboard videos — plain YouTube links, not uploaded files, so they open in a new tab. */
+  /** The 4 product/dashboard videos — plain YouTube links, not uploaded files, so they open in the media viewer dialog. */
   readonly videoRows = computed(() => {
     const links = this.trainingHubLinksStore.links();
     return links ? videoLinkRows(links) : [];
@@ -80,8 +81,19 @@ export class AdminRepsDetials {
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
 
-  openVideoLink(url: string): void {
-    window.open(url, '_blank', 'noopener');
+  openVideoLink(url: string, title: string): void {
+    if (this.dialog.openDialogs.length) return;
+    this.dialog.open(MediaViewerDialog, {
+      data: { title, type: 'youtube', url, fileName: title },
+      maxWidth: '90vw',
+      panelClass: 'media-viewer-panel',
+    });
+  }
+
+  /** The thumbnail shown under each video row, kept visible at all times rather than just inside the viewer dialog. */
+  youtubeThumbnail(url: string): string | null {
+    const id = extractYouTubeId(url);
+    return id ? youTubeThumbnailUrl(id) : null;
   }
 
   constructor() {

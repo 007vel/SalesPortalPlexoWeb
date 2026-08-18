@@ -9,6 +9,7 @@ import { TrainingHubLinksStore, videoLinkRows } from '../training-hub-links-stor
 import { Toast } from '../toast/toast';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { Auth } from '../auth/auth';
+import { extractYouTubeId, youTubeThumbnailUrl } from '../shared/youtube';
 
 @Component({
   selector: 'app-rep-training-hub',
@@ -53,6 +54,21 @@ export class RepTrainingHub {
 
   openLink(url: string): void {
     window.open(url, '_blank', 'noopener');
+  }
+
+  /** The thumbnail shown under each video row, kept visible at all times rather than just inside the viewer dialog. */
+  youtubeThumbnail(url: string): string | null {
+    const id = extractYouTubeId(url);
+    return id ? youTubeThumbnailUrl(id) : null;
+  }
+
+  openVideoLink(url: string, title: string): void {
+    if (this.dialog.openDialogs.length) return;
+    this.dialog.open(MediaViewerDialog, {
+      data: { title, type: 'youtube', url, fileName: title },
+      maxWidth: '90vw',
+      panelClass: 'media-viewer-panel',
+    });
   }
 
   view(resource: TrainingResource): void {

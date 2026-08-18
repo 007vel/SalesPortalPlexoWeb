@@ -62,6 +62,7 @@ export class RepVideoDialog {
   /** Icon shown on the dropzone/file chip for each detected file kind. */
   private static readonly KIND_ICON: Record<TrainingResourceType, string> = {
     video: 'movie',
+    youtube: 'smart_display',
     image: 'image',
     pdf: 'picture_as_pdf',
     doc: 'description',

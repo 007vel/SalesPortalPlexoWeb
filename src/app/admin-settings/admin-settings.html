@@ -85,13 +85,13 @@
     </form>
     } @else {
     <ng-container
-      *ngTemplateOutlet="field; context: {label:'Product Video (English)', value: videoLinks()?.productVideoEnglishLink}"></ng-container>
+      *ngTemplateOutlet="field; context: {label:'Product Video (English)', value: videoLinks()?.productVideoEnglishLink, isVideo: true}"></ng-container>
     <ng-container
-      *ngTemplateOutlet="field; context: {label:'Product Video (Spanish)', value: videoLinks()?.productVideoSpanishLink}"></ng-container>
+      *ngTemplateOutlet="field; context: {label:'Product Video (Spanish)', value: videoLinks()?.productVideoSpanishLink, isVideo: true}"></ng-container>
     <ng-container
-      *ngTemplateOutlet="field; context: {label:'Dashboard Video (English)', value: videoLinks()?.dashboardVideoEnglishLink}"></ng-container>
+      *ngTemplateOutlet="field; context: {label:'Dashboard Video (English)', value: videoLinks()?.dashboardVideoEnglishLink, isVideo: true}"></ng-container>
     <ng-container
-      *ngTemplateOutlet="field; context: {label:'Dashboard Video (Spanish)', value: videoLinks()?.dashboardVideoSpanishLink}"></ng-container>
+      *ngTemplateOutlet="field; context: {label:'Dashboard Video (Spanish)', value: videoLinks()?.dashboardVideoSpanishLink, isVideo: true}"></ng-container>
     <ng-container
       *ngTemplateOutlet="field; context: {label:'Knowledge Base', value: videoLinks()?.knowledgeBaseLink}"></ng-container>
     }
@@ -130,11 +130,19 @@
   }
 </mat-card>
 
-<ng-template #field let-label="label" let-value="value">
+<ng-template #field let-label="label" let-value="value" let-isVideo="isVideo">
   <div class="readonly-field">
     <div class="rl">{{ label }}</div>
     @if (!value) {
     <div class="rv empty">Not set</div>
+    } @else if (isVideo) {
+    <div class="rv"><button type="button" class="link-btn" (click)="openVideoLink(value, label)">{{ value }}</button></div>
+    @if (youtubeThumbnail(value); as thumb) {
+    <button type="button" class="as-video-thumb-btn" title="Open {{ label }}" (click)="openVideoLink(value, label)">
+      <img [src]="thumb" [alt]="label" class="as-video-thumb">
+      <mat-icon class="as-video-thumb-play">play_circle</mat-icon>
+    </button>
+    }
     } @else {
     <div class="rv"><a [href]="value" target="_blank" rel="noopener">{{ value }}</a></div>
     }

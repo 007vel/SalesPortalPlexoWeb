@@ -803,10 +803,17 @@
         @if (row.url) {
         <div style="display: flex; align-items: center; gap: 10px;">
           <button type="button" mat-icon-button class="action-btn" title="Open"
-            (click)="openVideoLink(row.url)"><mat-icon>open_in_new</mat-icon></button>
+            (click)="openVideoLink(row.url, row.label)"><mat-icon>open_in_new</mat-icon></button>
         </div>
         }
       </div>
+      @if (youtubeThumbnail(row.url); as thumb) {
+      <button type="button" class="hub-video-thumb-btn" title="Open {{ row.label }}"
+        (click)="openVideoLink(row.url, row.label)">
+        <img [src]="thumb" [alt]="row.label" class="hub-video-thumb">
+        <mat-icon class="hub-video-thumb-play">play_circle</mat-icon>
+      </button>
+      }
       }
       @for (slot of adminHubSlots(); track slot.key) {
       <div class="doc-row">

@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable, map, of, tap } from 'rxjs';
 import { Api } from '../api/api';
 
-export type TrainingResourceType = 'video' | 'image' | 'pdf' | 'doc' | 'link';
+export type TrainingResourceType = 'video' | 'youtube' | 'image' | 'pdf' | 'doc' | 'link';
 export type TrainingResourceLanguage = 'English' | 'Spanish';
 export type HubType = 'Training' | 'Marketing';
 
@@ -62,8 +62,8 @@ interface TrainingHubDocumentDto {
   hubType: string;
 }
 
-const TYPE_ICON: Record<TrainingResourceType, string> = { video: 'movie', image: 'image', pdf: 'description', doc: 'article', link: 'link' };
-const TYPE_LABEL: Record<TrainingResourceType, string> = { video: 'Video', image: 'Image', pdf: 'PDF', doc: 'Guide', link: 'Link' };
+const TYPE_ICON: Record<TrainingResourceType, string> = { video: 'movie', youtube: 'smart_display', image: 'image', pdf: 'description', doc: 'article', link: 'link' };
+const TYPE_LABEL: Record<TrainingResourceType, string> = { video: 'Video', youtube: 'Video', image: 'Image', pdf: 'PDF', doc: 'Guide', link: 'Link' };
 const FILE_TYPE_TO_RESOURCE_TYPE: Record<string, TrainingResourceType> = { Video: 'video', Image: 'image', Pdf: 'pdf', Document: 'doc' };
 const VIDEO_EXTENSIONS = ['mp4', 'mov', 'avi', 'webm', 'mkv', 'm4v'];
 const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'];

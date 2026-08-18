@@ -11,6 +11,26 @@
   @case ('video') {
   <video [src]="data.url" controls autoplay class="mv-video"></video>
   }
+  @case ('youtube') {
+  <div class="mv-youtube">
+    @if (youtubeThumbnailUrl && !youtubeReady()) {
+    <img [src]="youtubeThumbnailUrl" [alt]="data.title" class="mv-youtube-thumb">
+    <div class="mv-youtube-spinner">
+      <mat-progress-spinner mode="indeterminate" diameter="48" strokeWidth="4"></mat-progress-spinner>
+    </div>
+    }
+    @if (youtubeEmbedUrl) {
+    <iframe [src]="youtubeEmbedUrl" [class.hidden]="!youtubeReady()" class="mv-youtube-frame"
+      title="{{ data.title }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen (load)="youtubeReady.set(true)"></iframe>
+    } @else {
+    <div class="mv-unsupported">
+      <mat-icon>smart_display</mat-icon>
+      <p>This link isn't a valid YouTube video.</p>
+    </div>
+    }
+  </div>
+  }
   @case ('pdf') {
   <iframe [src]="safeUrl" class="mv-pdf" title="{{ data.title }}"></iframe>
   }
@@ -24,6 +44,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
+  @if (data.type !== 'youtube') {
   <button type="button" mat-button (click)="download()"><mat-icon>download</mat-icon> Download</button>
+  }
   <button type="button" mat-flat-button (click)="close()">Close</button>
 </mat-dialog-actions>
