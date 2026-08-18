@@ -126,7 +126,7 @@ export class AdminRepsDetials {
       .open(ConfirmDialog, {
         data: {
           title: 'Delete this rep?',
-          message: `"${rep.name || rep.repId}" and their records will be permanently removed. This can't be undone.`,
+          message: `Are you sure you want to delete?`,
           confirmLabel: 'Delete',
         },
       })
