@@ -60,9 +60,17 @@
 
 <mat-card class="checklist-card">
   <div class="checklist-head">
-    <div class="eyebrow">Status</div>
-    <h2>Setup checklist</h2>
+    <div>
+      <div class="eyebrow">Status</div>
+      <h2>Setup checklist</h2>
+    </div>
+    <div class="checklist-pct">{{ progressPct() }}%</div>
   </div>
+
+  <div class="checklist-bar-track">
+    <div class="checklist-bar-fill" [style.width.%]="progressPct()"></div>
+  </div>
+  <div class="checklist-bar-label">{{ checklistDoneCount() }} of {{ checklist().length }} complete</div>
 
   <div class="checklist-row">
     @for (item of checklist(); track item.label) {

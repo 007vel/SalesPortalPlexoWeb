@@ -6,7 +6,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { Auth } from '../auth/auth';
-import { RepProfileStore, RepProfileData } from '../rep-profile-store/rep-profile-store';
+import { RepProfileStore } from '../rep-profile-store/rep-profile-store';
 import { TrainingResourceStore } from '../training-resource-store/training-resource-store';
 import { RepDirectoryStore, portalLink } from '../rep-directory-store/rep-directory-store';
 import { MOCK_CONFIG } from '../mock-config/mock-config';
@@ -15,17 +15,6 @@ import { Toast } from '../toast/toast';
 interface ChecklistItem {
   label: string;
   done: boolean;
-}
-
-function calcProgressPct(profile: RepProfileData, email: string | undefined): number {
-  const fields = [
-    profile.name, profile.address, profile.city, profile.state, profile.zip,
-    profile.phone, email, profile.googleLink,
-  ];
-  let filled = fields.filter((v) => !!v && v.trim().length > 0).length;
-  if (profile.docs.agreement) filled++;
-  if (profile.docs.w4) filled++;
-  return Math.round((filled / (fields.length + 2)) * 100);
 }
 
 @Component({
@@ -55,17 +44,27 @@ export class RepOverview {
     return name ? `Welcome back, ${name.split(' ')[0]}` : 'Welcome';
   });
 
-  readonly progressPct = computed(() => calcProgressPct(this.profile(), this.session()?.email));
-
   readonly checklist = computed<ChecklistItem[]>(() => {
     const p = this.profile();
     const email = this.session()?.email ?? '';
     return [
       { label: 'Contact info', done: !!(p.name && p.address && p.city && p.state && p.zip && p.phone && email) },
-      //{ label: 'Sales Leads link', done: !!p.googleLink },
+      { label: 'Sales Leads link', done: !!p.googleLink },
       { label: 'Representative Agreement', done: !!p.docs.agreement },
       { label: '1099 Form', done: !!p.docs.w4 },
+      { label: 'Certification passed', done: p.passedCertification },
+      { label: 'Consultant fee paid', done: p.consultantFeePaid },
+      { label: 'Business card approved', done: p.businessCardStatus === 'approved' },
+      { label: 'Contract wizard access', done: !!p.contractWizardLink },
+      { label: 'PWR Rewards email', done: !!p.pwrRewardsEmail },
     ];
+  });
+
+  readonly checklistDoneCount = computed(() => this.checklist().filter((item) => item.done).length);
+
+  readonly progressPct = computed(() => {
+    const items = this.checklist();
+    return items.length === 0 ? 0 : Math.round((this.checklistDoneCount() / items.length) * 100);
   });
 
   constructor() {

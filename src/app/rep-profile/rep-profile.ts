@@ -90,7 +90,6 @@ export class RepProfile {
   readonly businessCardStatus = computed(() => this.repProfileStore.profile().businessCardStatus);
   readonly businessCardSample = computed(() => this.repProfileStore.profile().docs.businessCards);
 
-  readonly isMarketingConsultant = computed(() => this.repProfileStore.profile().salesRepType === 'marketingConsultant');
   readonly pwrRewardsRows = computed<ProfileRow[]>(() => {
     const p = this.repProfileStore.profile();
     return [
