@@ -22,32 +22,22 @@ export class RepTrainingHub {
   private readonly trainingResourceStore = inject(TrainingResourceStore);
   private readonly trainingHubLinksStore = inject(TrainingHubLinksStore);
   private readonly toast = inject(Toast);
-
-  /** Minimum time the view-loading overlay stays up — keeps it from flashing on fast/mocked responses. */
   private static readonly MIN_VIEWING_MS = 200;
-
   readonly typeIcon = trainingResourceTypeIcon;
   readonly typeLabel = trainingResourceTypeLabel;
-
   readonly resources = this.trainingResourceStore.resources;
   readonly viewing = signal(false);
-
-  /** The fixed Admin card — the only content reps see on this page now that "Your uploads" is gone. */
   readonly adminHubSlots = computed(() => matchHubSlots(this.resources().filter((r) => r.uploadedBy === 'Admin')));
-
-  /** The 4 product/dashboard videos — plain YouTube links, not uploaded files, so they open in a new tab rather than the media viewer. */
   readonly videoRows = computed(() => {
     const links = this.trainingHubLinksStore.links();
     return links ? videoLinkRows(links) : [];
   });
 
-  /** Knowledge Base and Sales Leads — also plain admin-edited links, not uploaded files. */
   readonly resourceLinkRows = computed(() => {
     const links = this.trainingHubLinksStore.links();
     if (!links) return [];
     return [
-      { key: 'knowledgeBase', label: 'Knowledge Base', icon: 'menu_book', url: links.knowledgeBaseLink ?? '' },
-      { key: 'salesLead', label: 'Sales Leads', icon: 'storefront', url: links.salesLeadLink ?? '' },
+      { key: 'knowledgeBase', label: 'Knowledge Base', icon: 'menu_book', url: links.knowledgeBaseLink ?? '' }
     ];
   });
 
@@ -65,12 +55,6 @@ export class RepTrainingHub {
     window.open(url, '_blank', 'noopener');
   }
 
-  /**
-   * Opens the file in the in-app media viewer. Images/PDFs are fetched as a blob first since
-   * the backend renders them inline regardless. Videos instead get the raw streaming URL —
-   * the backend serves those with range support, so the <video> element can start playing and
-   * seek without waiting for the whole file to download first.
-   */
   view(resource: TrainingResource): void {
     if (resource.type === 'video') {
       if (this.dialog.openDialogs.length) return;
@@ -120,8 +104,7 @@ export class RepTrainingHub {
     });
   }
 
-  /** Keeps the loading overlay up for at least MIN_VIEWING_MS so it doesn't flash on fast/mocked responses. */
-  private stopViewing(startedAt: number, after: () => void): void {
+   private stopViewing(startedAt: number, after: () => void): void {
     const remaining = RepTrainingHub.MIN_VIEWING_MS - (Date.now() - startedAt);
     setTimeout(() => {
       this.viewing.set(false);
