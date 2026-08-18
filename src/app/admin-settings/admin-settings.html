@@ -58,10 +58,7 @@
         <mat-label>Knowledge Base</mat-label>
         <input matInput type="url" formControlName="knowledgeBaseLink">
       </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-        <mat-label>Sales Leads</mat-label>
-        <input matInput type="url" formControlName="salesLeadLink">
-      </mat-form-field>
+
 
       <div class="edit-actions">
         <button type="button" mat-button [disabled]="savingVideoLinks()" (click)="cancelEditVideoLinks()">Cancel</button>
@@ -75,7 +72,6 @@
     <ng-container *ngTemplateOutlet="field; context: {label:'Dashboard Video (English)', value: videoLinks()?.dashboardVideoEnglishLink}"></ng-container>
     <ng-container *ngTemplateOutlet="field; context: {label:'Dashboard Video (Spanish)', value: videoLinks()?.dashboardVideoSpanishLink}"></ng-container>
     <ng-container *ngTemplateOutlet="field; context: {label:'Knowledge Base', value: videoLinks()?.knowledgeBaseLink}"></ng-container>
-    <ng-container *ngTemplateOutlet="field; context: {label:'Sales Leads', value: videoLinks()?.salesLeadLink}"></ng-container>
     }
   </div>
 </mat-card>

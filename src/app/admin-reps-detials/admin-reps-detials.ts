@@ -160,8 +160,6 @@ export class AdminRepsDetials {
     city: [''],
     state: [''],
     zip: [''],
-    pwrRewardsEmail: ['', Validators.pattern(EMAIL_PATTERN)],
-    pwrRewardsEmailPassword: [''],
   });
 
   /** Reformats the phone field as the admin types — strips non-digits and caps at 10 (`xxx-xxx-xxxx`). */
@@ -183,8 +181,6 @@ export class AdminRepsDetials {
       city: rep.city,
       state: rep.state,
       zip: rep.zip,
-      pwrRewardsEmail: rep.pwrRewardsEmail,
-      pwrRewardsEmailPassword: rep.pwrRewardsEmailPassword,
     });
     this.editingContact.set(true);
   }
@@ -214,8 +210,6 @@ export class AdminRepsDetials {
         city: v.city.trim(),
         state: v.state.trim(),
         zip: v.zip.trim(),
-        pwrRewardsEmail: v.pwrRewardsEmail.trim(),
-        pwrRewardsEmailPassword: v.pwrRewardsEmailPassword.trim(),
       })
       .pipe(finalize(() => this.savingContact.set(false)))
       .subscribe({
@@ -429,10 +423,55 @@ export class AdminRepsDetials {
       });
   }
 
-  // ----- PWR Rewards email (part of the Contact information form/card) + instructions PDF dropzone (drag/drop mirrors the create-rep dialog's upload UI) -----
+  // ----- PWR Rewards email edit (its own card/form, separate from Contact information) + instructions PDF dropzone (drag/drop mirrors the create-rep dialog's upload UI) -----
+  readonly editingPwrRewards = signal(false);
+  readonly savingPwrRewards = signal(false);
   readonly pwrRewardsPasswordVisible = signal(false);
   readonly uploadingPwrInstructions = signal(false);
   readonly pwrInstructionsDragActive = signal(false);
+  readonly pwrRewardsForm = this.fb.nonNullable.group({
+    pwrRewardsEmail: ['', Validators.pattern(EMAIL_PATTERN)],
+    pwrRewardsEmailPassword: [''],
+  });
+
+  startEditPwrRewards(): void {
+    const rep = this.rep();
+    if (!rep) return;
+    this.pwrRewardsForm.setValue({
+      pwrRewardsEmail: rep.pwrRewardsEmail,
+      pwrRewardsEmailPassword: rep.pwrRewardsEmailPassword,
+    });
+    this.editingPwrRewards.set(true);
+  }
+
+  cancelEditPwrRewards(): void {
+    this.editingPwrRewards.set(false);
+  }
+
+  savePwrRewards(): void {
+    this.pwrRewardsForm.markAllAsTouched();
+    if (this.pwrRewardsForm.invalid) {
+      this.toast.show('Fix the highlighted fields before saving.');
+      return;
+    }
+    const rep = this.rep();
+    if (!rep) return;
+    const v = this.pwrRewardsForm.getRawValue();
+    this.savingPwrRewards.set(true);
+    this.directory
+      .updateRep(rep.repId, {
+        pwrRewardsEmail: v.pwrRewardsEmail.trim(),
+        pwrRewardsEmailPassword: v.pwrRewardsEmailPassword.trim(),
+      })
+      .pipe(finalize(() => this.savingPwrRewards.set(false)))
+      .subscribe({
+        next: () => {
+          this.editingPwrRewards.set(false);
+          this.toast.show('PWR Rewards email updated');
+        },
+        error: () => this.toast.show('Failed to update PWR Rewards email'),
+      });
+  }
 
   togglePwrRewardsPasswordVisibility(): void {
     this.pwrRewardsPasswordVisible.update((visible) => !visible);
