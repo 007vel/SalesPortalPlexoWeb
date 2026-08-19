@@ -72,7 +72,7 @@ export class AdminSettings {
 
   readonly filledSlotCount = computed(() => this.hubSlots().filter((s) => !!s.resource).length);
 
-  /** 6 admin-edited link fields (4 videos + Knowledge Base + Sales Leads) counted alongside the 2 PDF slots for the overview stat. */
+  /** 5 admin-edited link fields (4 videos + Knowledge Base) counted alongside the 2 PDF slots for the overview stat. */
   private readonly filledLinkCount = computed(() => {
     const links = this.videoLinks();
     if (!links) return 0;
@@ -82,11 +82,10 @@ export class AdminSettings {
       links.dashboardVideoEnglishLink,
       links.dashboardVideoSpanishLink,
       links.knowledgeBaseLink,
-      links.salesLeadLink,
     ].filter((v) => !!v?.trim()).length;
   });
 
-  readonly totalResourceCount = computed(() => this.hubSlots().length + 6);
+  readonly totalResourceCount = computed(() => this.hubSlots().length + 5);
   readonly filledResourceCount = computed(() => this.filledSlotCount() + this.filledLinkCount());
 
   readonly documentRows = computed<DocumentRow[]>(() => {
@@ -100,7 +99,7 @@ export class AdminSettings {
     }));
   });
 
-  // ----- training links edit (Product/Dashboard videos, Knowledge Base, Sales Leads — plain URLs, not uploads) -----
+  // ----- training links edit (Product/Dashboard videos, Knowledge Base — plain URLs, not uploads) -----
   readonly videoLinks = this.trainingHubLinksStore.links;
   readonly editingVideoLinks = signal(false);
   readonly savingVideoLinks = signal(false);
@@ -110,7 +109,6 @@ export class AdminSettings {
     dashboardVideoEnglishLink: [''],
     dashboardVideoSpanishLink: [''],
     knowledgeBaseLink: [''],
-    salesLeadLink: [''],
   });
 
   constructor() {
@@ -133,7 +131,6 @@ export class AdminSettings {
       dashboardVideoEnglishLink: links.dashboardVideoEnglishLink ?? '',
       dashboardVideoSpanishLink: links.dashboardVideoSpanishLink ?? '',
       knowledgeBaseLink: links.knowledgeBaseLink ?? '',
-      salesLeadLink: links.salesLeadLink ?? '',
     });
     this.editingVideoLinks.set(true);
   }
@@ -170,7 +167,8 @@ export class AdminSettings {
         dashboardVideoEnglishLink: v.dashboardVideoEnglishLink.trim(),
         dashboardVideoSpanishLink: v.dashboardVideoSpanishLink.trim(),
         knowledgeBaseLink: v.knowledgeBaseLink.trim(),
-        salesLeadLink: v.salesLeadLink.trim(),
+        // Not editable from this form — pass the existing value straight through unchanged.
+        salesLeadLink: links.salesLeadLink ?? '',
       })
       .pipe(finalize(() => this.savingVideoLinks.set(false)))
       .subscribe({
