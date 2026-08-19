@@ -1,6 +1,91 @@
 <div class="admin-topbar">
   <div>
     <h1>Marketing Hub Admin</h1>
+    <p>Training videos shared with every rep.</p>
+  </div>
+</div>
+
+<mat-card class="table-card hub-links-card">
+  <div class="section-head editable">
+    <div>
+      <div class="eyebrow">Links</div>
+      <h2>Training links</h2>
+    </div>
+    @if (!editingVideoLinks()) {
+    <button type="button" mat-stroked-button class="edit-btn" (click)="startEditVideoLinks()">
+      <mat-icon>edit</mat-icon> Edit
+    </button>
+    }
+  </div>
+  <div class="section-body">
+    @if (editingVideoLinks()) {
+    <form [formGroup]="videoLinksForm" class="edit-form">
+      <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+        <mat-label>Product Video (English)</mat-label>
+        <input matInput type="url" formControlName="productVideoEnglishLink">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+        <mat-label>Product Video (Spanish)</mat-label>
+        <input matInput type="url" formControlName="productVideoSpanishLink">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+        <mat-label>Dashboard Video (English)</mat-label>
+        <input matInput type="url" formControlName="dashboardVideoEnglishLink">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+        <mat-label>Dashboard Video (Spanish)</mat-label>
+        <input matInput type="url" formControlName="dashboardVideoSpanishLink">
+      </mat-form-field>
+
+      <div class="edit-actions">
+        <button type="button" mat-button [disabled]="savingVideoLinks()"
+          (click)="cancelEditVideoLinks()">Cancel</button>
+        <button type="button" mat-flat-button class="save-btn" [disabled]="savingVideoLinks()"
+          (click)="saveVideoLinks()">{{
+          savingVideoLinks() ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </form>
+    } @else {
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Product Video (English)', value: videoLinks()?.productVideoEnglishLink}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Product Video (Spanish)', value: videoLinks()?.productVideoSpanishLink}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Dashboard Video (English)', value: videoLinks()?.dashboardVideoEnglishLink}"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="field; context: {label:'Dashboard Video (Spanish)', value: videoLinks()?.dashboardVideoSpanishLink}"></ng-container>
+    }
+  </div>
+</mat-card>
+
+<ng-template #field let-label="label" let-value="value">
+  <div class="readonly-field">
+    <div class="rl">{{ label }}</div>
+    @if (!value) {
+    <div class="rv empty">Not set</div>
+    } @else {
+    <div class="rv"><button type="button" class="link-btn" (click)="openVideoLink(value, label)">{{ value }}</button></div>
+    @if (youtubeThumbnail(value); as thumb) {
+    <button type="button" class="as-video-thumb-btn" title="Open {{ label }}" (click)="openVideoLink(value, label)">
+      <img [src]="thumb" [alt]="label" class="as-video-thumb">
+      <mat-icon class="as-video-thumb-play">play_circle</mat-icon>
+    </button>
+    }
+    }
+  </div>
+</ng-template>
+
+<!--
+  Marketing Hub media grid (brochures/decks/etc.) — temporarily disabled while this page hosts the
+  Training links card above instead. Re-enable (and drop the Training links card) once Marketing
+  Hub's own upload flow is ready to ship again.
+
+<div class="admin-topbar">
+  <div>
+    <h1>Marketing Hub Admin</h1>
     <p>Brochures, decks, and marketing assets shared with every rep.</p>
   </div>
   <button type="button" mat-flat-button color="primary" class="add-media-btn" (click)="openAddDialog()">
@@ -91,3 +176,5 @@
   <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
 </div>
 }
+-->
+

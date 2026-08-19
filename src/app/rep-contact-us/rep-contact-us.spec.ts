@@ -41,9 +41,9 @@ describe('RepContactUs', () => {
 
     const req = httpMock.expectOne(apiUrl('support/contact-admin'));
     expect(req.request.method).toBe('POST');
+    expect(req.request.body.name).toBe('Jordan Reyes');
     expect(req.request.body.email).toBe('jordan@example.com');
-    expect(req.request.body.message).toContain('Jordan Reyes');
-    expect(req.request.body.message).toContain('Need help with my agreement.');
+    expect(req.request.body.message).toBe('Need help with my agreement.');
     req.flush({});
 
     expect(component.sending()).toBe(false);

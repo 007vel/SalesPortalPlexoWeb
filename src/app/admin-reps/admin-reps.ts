@@ -137,7 +137,14 @@ export class AdminReps {
           .deleteRep(rep.oId)
           .pipe(finalize(() => this.setDeleting(rep.oId, false)))
           .subscribe({
-            next: () => this.toast.show(`"${rep.name || rep.repId}" Deleted Successfully`),
+            next: () => {
+              // deleteRep() only updates the store's canonical list — when a filter/search is
+              // active, this component renders from the separate `filteredReps` snapshot instead
+              // (see `reps` computed above), so that snapshot needs the same removal or the row
+              // stays visible despite the delete having succeeded.
+              this.filteredReps.update((list) => list && list.filter((r) => r.oId !== rep.oId));
+              this.toast.show(`"${rep.name || rep.repId}" Deleted Successfully`);
+            },
             error: () => this.toast.show('Failed to delete rep'),
           });
       });

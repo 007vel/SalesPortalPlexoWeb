@@ -5,11 +5,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TrainingResource, TrainingResourceStore, matchHubSlots, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
-import { TrainingHubLinksStore, videoLinkRows } from '../training-hub-links-store/training-hub-links-store';
+import { TrainingHubLinksStore } from '../training-hub-links-store/training-hub-links-store';
 import { Toast } from '../toast/toast';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { Auth } from '../auth/auth';
-import { extractYouTubeId, youTubeThumbnailUrl } from '../shared/youtube';
 
 @Component({
   selector: 'app-rep-training-hub',
@@ -29,10 +28,6 @@ export class RepTrainingHub {
   readonly resources = this.trainingResourceStore.resources;
   readonly viewing = signal(false);
   readonly adminHubSlots = computed(() => matchHubSlots(this.resources().filter((r) => r.uploadedBy === 'Admin')));
-  readonly videoRows = computed(() => {
-    const links = this.trainingHubLinksStore.links();
-    return links ? videoLinkRows(links) : [];
-  });
 
   readonly resourceLinkRows = computed(() => {
     const links = this.trainingHubLinksStore.links();
@@ -54,21 +49,6 @@ export class RepTrainingHub {
 
   openLink(url: string): void {
     window.open(url, '_blank', 'noopener');
-  }
-
-  /** The thumbnail shown under each video row, kept visible at all times rather than just inside the viewer dialog. */
-  youtubeThumbnail(url: string): string | null {
-    const id = extractYouTubeId(url);
-    return id ? youTubeThumbnailUrl(id) : null;
-  }
-
-  openVideoLink(url: string, title: string): void {
-    if (this.dialog.openDialogs.length) return;
-    this.dialog.open(MediaViewerDialog, {
-      data: { title, type: 'youtube', url, fileName: title },
-      maxWidth: '90vw',
-      panelClass: 'media-viewer-panel',
-    });
   }
 
   view(resource: TrainingResource): void {

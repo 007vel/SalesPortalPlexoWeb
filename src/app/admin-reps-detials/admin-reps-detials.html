@@ -772,7 +772,7 @@
     <ng-container
       *ngTemplateOutlet="field; context: {label:'Routing number', value: bank.routingNumber}"></ng-container>
     <ng-container
-      *ngTemplateOutlet="field; context: {label:'Account number', value: bank.accountNumber}"></ng-container>
+      *ngTemplateOutlet="field; context: {label:'Account number', value: maskAccountNumber(bank.accountNumber)}"></ng-container>
     <ng-container
       *ngTemplateOutlet="field; context: {label:'Last updated', value: formatDate(bank.updatedAt)}"></ng-container>
     } @else {
@@ -784,69 +784,7 @@
     }
   </div>
 </mat-card>
-<mat-card class="section training-section">
-  <div class="section-head">
-    <div class="eyebrow">Training hub</div>
-  </div>
-  <div class="section-body">
-    <h3 class="hub-section-title">Shared by Admin</h3>
-    <div class="hub-slots-list">
-      @for (row of videoRows(); track row.key) {
-      <div class="doc-row">
-        <div class="doc-info">
-          <div class="doc-icon" [class.filled]="!!row.url"><mat-icon>movie</mat-icon></div>
-          <div>
-            <div class="doc-name">{{ row.label }}</div>
-            <div class="doc-status" [class.filled]="!!row.url">{{ row.url ? 'YouTube link' : 'Not set yet' }}</div>
-          </div>
-        </div>
-        @if (row.url) {
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <button type="button" mat-icon-button class="action-btn" title="Open"
-            (click)="openVideoLink(row.url, row.label)"><mat-icon>open_in_new</mat-icon></button>
-        </div>
-        }
-      </div>
-      @if (youtubeThumbnail(row.url); as thumb) {
-      <button type="button" class="hub-video-thumb-btn" title="Open {{ row.label }}"
-        (click)="openVideoLink(row.url, row.label)">
-        <img [src]="thumb" [alt]="row.label" class="hub-video-thumb">
-        <mat-icon class="hub-video-thumb-play">play_circle</mat-icon>
-      </button>
-      }
-      }
-      @for (slot of adminHubSlots(); track slot.key) {
-      <div class="doc-row">
-        <div class="doc-info">
-          <div class="doc-icon" [class.filled]="!!slot.resource"><mat-icon>{{ slot.resource ? 'check' : slot.icon
-              }}</mat-icon></div>
-          <div>
-            <div class="doc-name">{{ slot.label }}</div>
-            <div class="doc-status" [class.filled]="!!slot.resource">
-              {{ slot.resource ? slot.resource.fileName : 'Not uploaded yet'}} </div>
-          </div>
-        </div>
-        @if (slot.resource; as res) {
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <button type="button" mat-icon-button class="action-btn" title="View"
-            (click)="view(res)"><mat-icon>visibility</mat-icon></button>
-          <button type="button" mat-icon-button class="action-btn" title="Download"
-            (click)="downloadResource(res.oId, res.fileName)"><mat-icon>download</mat-icon></button>
-        </div>
-        }
-      </div>
-      }
-    </div>
 
-    <!-- <h3 class="hub-section-title">{{ rep.name || 'This rep' }}'s uploads</h3>
-    <h4 class="hub-lang-subtitle">English</h4>
-    <ng-container
-      *ngTemplateOutlet="hubLangGrid; context: { list: ownResourcesEnglish(), emptyMsg: (rep.name || 'This rep') + ' has not uploaded anything in English yet.' }"></ng-container>
-    <h4 class="hub-lang-subtitle">Spanish</h4>
-    <ng-container
-      *ngTemplateOutlet="hubLangGrid; context: { list: ownResourcesSpanish(), emptyMsg: (rep.name || 'This rep') + ' has not uploaded anything in Spanish yet.' }"></ng-container> -->
-  </div>
-</mat-card>
 
 <ng-template #hubLangGrid let-list="list" let-emptyMsg="emptyMsg">
   @if (list.length === 0) {

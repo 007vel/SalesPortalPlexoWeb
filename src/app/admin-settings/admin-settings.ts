@@ -17,7 +17,6 @@ import { RepDirectoryStore, RepDocumentRecord } from '../rep-directory-store/rep
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { Toast } from '../toast/toast';
-import { extractYouTubeId, youTubeThumbnailUrl } from '../shared/youtube';
 
 const DOC_KIND_LABEL: Record<string, string> = { agreement: 'Representative Agreement', w4: 'W-4 Form' };
 
@@ -72,20 +71,10 @@ export class AdminSettings {
 
   readonly filledSlotCount = computed(() => this.hubSlots().filter((s) => !!s.resource).length);
 
-  /** 5 admin-edited link fields (4 videos + Knowledge Base) counted alongside the 2 PDF slots for the overview stat. */
-  private readonly filledLinkCount = computed(() => {
-    const links = this.videoLinks();
-    if (!links) return 0;
-    return [
-      links.productVideoEnglishLink,
-      links.productVideoSpanishLink,
-      links.dashboardVideoEnglishLink,
-      links.dashboardVideoSpanishLink,
-      links.knowledgeBaseLink,
-    ].filter((v) => !!v?.trim()).length;
-  });
+  /** The Knowledge Base link field counted alongside the 2 PDF slots for the overview stat — the 4 video links moved to Marketing Hub Admin. */
+  private readonly filledLinkCount = computed(() => (this.hubLinks()?.knowledgeBaseLink?.trim() ? 1 : 0));
 
-  readonly totalResourceCount = computed(() => this.hubSlots().length + 5);
+  readonly totalResourceCount = computed(() => this.hubSlots().length + 1);
   readonly filledResourceCount = computed(() => this.filledSlotCount() + this.filledLinkCount());
 
   readonly documentRows = computed<DocumentRow[]>(() => {
@@ -99,15 +88,11 @@ export class AdminSettings {
     }));
   });
 
-  // ----- training links edit (Product/Dashboard videos, Knowledge Base — plain URLs, not uploads) -----
-  readonly videoLinks = this.trainingHubLinksStore.links;
-  readonly editingVideoLinks = signal(false);
-  readonly savingVideoLinks = signal(false);
-  readonly videoLinksForm = this.fb.nonNullable.group({
-    productVideoEnglishLink: [''],
-    productVideoSpanishLink: [''],
-    dashboardVideoEnglishLink: [''],
-    dashboardVideoSpanishLink: [''],
+  // ----- Knowledge Base link edit (plain URL, not an upload) — the 4 video links moved to Marketing Hub Admin -----
+  readonly hubLinks = this.trainingHubLinksStore.links;
+  readonly editingKnowledgeBase = signal(false);
+  readonly savingKnowledgeBase = signal(false);
+  readonly knowledgeBaseForm = this.fb.nonNullable.group({
     knowledgeBaseLink: [''],
   });
 
@@ -119,64 +104,42 @@ export class AdminSettings {
     });
   }
 
-  startEditVideoLinks(): void {
-    const links = this.videoLinks();
+  startEditKnowledgeBase(): void {
+    const links = this.hubLinks();
     if (!links) {
       this.toast.show('Training links are still loading — try again in a moment.');
       return;
     }
-    this.videoLinksForm.setValue({
-      productVideoEnglishLink: links.productVideoEnglishLink ?? '',
-      productVideoSpanishLink: links.productVideoSpanishLink ?? '',
-      dashboardVideoEnglishLink: links.dashboardVideoEnglishLink ?? '',
-      dashboardVideoSpanishLink: links.dashboardVideoSpanishLink ?? '',
-      knowledgeBaseLink: links.knowledgeBaseLink ?? '',
-    });
-    this.editingVideoLinks.set(true);
+    this.knowledgeBaseForm.setValue({ knowledgeBaseLink: links.knowledgeBaseLink ?? '' });
+    this.editingKnowledgeBase.set(true);
   }
 
-  cancelEditVideoLinks(): void {
-    this.editingVideoLinks.set(false);
+  cancelEditKnowledgeBase(): void {
+    this.editingKnowledgeBase.set(false);
   }
 
-  openVideoLink(url: string, title: string): void {
-    if (this.dialog.openDialogs.length) return;
-    this.dialog.open(MediaViewerDialog, {
-      data: { title, type: 'youtube', url, fileName: title },
-      maxWidth: '90vw',
-      panelClass: 'media-viewer-panel',
-    });
-  }
-
-  /** The thumbnail shown under each video link, kept visible at all times rather than just inside the viewer dialog. */
-  youtubeThumbnail(url: string | null | undefined): string | null {
-    if (!url) return null;
-    const id = extractYouTubeId(url);
-    return id ? youTubeThumbnailUrl(id) : null;
-  }
-
-  saveVideoLinks(): void {
-    const links = this.videoLinks();
+  saveKnowledgeBase(): void {
+    const links = this.hubLinks();
     if (!links) return;
-    const v = this.videoLinksForm.getRawValue();
-    this.savingVideoLinks.set(true);
+    const v = this.knowledgeBaseForm.getRawValue();
+    this.savingKnowledgeBase.set(true);
     this.trainingHubLinksStore
       .update(links.oId, {
-        productVideoEnglishLink: v.productVideoEnglishLink.trim(),
-        productVideoSpanishLink: v.productVideoSpanishLink.trim(),
-        dashboardVideoEnglishLink: v.dashboardVideoEnglishLink.trim(),
-        dashboardVideoSpanishLink: v.dashboardVideoSpanishLink.trim(),
+        // Not editable from this form — pass the existing values straight through unchanged.
+        productVideoEnglishLink: links.productVideoEnglishLink ?? '',
+        productVideoSpanishLink: links.productVideoSpanishLink ?? '',
+        dashboardVideoEnglishLink: links.dashboardVideoEnglishLink ?? '',
+        dashboardVideoSpanishLink: links.dashboardVideoSpanishLink ?? '',
         knowledgeBaseLink: v.knowledgeBaseLink.trim(),
-        // Not editable from this form — pass the existing value straight through unchanged.
         salesLeadLink: links.salesLeadLink ?? '',
       })
-      .pipe(finalize(() => this.savingVideoLinks.set(false)))
+      .pipe(finalize(() => this.savingKnowledgeBase.set(false)))
       .subscribe({
         next: () => {
-          this.editingVideoLinks.set(false);
-          this.toast.show('Video links updated');
+          this.editingKnowledgeBase.set(false);
+          this.toast.show('Knowledge Base link updated');
         },
-        error: () => this.toast.show('Failed to update video links'),
+        error: () => this.toast.show('Failed to update Knowledge Base link'),
       });
   }
 

@@ -32,8 +32,19 @@ describe('MarketingHubRep', () => {
     ]);
   }
 
+  function flushHubLinks(): void {
+    httpMock.expectOne(apiUrl('traininghublinks')).flush([
+      {
+        oId: 1, productVideoEnglishLink: 'https://youtu.be/product-en', productVideoSpanishLink: 'https://youtu.be/product-es',
+        dashboardVideoEnglishLink: 'https://youtu.be/dashboard-en', dashboardVideoSpanishLink: 'https://youtu.be/dashboard-es',
+        knowledgeBaseLink: null, salesLeadLink: null,
+      },
+    ]);
+  }
+
   it('loads Marketing Hub resources on construction, regardless of sign-in state', async () => {
     flushMarketing();
+    flushHubLinks();
     await fixture.whenStable();
 
     expect(component).toBeTruthy();
@@ -43,6 +54,7 @@ describe('MarketingHubRep', () => {
 
   it('filteredResources() narrows down to the selected category', async () => {
     flushMarketing();
+    flushHubLinks();
     await fixture.whenStable();
 
     expect(component.categories()).toEqual(['Flyers', 'Sell Sheets']);

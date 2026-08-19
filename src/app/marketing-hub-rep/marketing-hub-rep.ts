@@ -5,8 +5,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TrainingResource, TrainingResourceStore, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { TrainingHubLinksStore, videoLinkRows } from '../training-hub-links-store/training-hub-links-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { Toast } from '../toast/toast';
+import { extractYouTubeId, youTubeThumbnailUrl } from '../shared/youtube';
 
 const ALL_CATEGORIES = 'all';
 
@@ -19,6 +21,7 @@ const ALL_CATEGORIES = 'all';
 export class MarketingHubRep {
   private readonly dialog = inject(MatDialog);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
+  private readonly trainingHubLinksStore = inject(TrainingHubLinksStore);
   private readonly toast = inject(Toast);
 
   private static readonly MIN_VIEWING_MS = 200;
@@ -37,6 +40,12 @@ export class MarketingHubRep {
     return category === ALL_CATEGORIES ? list : list.filter((r) => r.category === category);
   });
 
+  /** The 4 Product/Dashboard video links — moved here from the Training Hub's rep-facing page. */
+  readonly videoRows = computed(() => {
+    const links = this.trainingHubLinksStore.links();
+    return links ? videoLinkRows(links) : [];
+  });
+
   constructor() {
     this.trainingResourceStore.loadMarketing().subscribe({
       next: () => this.loaded.set(true),
@@ -44,6 +53,22 @@ export class MarketingHubRep {
         this.loaded.set(true);
         this.toast.show('Failed to load Marketing Hub');
       },
+    });
+    this.trainingHubLinksStore.load().subscribe();
+  }
+
+  /** The thumbnail shown under each video row, kept visible at all times rather than just inside the viewer dialog. */
+  youtubeThumbnail(url: string): string | null {
+    const id = extractYouTubeId(url);
+    return id ? youTubeThumbnailUrl(id) : null;
+  }
+
+  openVideoLink(url: string, title: string): void {
+    if (this.dialog.openDialogs.length) return;
+    this.dialog.open(MediaViewerDialog, {
+      data: { title, type: 'youtube', url, fileName: title },
+      maxWidth: '90vw',
+      panelClass: 'media-viewer-panel',
     });
   }
 

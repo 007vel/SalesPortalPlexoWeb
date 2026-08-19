@@ -1,5 +1,46 @@
 <div class="rep-page-head">
   <div class="eyebrow">Marketing Hub</div>
+  <h1>Marketing Hub &amp; resources</h1>
+  <p>Shared by admin — open any video below.</p>
+</div>
+
+<mat-card class="th-card-section">
+  <div class="th-card-section-head">
+    <h3 class="th-section-title">Training links</h3>
+  </div>
+  <div class="th-card-section-body">
+    @for (row of videoRows(); track row.key) {
+    <div class="th-slot-row th-video-slot-row">
+      <div class="th-slot-info">
+        <div class="th-slot-icon" [class.filled]="!!row.url"><mat-icon>movie</mat-icon></div>
+        <div>
+          <div class="th-slot-name">{{ row.label }}</div>
+          <div class="th-slot-status" [class.filled]="!!row.url">{{ row.url ? 'YouTube link' : 'Not set yet' }}</div>
+        </div>
+      </div>
+      @if (row.url) {
+      <div class="th-slot-actions">
+        <button type="button" mat-icon-button class="th-action-btn" title="Open" (click)="openVideoLink(row.url, row.label)"><mat-icon>open_in_new</mat-icon></button>
+      </div>
+      }
+    </div>
+    @if (youtubeThumbnail(row.url); as thumb) {
+    <button type="button" class="th-video-thumb-btn" title="Open {{ row.label }}" (click)="openVideoLink(row.url, row.label)">
+      <img [src]="thumb" [alt]="row.label" class="th-video-thumb">
+      <mat-icon class="th-video-thumb-play">play_circle</mat-icon>
+    </button>
+    }
+    }
+  </div>
+</mat-card>
+
+<!--
+  Marketing Hub media grid (brochures/decks/etc.) — temporarily disabled while this page hosts the
+  Training links card above instead. Re-enable (and drop the Training links card) once Marketing
+  Hub's own upload flow is ready to ship again.
+
+<div class="rep-page-head">
+  <div class="eyebrow">Marketing Hub</div>
   <h1>Brochures &amp; marketing assets</h1>
   <p>Shared by admin — browse, view, or download anything here.</p>
 </div>
@@ -60,3 +101,5 @@
   <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
 </div>
 }
+-->
+

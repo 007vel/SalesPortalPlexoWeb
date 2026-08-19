@@ -20,7 +20,7 @@ export interface VideoLinkRow {
   url: string;
 }
 
-/** Flattens the 4 fixed video link fields into display rows — shared by admin-settings' read view, rep-training-hub, and admin-reps-detials so they don't drift. */
+/** Flattens the 4 fixed video link fields into display rows — shared by marketing-hub-admin's read view, marketing-hub-rep, and admin-reps-detials so they don't drift. */
 export function videoLinkRows(links: TrainingHubLinks): VideoLinkRow[] {
   return [
     { key: 'productVideoEn', label: 'Product Video (English)', url: links.productVideoEnglishLink ?? '' },

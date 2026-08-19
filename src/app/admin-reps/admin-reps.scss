@@ -397,6 +397,7 @@ td.mat-mdc-cell {
   .search-field,
   .filter-field {
     width: 100%;
+    flex: 0 0 auto;
   }
 
   .clear-filters-btn {
@@ -438,6 +439,7 @@ td.mat-mdc-cell {
     grid-template-areas:
       "name   status"
       "repid  repid"
+      "reptype reptype"
       "docs   docs"
       "link   link"
       "actions actions";
@@ -520,6 +522,7 @@ td.mat-mdc-cell {
   }
 
   // ---- meta rows: label left (with icon), value right ----
+  td.mat-column-salesRepType,
   td.mat-column-documents,
   td.mat-column-portalLink {
     display: flex;
@@ -538,6 +541,10 @@ td.mat-mdc-cell {
       color: var(--muted, #9AA6B8);
       flex-shrink: 0;
     }
+  }
+
+  td.mat-column-salesRepType {
+    grid-area: reptype;
   }
 
   td.mat-column-documents {
