@@ -51,6 +51,191 @@
   }
 }
 
+// ---------- Training links card (read-only, moved here from the rep-facing Training Hub) ----------
+.th-card-section {
+  padding: 0 !important;
+  border-radius: 16px;
+  border: 1px solid #EEF1F6;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.th-card-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 22px;
+  border-bottom: 1px solid #F0F2F6;
+}
+
+.th-card-section-body {
+  padding: 6px 22px 18px;
+}
+
+.th-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0;
+}
+
+.th-slot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid #F0F2F6;
+
+  &:first-of-type {
+    border-top: none;
+  }
+}
+
+.th-slot-info {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.th-slot-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #F1F3F7;
+  color: #9AA6B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+  }
+
+  &.filled {
+    background: #E4F7EE;
+    color: #1A8A5F;
+  }
+}
+
+.th-slot-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.th-slot-status {
+  font-size: 12.5px;
+  color: var(--faint, #9AA6B8);
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+
+  &.filled {
+    color: var(--muted);
+  }
+}
+
+.th-slot-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.th-video-slot-row {
+  padding-bottom: 10px;
+}
+
+.th-video-thumb-btn {
+  position: relative;
+  display: block;
+  width: 220px;
+  aspect-ratio: 16 / 9;
+  margin: 0 0 14px 51px; // aligns under the row's title, past the 38px icon + 13px gap
+  border: 1px solid #E5E9F0;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  background: #EEF1F5;
+
+  &:hover .th-video-thumb-play {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+.th-video-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.th-video-thumb-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
+  transition: transform .15s ease;
+}
+
+@media (max-width: 560px) {
+  .th-video-thumb-btn {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+.th-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #E5E9F0;
+  border-radius: 8px;
+  color: var(--muted);
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+  }
+
+  &:hover {
+    background: #F5F7FA;
+    color: var(--orange);
+    border-color: #F0D9C4;
+  }
+}
+
+@media (max-width: 560px) {
+  .th-card-section-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .th-slot-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .th-slot-actions {
+    justify-content: flex-end;
+  }
+}
+
 // ---------- filter bar ----------
 .filter-bar {
   margin-bottom: 16px;

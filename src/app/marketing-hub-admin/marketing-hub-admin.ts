@@ -1,27 +1,39 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize } from 'rxjs';
 import { RepVideoDialog } from '../rep-video-dialog/rep-video-dialog';
 import { TrainingResource, TrainingResourceStore, trainingResourceTypeIcon, trainingResourceTypeLabel } from '../training-resource-store/training-resource-store';
+import { TrainingHubLinksStore } from '../training-hub-links-store/training-hub-links-store';
 import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { Toast } from '../toast/toast';
+import { extractYouTubeId, youTubeThumbnailUrl } from '../shared/youtube';
 
 export const ALL_CATEGORIES = 'all';
 
 @Component({
   selector: 'app-marketing-hub-admin',
-  imports: [MatButtonModule, MatCardModule, MatIconModule, MatMenuModule, MatProgressSpinnerModule],
+  imports: [
+    ReactiveFormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule,
+    MatMenuModule, MatProgressSpinnerModule, NgTemplateOutlet,
+  ],
   templateUrl: './marketing-hub-admin.html',
   styleUrl: './marketing-hub-admin.scss',
 })
 export class MarketingHubAdmin {
+  private readonly fb = inject(FormBuilder);
   private readonly dialog = inject(MatDialog);
   private readonly trainingResourceStore = inject(TrainingResourceStore);
+  private readonly trainingHubLinksStore = inject(TrainingHubLinksStore);
   private readonly toast = inject(Toast);
 
   /** Minimum time the view-loading overlay stays up — keeps it from flashing on fast/mocked responses. */
@@ -43,6 +55,17 @@ export class MarketingHubAdmin {
     return category === ALL_CATEGORIES ? list : list.filter((r) => r.category === category);
   });
 
+  // ----- training links edit (Product/Dashboard videos — moved here from Training Hub Admin; plain URLs, not uploads) -----
+  readonly videoLinks = this.trainingHubLinksStore.links;
+  readonly editingVideoLinks = signal(false);
+  readonly savingVideoLinks = signal(false);
+  readonly videoLinksForm = this.fb.nonNullable.group({
+    productVideoEnglishLink: [''],
+    productVideoSpanishLink: [''],
+    dashboardVideoEnglishLink: [''],
+    dashboardVideoSpanishLink: [''],
+  });
+
   constructor() {
     this.trainingResourceStore.loadMarketing().subscribe({
       next: () => this.loaded.set(true),
@@ -51,6 +74,69 @@ export class MarketingHubAdmin {
         this.toast.show('Failed to load Marketing Hub');
       },
     });
+    this.trainingHubLinksStore.load().subscribe({
+      error: () => this.toast.show('Failed to load training links'),
+    });
+  }
+
+  startEditVideoLinks(): void {
+    const links = this.videoLinks();
+    if (!links) {
+      this.toast.show('Training links are still loading — try again in a moment.');
+      return;
+    }
+    this.videoLinksForm.setValue({
+      productVideoEnglishLink: links.productVideoEnglishLink ?? '',
+      productVideoSpanishLink: links.productVideoSpanishLink ?? '',
+      dashboardVideoEnglishLink: links.dashboardVideoEnglishLink ?? '',
+      dashboardVideoSpanishLink: links.dashboardVideoSpanishLink ?? '',
+    });
+    this.editingVideoLinks.set(true);
+  }
+
+  cancelEditVideoLinks(): void {
+    this.editingVideoLinks.set(false);
+  }
+
+  openVideoLink(url: string, title: string): void {
+    if (this.dialog.openDialogs.length) return;
+    this.dialog.open(MediaViewerDialog, {
+      data: { title, type: 'youtube', url, fileName: title },
+      maxWidth: '90vw',
+      panelClass: 'media-viewer-panel',
+    });
+  }
+
+  /** The thumbnail shown under each video link, kept visible at all times rather than just inside the viewer dialog. */
+  youtubeThumbnail(url: string | null | undefined): string | null {
+    if (!url) return null;
+    const id = extractYouTubeId(url);
+    return id ? youTubeThumbnailUrl(id) : null;
+  }
+
+  saveVideoLinks(): void {
+    const links = this.videoLinks();
+    if (!links) return;
+    const v = this.videoLinksForm.getRawValue();
+    this.savingVideoLinks.set(true);
+    this.trainingHubLinksStore
+      .update(links.oId, {
+        productVideoEnglishLink: v.productVideoEnglishLink.trim(),
+        productVideoSpanishLink: v.productVideoSpanishLink.trim(),
+        dashboardVideoEnglishLink: v.dashboardVideoEnglishLink.trim(),
+        dashboardVideoSpanishLink: v.dashboardVideoSpanishLink.trim(),
+        // Not editable from this form — pass the existing values straight through unchanged.
+        knowledgeBaseLink: links.knowledgeBaseLink ?? '',
+        salesLeadLink: links.salesLeadLink ?? '',
+      })
+      .pipe(finalize(() => this.savingVideoLinks.set(false)))
+      .subscribe({
+        next: () => {
+          this.editingVideoLinks.set(false);
+          this.toast.show('Video links updated');
+        },
+        error: () => this.toast.show('Failed to update video links'),
+      });
   }
 
   openAddDialog(): void {

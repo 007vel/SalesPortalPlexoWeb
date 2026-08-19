@@ -500,8 +500,8 @@ td.mat-mdc-cell {
   }
 }
 
-// ---------- video links card (inline edit, mirrors admin-reps-detials' Sales Leads section) ----------
-.video-links-card {
+// ---------- Knowledge Base link card (inline edit, mirrors admin-reps-detials' Sales Leads section) ----------
+.hub-links-card {
   padding: 0 !important;
 }
 
@@ -588,7 +588,7 @@ td.mat-mdc-cell {
   background-color: var(--orange) !important;
 }
 
-.video-links-card .section-body {
+.hub-links-card .section-body {
   padding: 20px 24px 22px;
 }
 
@@ -648,50 +648,6 @@ td.mat-mdc-cell {
       cursor: pointer;
       overflow-wrap: anywhere;
     }
-  }
-}
-
-.as-video-thumb-btn {
-  position: relative;
-  display: block;
-  width: 220px;
-  aspect-ratio: 16 / 9;
-  margin: 10px 0 0;
-  border: 1px solid #E5E9F0;
-  border-radius: 10px;
-  overflow: hidden;
-  padding: 0;
-  cursor: pointer;
-  background: #EEF1F5;
-
-  &:hover .as-video-thumb-play {
-    transform: translate(-50%, -50%) scale(1.08);
-  }
-}
-
-.as-video-thumb {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.as-video-thumb-play {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff;
-  font-size: 40px;
-  width: 40px;
-  height: 40px;
-  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
-  transition: transform .15s ease;
-}
-
-@media (max-width: 560px) {
-  .as-video-thumb-btn {
-    width: 100%;
   }
 }
 

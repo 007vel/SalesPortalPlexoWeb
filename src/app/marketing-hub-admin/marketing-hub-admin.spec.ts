@@ -32,8 +32,19 @@ describe('MarketingHubAdmin', () => {
     ]);
   }
 
+  function flushHubLinks(): void {
+    httpMock.expectOne(apiUrl('traininghublinks')).flush([
+      {
+        oId: 1, productVideoEnglishLink: 'https://youtu.be/product-en', productVideoSpanishLink: 'https://youtu.be/product-es',
+        dashboardVideoEnglishLink: 'https://youtu.be/dashboard-en', dashboardVideoSpanishLink: 'https://youtu.be/dashboard-es',
+        knowledgeBaseLink: null, salesLeadLink: null,
+      },
+    ]);
+  }
+
   it('loads only Marketing Hub resources on construction', async () => {
     flushMarketing();
+    flushHubLinks();
     await fixture.whenStable();
 
     expect(component).toBeTruthy();
@@ -44,6 +55,7 @@ describe('MarketingHubAdmin', () => {
 
   it('categories() lists each distinct category once, sorted', async () => {
     flushMarketing();
+    flushHubLinks();
     await fixture.whenStable();
 
     expect(component.categories()).toEqual(['Flyers', 'Sell Sheets']);
@@ -51,6 +63,7 @@ describe('MarketingHubAdmin', () => {
 
   it('filteredResources() defaults to showing everything, and narrows down once a category is picked', async () => {
     flushMarketing();
+    flushHubLinks();
     await fixture.whenStable();
 
     expect(component.filteredResources().length).toBe(3);
@@ -65,6 +78,7 @@ describe('MarketingHubAdmin', () => {
   it('marks itself loaded even if the request fails', async () => {
     const req = httpMock.expectOne((r) => r.url === apiUrl('traininghub'));
     req.flush('error', { status: 500, statusText: 'Server Error' });
+    flushHubLinks();
     await fixture.whenStable();
 
     expect(component.loaded()).toBe(true);

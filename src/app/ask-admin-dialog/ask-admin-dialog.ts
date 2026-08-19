@@ -44,7 +44,7 @@ export class AskAdminDialog {
     this.sending.set(true);
 
     const { email, message } = this.form.getRawValue();
-    this.api.post('support/contact-admin', { email: email.trim(), message: message.trim() }).subscribe({
+    this.api.post('support/ask-admin', { email: email.trim(), message: message.trim() }).subscribe({
       next: () => this.dialogRef.close(true),
       error: () => {
         this.sending.set(false);

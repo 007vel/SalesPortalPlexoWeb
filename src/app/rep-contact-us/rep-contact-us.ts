@@ -45,11 +45,12 @@ export class RepContactUs {
     this.sending.set(true);
 
     const { name, email, message } = this.form.getRawValue();
-    // The backend endpoint only takes email + message — the name rides along inline in the body
-    // rather than requiring a schema change purely for this page's convenience.
-    const body = `From: ${name.trim()}\n\n${message.trim()}`;
 
-    this.api.post('support/contact-admin', { email: email.trim(), message: body }).subscribe({
+    this.api.post('support/contact-admin', {
+      name: name.trim(),
+      email: email.trim(),
+      message: message.trim(),
+    }).subscribe({
       next: () => {
         this.sending.set(false);
         this.sent.set(true);

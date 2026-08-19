@@ -47,12 +47,12 @@ export class BusinessCardFeedbackDialog {
     this.sending.set(true);
 
     const { repId, email, notes } = this.form.getRawValue();
-    // The backend endpoint only takes email + message — Rep ID rides along inline in the body,
-    // same as rep-contact-us.ts already does with the rep's name, rather than requiring a schema
-    // change purely for this dialog's convenience.
-    const body = `Business card feedback from Rep ${repId.trim()}:\n\n${notes.trim()}`;
 
-    this.api.post('support/contact-admin', { email: email.trim(), message: body }).subscribe({
+    this.api.post('support/business-card-request', {
+      repId: repId.trim(),
+      email: email.trim(),
+      notes: notes.trim(),
+    }).subscribe({
       next: () => this.dialogRef.close(true),
       error: () => {
         this.sending.set(false);

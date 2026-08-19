@@ -20,6 +20,7 @@ import { MediaViewerDialog } from '../media-viewer-dialog/media-viewer-dialog';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { Toast } from '../toast/toast';
 import { formatDateMDY } from '../shared/format-date';
+import { maskAccountNumber } from '../shared/mask-account-number';
 import { PHONE_PATTERN, formatPhoneInput } from '../shared/format-phone';
 import { extractYouTubeId, youTubeThumbnailUrl } from '../shared/youtube';
 
@@ -63,6 +64,7 @@ export class AdminRepsDetials {
   readonly statusBadge = repStatusBadge;
   readonly cardStatusBadge = businessCardStatusBadge;
   readonly formatDate = formatDateMDY;
+  readonly maskAccountNumber = maskAccountNumber;
   readonly repTypeLabel = salesRepTypeLabel;
 
   readonly trainingResources = this.trainingResourceStore.resources;

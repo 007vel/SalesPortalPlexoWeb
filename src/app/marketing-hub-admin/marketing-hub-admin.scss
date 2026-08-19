@@ -63,6 +63,206 @@
   }
 }
 
+// ---------- Training links card (inline edit, moved here from Training Hub Admin) ----------
+.hub-links-card {
+  padding: 0 !important;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid #EEF1F6;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  overflow: hidden;
+}
+
+.section-head {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #F0F2F6;
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 4px;
+  }
+
+  h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+
+  &.editable {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+}
+
+.edit-btn {
+  flex-shrink: 0;
+  height: 34px;
+  padding: 0 14px 0 10px;
+  border-radius: 8px;
+  border-color: #E1E6ED !important;
+  color: var(--text) !important;
+  font-weight: 600;
+  font-size: 13px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  &:hover {
+    background: #F5F7FA;
+    border-color: var(--orange) !important;
+    color: var(--orange) !important;
+  }
+}
+
+.edit-form {
+  .full-width {
+    width: 100%;
+  }
+
+  mat-form-field.full-width {
+    margin-top: 10px;
+  }
+
+  mat-form-field:first-child {
+    margin-top: 0;
+  }
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+
+  button[mat-button] {
+    color: var(--muted);
+  }
+}
+
+.save-btn {
+  color: #fff !important;
+  background-color: var(--orange) !important;
+}
+
+.hub-links-card .section-body {
+  padding: 20px 24px 22px;
+}
+
+// ---------- readonly field ----------
+.readonly-field {
+  margin-bottom: 18px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .rl {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 5px;
+  }
+
+  .rv {
+    font-size: 14px;
+    color: var(--text);
+    padding: 10px 13px;
+    background: #FAFBFD;
+    border: 1.5px solid #E9EDF3;
+    border-radius: 9px;
+    overflow-wrap: anywhere;
+
+    &.empty {
+      color: var(--faint, #9AA6B8);
+      font-style: italic;
+      background: transparent;
+      border-style: dashed;
+    }
+
+    a,
+    .link-btn {
+      color: var(--navy);
+      font-weight: 600;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+        color: var(--orange);
+      }
+    }
+
+    .link-btn {
+      display: block;
+      width: 100%;
+      background: none;
+      border: 0;
+      padding: 0;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
+.as-video-thumb-btn {
+  position: relative;
+  display: block;
+  width: 220px;
+  aspect-ratio: 16 / 9;
+  margin: 10px 0 0;
+  border: 1px solid #E5E9F0;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  background: #EEF1F5;
+
+  &:hover .as-video-thumb-play {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+.as-video-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.as-video-thumb-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
+  transition: transform .15s ease;
+}
+
+@media (max-width: 560px) {
+  .as-video-thumb-btn {
+    width: 100%;
+  }
+}
+
 // ---------- filter bar ----------
 .filter-bar {
   margin-bottom: 16px;
