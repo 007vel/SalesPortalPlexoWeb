@@ -30,6 +30,14 @@ export interface RepDocs {
 
 const EMPTY_DOCS: RepDocs = { agreement: null, w4: null, certification: null, pricingSheet: null, powerPoint: null, pwrInstructions: null, businessCards: null };
 
+/** The two notes cards on the admin Rep Details page — `admin` is admin-only, `shared` is visible to both the rep and admin. */
+export interface RepNotes {
+  admin: string;
+  shared: string;
+}
+
+const EMPTY_NOTES: RepNotes = { admin: '', shared: '' };
+
 /** A single document row across every rep — used by admin oversight views. */
 export interface RepDocumentRecord {
   oId: number;
@@ -67,6 +75,7 @@ export interface RepRecord {
   consultantFeePaid: boolean;
   docs: RepDocs;
   bankDetails: RepBankDetails | null;
+  notes: RepNotes;
   commissions: CommissionDay[];
   createdAt: string;
 
@@ -181,6 +190,22 @@ interface RepBankDetailsDto {
   bankName: string;
   routingNumber: string;
   accountNumber: string;
+  updatedAt: string;
+}
+
+/** Body shape for POST api/repnotes (RepNoteRequest). */
+interface RepNoteWriteDto {
+  repId: string;
+  kind: string;
+  text: string;
+}
+
+/** Shape returned by GET api/repnotes/rep/{repId} and POST api/repnotes (RepNoteDto). */
+interface RepNoteDto {
+  oId: number;
+  repId: string;
+  kind: string;
+  text: string | null;
   updatedAt: string;
 }
 
@@ -380,6 +405,34 @@ export class RepDirectoryStore {
     );
   }
 
+  /** Saves (creates or replaces) one of the two notes on file for a rep — see api/repnotes. */
+  setNote(repId: string, kind: keyof RepNotes, text: string): Observable<void> {
+    const body: RepNoteWriteDto = { repId, kind: kind === 'admin' ? 'Admin' : 'Shared', text };
+    return this.api.post('repnotes', body).pipe(
+      map(() => undefined),
+      tap(() =>
+        this.repsSignal.update((list) =>
+          list.map((r) => (r.repId === repId ? { ...r, notes: { ...r.notes, [kind]: text } } : r)),
+        ),
+      ),
+    );
+  }
+
+  /** Fetches every note on file for a rep (via `api/repnotes/rep/{repId}`) and fills in its admin/shared slots. */
+  loadNotes(repId: string): Observable<RepNotes> {
+    return this.api.get<RepNoteDto[]>(`repnotes/rep/${repId}`).pipe(
+      map((dtos): RepNotes => {
+        const notes: RepNotes = { ...EMPTY_NOTES };
+        for (const dto of dtos) {
+          if (dto.kind === 'Admin') notes.admin = dto.text ?? '';
+          else if (dto.kind === 'Shared') notes.shared = dto.text ?? '';
+        }
+        return notes;
+      }),
+      tap((notes) => this.repsSignal.update((list) => list.map((r) => (r.repId === repId ? { ...r, notes } : r)))),
+    );
+  }
+
   updateStatus(repId: string, status: RepStatus): Observable<RepRecord> {
     return this.updateRep(repId, { status });
   }
@@ -528,6 +581,7 @@ export class RepDirectoryStore {
       consultantFeePaid: dto.consultantFeePaid,
       docs: existing?.docs ?? { ...EMPTY_DOCS },
       bankDetails: existing?.bankDetails ?? null,
+      notes: existing?.notes ?? { ...EMPTY_NOTES },
       commissions: existing?.commissions ?? emptyCommissionHistory(14),
       createdAt: dto.createdAt.slice(0, 10),
       contractWizardLink: dto.contractWizardLink ?? '',

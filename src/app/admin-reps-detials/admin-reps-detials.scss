@@ -601,6 +601,21 @@
   }
 }
 
+// ---------- notes textareas (Admin-only / Rep-and-Admin cards) ----------
+// cdkTextareaAutosize grows the box with content instead of the browser's manual resize
+// handle, which otherwise pokes out past the outline's rounded corner.
+.notes-field textarea.mat-mdc-input-element {
+  resize: none;
+  min-height: 36px;
+  line-height: 1.5;
+}
+
+.notes-rv {
+  min-height:36px;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
 // ---------- address (its own box, set apart from the plain contact rows) ----------
 .address-box {
   margin-top: 4px;

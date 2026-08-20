@@ -33,7 +33,7 @@ interface DocCardView extends DocDef {
 
 const DOC_DEFS: DocDef[] = [
   { kind: 'agreement', label: 'Representative Agreement' },
-  { kind: 'w4', label: '1099 Form' },
+  { kind: 'w4', label: 'W9 Form' },
   { kind: 'pricingSheet', label: 'Pricing Sheet' },
   { kind: 'powerPoint', label: 'PowerPoint' },
 ];

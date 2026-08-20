@@ -60,6 +60,7 @@ export class RepProfile {
       if (!this.directory.findByRepId(repId)) return;
       this.loadedForRepId = repId;
       this.directory.loadDocuments(repId).subscribe();
+      this.directory.loadNotes(repId).subscribe();
     });
   }
 
@@ -89,6 +90,7 @@ export class RepProfile {
 
   readonly businessCardStatus = computed(() => this.repProfileStore.profile().businessCardStatus);
   readonly businessCardSample = computed(() => this.repProfileStore.profile().docs.businessCards);
+  readonly sharedNote = computed(() => this.repProfileStore.profile().sharedNote);
 
   readonly pwrRewardsRows = computed<ProfileRow[]>(() => {
     const p = this.repProfileStore.profile();

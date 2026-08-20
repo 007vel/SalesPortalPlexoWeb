@@ -28,6 +28,8 @@ export interface RepProfileData {
   contractWizardUsername: string;
   contractWizardPassword: string;
   contractWizardInstructionsLink: string;
+  /** Set by admin from the Rep Details page's "Notes for Rep and Admin" card — read-only here. */
+  sharedNote: string;
 }
 
 function emptyRepProfile(): RepProfileData {
@@ -55,6 +57,7 @@ function emptyRepProfile(): RepProfileData {
     contractWizardUsername: '',
     contractWizardPassword: '',
     contractWizardInstructionsLink: '',
+    sharedNote: '',
   };
 }
 
@@ -84,6 +87,7 @@ function toProfileData(rep: RepRecord | undefined): RepProfileData {
     contractWizardUsername: rep.contractWizardUsername,
     contractWizardPassword: rep.contractWizardPassword,
     contractWizardInstructionsLink: rep.contractWizardInstructionsLink,
+    sharedNote: rep.notes.shared,
   };
 }
 

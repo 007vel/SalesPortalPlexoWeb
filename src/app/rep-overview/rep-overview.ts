@@ -51,7 +51,7 @@ export class RepOverview {
       { label: 'Contact info', done: !!(p.name && p.address && p.city && p.state && p.zip && p.phone && email) },
       { label: 'Sales Leads link', done: !!p.googleLink },
       { label: 'Representative Agreement', done: !!p.docs.agreement },
-      { label: '1099 Form', done: !!p.docs.w4 },
+      { label: ' W9 Form', done: !!p.docs.w4 },
       { label: 'Certification passed', done: p.passedCertification },
       { label: 'Consultant fee paid', done: p.consultantFeePaid },
       { label: 'Business card approved', done: p.businessCardStatus === 'approved' },

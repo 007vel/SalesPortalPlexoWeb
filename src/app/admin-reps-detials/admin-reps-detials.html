@@ -410,6 +410,20 @@
       </div>
     </mat-card>
 
+    <mat-card class="section">
+      <div class="section-head">
+        <div class="eyebrow">Meta</div>
+        <h2>Rep record</h2>
+      </div>
+      <div class="section-body">
+        <ng-container *ngTemplateOutlet="field; context: {label:'Rep ID', value: rep.repId}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Portal link', value: rep.portalLink, isLink: true}"></ng-container>
+        <ng-container
+          *ngTemplateOutlet="field; context: {label:'Created', value: formatDate(rep.createdAt)}"></ng-container>
+      </div>
+    </mat-card>
+  
   </div>
 
   <div>
@@ -627,7 +641,7 @@
             <div class="doc-icon" [class.filled]="!!rep.docs.w4"><mat-icon>{{ rep.docs.w4 ? 'check' : 'description'
                 }}</mat-icon></div>
             <div>
-              <div class="doc-name">1099 Form</div>
+              <div class="doc-name">W9 Form</div>
               <div class="doc-status" [class.filled]="!!rep.docs.w4">{{ rep.docs.w4 ? (rep.docs.w4.name + ' · ' +
                 formatDate(rep.docs.w4.uploadedAt)) : 'Not uploaded' }}</div>
             </div>
@@ -705,19 +719,7 @@
       </div>
     </mat-card>
 
-    <mat-card class="section">
-      <div class="section-head">
-        <div class="eyebrow">Meta</div>
-        <h2>Rep record</h2>
-      </div>
-      <div class="section-body">
-        <ng-container *ngTemplateOutlet="field; context: {label:'Rep ID', value: rep.repId}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Portal link', value: rep.portalLink, isLink: true}"></ng-container>
-        <ng-container
-          *ngTemplateOutlet="field; context: {label:'Created', value: formatDate(rep.createdAt)}"></ng-container>
-      </div>
-    </mat-card>
+
 
   </div>
 </div>
@@ -785,6 +787,80 @@
   </div>
 </mat-card>
 
+<div class="detail-grid">
+  <div>
+    <mat-card class="section">
+      <div class="section-head editable">
+        <div>
+          <div class="eyebrow">Internal</div>
+          <h2>Notes for Admin only</h2>
+        </div>
+        @if (!editingAdminNotes()) {
+        <button type="button" mat-stroked-button class="edit-btn" (click)="startEditAdminNotes()">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        }
+      </div>
+      <div class="section-body">
+        @if (editingAdminNotes()) {
+        <form [formGroup]="adminNotesForm" class="edit-form">
+          <mat-form-field appearance="outline" class="full-width notes-field" subscriptSizing="dynamic">
+            <mat-label>Admin notes</mat-label>
+            <textarea matInput formControlName="text" rows="5" cdkTextareaAutosize cdkAutosizeMinRows="5"
+              placeholder="Internal notes visible to admins only"></textarea>
+          </mat-form-field>
+
+          <div class="edit-actions">
+            <button type="button" mat-button [disabled]="savingAdminNotes()" (click)="cancelEditAdminNotes()">Cancel</button>
+            <button type="button" mat-flat-button class="save-btn" [disabled]="savingAdminNotes()"
+              (click)="saveAdminNotes()">{{ savingAdminNotes() ? 'Saving…' : 'Save' }}</button>
+          </div>
+        </form>
+        } @else {
+        <div class="readonly-field">
+          <div class="rv notes-rv" [class.empty]="!rep.notes.admin">{{ rep.notes.admin || 'No notes yet' }}</div>
+        </div>
+        }
+      </div>
+    </mat-card>
+  </div>
+  <div>
+    <mat-card class="section">
+      <div class="section-head editable">
+        <div>
+          <div class="eyebrow">Shared</div>
+          <h2>Notes for Rep and Admin</h2>
+        </div>
+        @if (!editingSharedNotes()) {
+        <button type="button" mat-stroked-button class="edit-btn" (click)="startEditSharedNotes()">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        }
+      </div>
+      <div class="section-body">
+        @if (editingSharedNotes()) {
+        <form [formGroup]="sharedNotesForm" class="edit-form">
+          <mat-form-field appearance="outline" class="full-width notes-field" subscriptSizing="dynamic">
+            <mat-label>Shared notes</mat-label>
+            <textarea matInput formControlName="text" rows="5" cdkTextareaAutosize cdkAutosizeMinRows="5"
+              placeholder="Notes visible to both the rep and admin"></textarea>
+          </mat-form-field>
+
+          <div class="edit-actions">
+            <button type="button" mat-button [disabled]="savingSharedNotes()" (click)="cancelEditSharedNotes()">Cancel</button>
+            <button type="button" mat-flat-button class="save-btn" [disabled]="savingSharedNotes()"
+              (click)="saveSharedNotes()">{{ savingSharedNotes() ? 'Saving…' : 'Save' }}</button>
+          </div>
+        </form>
+        } @else {
+        <div class="readonly-field">
+          <div class="rv notes-rv" [class.empty]="!rep.notes.shared">{{ rep.notes.shared || 'No notes yet' }}</div>
+        </div>
+        }
+      </div>
+    </mat-card>
+  </div>
+</div>
 
 <ng-template #hubLangGrid let-list="list" let-emptyMsg="emptyMsg">
   @if (list.length === 0) {
