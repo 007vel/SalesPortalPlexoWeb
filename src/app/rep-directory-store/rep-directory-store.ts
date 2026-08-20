@@ -78,6 +78,8 @@ export interface RepRecord {
   notes: RepNotes;
   commissions: CommissionDay[];
   createdAt: string;
+  /** Null unless the Rep welcome email actually sent successfully on creation. */
+  welcomeEmailSentAt: string | null;
 
   // ----- admin-only, set after creation — shown only on the admin Rep Details page -----
   contractWizardLink: string;
@@ -146,6 +148,7 @@ interface RepDto {
   consultantFeePaid: boolean;
   createdAt: string;
   updatedAt: string;
+  welcomeEmailSentAt: string | null;
   contractWizardLink: string | null;
   contractWizardUsername: string | null;
   contractWizardPassword: string | null;
@@ -584,6 +587,7 @@ export class RepDirectoryStore {
       notes: existing?.notes ?? { ...EMPTY_NOTES },
       commissions: existing?.commissions ?? emptyCommissionHistory(14),
       createdAt: dto.createdAt.slice(0, 10),
+      welcomeEmailSentAt: dto.welcomeEmailSentAt,
       contractWizardLink: dto.contractWizardLink ?? '',
       contractWizardUsername: dto.contractWizardUsername ?? '',
       contractWizardPassword: dto.contractWizardPassword ?? '',

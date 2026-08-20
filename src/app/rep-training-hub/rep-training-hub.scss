@@ -604,4 +604,21 @@
   .th-slot-actions {
     justify-content: flex-end;
   }
+
+  // ---- featured banner: icon + text + button all in one non-wrapping row was getting
+  // cramped (and, since the page shell clips overflow-x, could get silently cut off) ----
+  .th-featured {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .th-featured .fic {
+    margin: 0 auto;
+  }
+
+  .open-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

@@ -19,6 +19,11 @@
   </div>
 
   <div class="detail-head-actions">
+    @if (rep.welcomeEmailSentAt) {
+    <span class="badge badge-active welcome-email-badge" [title]="'Sent ' + formatDate(rep.welcomeEmailSentAt)">
+      <mat-icon>mark_email_read</mat-icon> Welcome email sent
+    </span>
+    }
     <mat-form-field appearance="outline" class="status-field">
       <mat-select [value]="rep.status" (selectionChange)="updateStatus($event.value)">
         <mat-option value="active">Active</mat-option>
