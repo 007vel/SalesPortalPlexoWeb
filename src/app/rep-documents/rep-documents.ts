@@ -22,7 +22,7 @@ interface DocDef {
 interface DocCardView extends DocDef {
   /** Blank template to fill out first — only agreement/W-4 have one; general uploads (pricing sheet, PowerPoint) don't. */
   templateFilename: string | null;
-  /** Only the 1099 is rep-uploaded — every other doc is admin-provided, view/download only. */
+  /** Only the W9 is rep-uploaded — every other doc is admin-provided, view/download only. */
   uploadable: boolean;
   filled: boolean;
   statusText: string;
