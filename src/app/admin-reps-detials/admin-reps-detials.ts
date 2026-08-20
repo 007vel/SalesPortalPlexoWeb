@@ -347,6 +347,12 @@ export class AdminRepsDetials {
     this.bankAccountNumberVisible.update((visible) => !visible);
   }
 
+  /** Chrome/Edge ignore autocomplete="off" on these fields and offer to fill them with a saved
+   * address/email profile value. Starting the input readonly (removed on focus) stops that. */
+  clearBankFieldAutofill(event: FocusEvent): void {
+    (event.target as HTMLInputElement).removeAttribute('readonly');
+  }
+
   startEditBankDetails(): void {
     const rep = this.rep();
     if (!rep) return;

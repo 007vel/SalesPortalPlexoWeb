@@ -125,14 +125,15 @@
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Routing number</mat-label>
             <mat-icon matPrefix>tag</mat-icon>
-            <input matInput formControlName="routingNumber" inputmode="numeric" autocomplete="off">
+            <input matInput formControlName="routingNumber" inputmode="numeric" autocomplete="off" readonly
+              (focus)="clearBankFieldAutofill($event)">
           </mat-form-field>
 
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>Account number</mat-label>
             <mat-icon matPrefix>lock</mat-icon>
             <input matInput [type]="accountNumberVisible() ? 'text' : 'password'" formControlName="accountNumber"
-              inputmode="numeric" autocomplete="off">
+              inputmode="numeric" autocomplete="off" readonly (focus)="clearBankFieldAutofill($event)">
             <mat-icon matSuffix role="button" tabindex="0" (click)="toggleAccountNumberVisibility()"
               (keydown.enter)="toggleAccountNumberVisibility()" (keydown.space)="toggleAccountNumberVisibility()"
               [attr.aria-label]="accountNumberVisible() ? 'Hide account number' : 'Show account number'"
