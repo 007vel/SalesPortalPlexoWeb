@@ -83,6 +83,7 @@ describe('AdminRepsDetials', () => {
     req.flush([{ oId: 5, repId: 1, kind: 'agreement', fileName: 'signed.pdf', uploadedAt: '2026-08-06T00:00:00Z' }]);
 
     httpMock.expectOne(apiUrl('repbankdetails/rep/1001')).flush(null, { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne(apiUrl('repnotes/rep/1001')).flush([]);
 
     const trainingReq = httpMock.expectOne((r) => r.url === apiUrl('traininghub/filter') && r.params.get('roleId') === '1001');
     expect(trainingReq.request.method).toBe('GET');
@@ -120,6 +121,7 @@ describe('AdminRepsDetials', () => {
 
     httpMock.expectOne(apiUrl('documents/rep/1001')).flush([]);
     httpMock.expectOne(apiUrl('repbankdetails/rep/1001')).flush(null, { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne(apiUrl('repnotes/rep/1001')).flush([]);
     httpMock.expectOne((r) => r.url === apiUrl('traininghub/filter') && r.params.get('roleId') === '1001').flush([]);
     await fixture.whenStable();
 
@@ -159,6 +161,7 @@ describe('AdminRepsDetials', () => {
 
     httpMock.expectOne(apiUrl('documents/rep/1001')).flush([]);
     httpMock.expectOne(apiUrl('repbankdetails/rep/1001')).flush(null, { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne(apiUrl('repnotes/rep/1001')).flush([]);
     httpMock.expectOne((r) => r.url === apiUrl('traininghub/filter') && r.params.get('roleId') === '1001').flush([]);
     await fixture.whenStable();
 
@@ -198,6 +201,7 @@ describe('AdminRepsDetials', () => {
 
     httpMock.expectOne(apiUrl('documents/rep/1001')).flush([]);
     httpMock.expectOne(apiUrl('repbankdetails/rep/1001')).flush(null, { status: 404, statusText: 'Not Found' });
+    httpMock.expectOne(apiUrl('repnotes/rep/1001')).flush([]);
     httpMock.expectOne((r) => r.url === apiUrl('traininghub/filter') && r.params.get('roleId') === '1001').flush([]);
     await fixture.whenStable();
 

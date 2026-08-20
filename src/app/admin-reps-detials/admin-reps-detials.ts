@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, signal } from '@angular/cor
 import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TextFieldModule } from '@angular/cdk/text-field';
 import { finalize, switchMap } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -29,8 +30,8 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 @Component({
   selector: 'app-admin-reps-detials',
   imports: [
-    RouterLink, ReactiveFormsModule, MatButtonModule, MatButtonToggleModule, MatCardModule, MatFormFieldModule, MatIconModule,
-    MatInputModule, MatProgressSpinnerModule, MatSelectModule, MatSlideToggleModule, NgTemplateOutlet,
+    RouterLink, ReactiveFormsModule, TextFieldModule, MatButtonModule, MatButtonToggleModule, MatCardModule, MatFormFieldModule,
+    MatIconModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule, MatSlideToggleModule, NgTemplateOutlet,
   ],
   templateUrl: './admin-reps-detials.html',
   styleUrl: './admin-reps-detials.scss',
@@ -109,6 +110,7 @@ export class AdminRepsDetials {
       this.loadedForRepId = repId;
       this.directory.loadDocuments(repId).subscribe();
       this.directory.loadBankDetails(repId).subscribe();
+      this.directory.loadNotes(repId).subscribe();
       this.trainingResourceStore.loadForRoleWithAdmin(repId).subscribe();
     });
     this.trainingHubLinksStore.load().subscribe();
@@ -345,6 +347,12 @@ export class AdminRepsDetials {
     this.bankAccountNumberVisible.update((visible) => !visible);
   }
 
+  /** Chrome/Edge ignore autocomplete="off" on these fields and offer to fill them with a saved
+   * address/email profile value. Starting the input readonly (removed on focus) stops that. */
+  clearBankFieldAutofill(event: FocusEvent): void {
+    (event.target as HTMLInputElement).removeAttribute('readonly');
+  }
+
   startEditBankDetails(): void {
     const rep = this.rep();
     if (!rep) return;
@@ -383,6 +391,67 @@ export class AdminRepsDetials {
           this.toast.show('Bank details updated');
         },
         error: () => this.toast.show('Failed to update bank details'),
+      });
+  }
+
+  // ----- notes edit (Admin-only + Rep-and-Admin) — see api/repnotes -----
+  readonly editingAdminNotes = signal(false);
+  readonly savingAdminNotes = signal(false);
+  readonly adminNotesForm = this.fb.nonNullable.group({ text: [''] });
+
+  startEditAdminNotes(): void {
+    this.adminNotesForm.setValue({ text: this.rep()?.notes.admin ?? '' });
+    this.editingAdminNotes.set(true);
+  }
+
+  cancelEditAdminNotes(): void {
+    this.editingAdminNotes.set(false);
+  }
+
+  saveAdminNotes(): void {
+    const rep = this.rep();
+    if (!rep) return;
+    const text = this.adminNotesForm.getRawValue().text.trim();
+    this.savingAdminNotes.set(true);
+    this.directory
+      .setNote(rep.repId, 'admin', text)
+      .pipe(finalize(() => this.savingAdminNotes.set(false)))
+      .subscribe({
+        next: () => {
+          this.editingAdminNotes.set(false);
+          this.toast.show('Admin notes updated');
+        },
+        error: () => this.toast.show('Failed to update admin notes'),
+      });
+  }
+
+  readonly editingSharedNotes = signal(false);
+  readonly savingSharedNotes = signal(false);
+  readonly sharedNotesForm = this.fb.nonNullable.group({ text: [''] });
+
+  startEditSharedNotes(): void {
+    this.sharedNotesForm.setValue({ text: this.rep()?.notes.shared ?? '' });
+    this.editingSharedNotes.set(true);
+  }
+
+  cancelEditSharedNotes(): void {
+    this.editingSharedNotes.set(false);
+  }
+
+  saveSharedNotes(): void {
+    const rep = this.rep();
+    if (!rep) return;
+    const text = this.sharedNotesForm.getRawValue().text.trim();
+    this.savingSharedNotes.set(true);
+    this.directory
+      .setNote(rep.repId, 'shared', text)
+      .pipe(finalize(() => this.savingSharedNotes.set(false)))
+      .subscribe({
+        next: () => {
+          this.editingSharedNotes.set(false);
+          this.toast.show('Shared notes updated');
+        },
+        error: () => this.toast.show('Failed to update shared notes'),
       });
   }
 

@@ -105,6 +105,12 @@ export class CreateRepDialog {
     this.accountNumberVisible.update((visible) => !visible);
   }
 
+  /** Chrome/Edge ignore autocomplete="off" on these fields and offer to fill them with a saved
+   * address/email profile value. Starting the input readonly (removed on focus) stops that. */
+  clearBankFieldAutofill(event: FocusEvent): void {
+    (event.target as HTMLInputElement).removeAttribute('readonly');
+  }
+
   // ----- step 4: links & documents (all optional — admin can fill these in later via the rep's own Links/Documents pages) -----
   readonly linksForm = this.fb.nonNullable.group({
     googleLink: [''],

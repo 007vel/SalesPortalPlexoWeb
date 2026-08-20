@@ -209,6 +209,32 @@
   </div>
 </mat-card>
 
+<mat-card class="rp-profile-card">
+  <div class="head-row">
+    <div class="head-title">
+      <div class="eyebrow">Notes</div>
+      <div class="title-line">
+        <span class="icon-chip"><mat-icon>sticky_note_2</mat-icon></span>
+        <h2>Notes from admin</h2>
+      </div>
+    </div>
+    <span class="ro-badge"><span class="ro-dot"></span>Read only</span>
+  </div>
+
+  <div class="rp-card-body">
+    <div class="rp-readonly">
+      <div class="rp-ro-item wide">
+        <div class="rl">Shared notes</div>
+        @if (!sharedNote()) {
+        <div class="rv empty">No notes yet</div>
+        } @else {
+        <div class="rv notes-rv">{{ sharedNote() }}</div>
+        }
+      </div>
+    </div>
+  </div>
+</mat-card>
+
 @if (viewing()) {
 <div class="rp-loading-overlay">
   <mat-progress-spinner mode="indeterminate" diameter="56" strokeWidth="4"></mat-progress-spinner>
