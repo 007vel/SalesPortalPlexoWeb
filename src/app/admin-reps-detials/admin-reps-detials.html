@@ -19,11 +19,22 @@
   </div>
 
   <div class="detail-head-actions">
-    @if (rep.welcomeEmailSentAt) {
-    <span class="badge badge-active welcome-email-badge" [title]="'Sent ' + formatDate(rep.welcomeEmailSentAt)">
-      <mat-icon>mark_email_read</mat-icon> Welcome email sent
-    </span>
-    }
+    <button type="button" mat-stroked-button class="welcome-email-btn" [class.sent]="!!rep.welcomeEmailSentAt"
+      [disabled]="sendingWelcomeEmail()" (click)="sendWelcomeEmail()">
+      <mat-icon>{{ rep.welcomeEmailSentAt ? 'mark_email_read' : 'mail_outline' }}</mat-icon>
+      <span class="welcome-email-btn-label">
+        <span class="welcome-email-btn-title">Welcome Email</span>
+        <span class="welcome-email-btn-status">
+          @if (sendingWelcomeEmail()) {
+          Sending…
+          } @else if (rep.welcomeEmailSentAt) {
+          Sent {{ formatDate(rep.welcomeEmailSentAt) }}
+          } @else {
+          Not sent
+          }
+        </span>
+      </span>
+    </button>
     <mat-form-field appearance="outline" class="status-field">
       <mat-select [value]="rep.status" (selectionChange)="updateStatus($event.value)">
         <mat-option value="active">Active</mat-option>

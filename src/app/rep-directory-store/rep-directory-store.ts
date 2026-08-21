@@ -78,7 +78,7 @@ export interface RepRecord {
   notes: RepNotes;
   commissions: CommissionDay[];
   createdAt: string;
-  /** Null unless the Rep welcome email actually sent successfully on creation. */
+  /** Null until an admin sends the welcome email; updated on every successful (re)send. */
   welcomeEmailSentAt: string | null;
 
   // ----- admin-only, set after creation — shown only on the admin Rep Details page -----
@@ -510,6 +510,14 @@ export class RepDirectoryStore {
   loadAllDocuments(): Observable<RepDocumentRecord[]> {
     return this.api.get<RepDocumentDto[]>('documents').pipe(
       map((dtos) => dtos.map((dto) => ({ oId: dto.oId, repId: dto.repId, kind: dto.kind, fileName: dto.fileName, uploadedAt: dto.uploadedAt }))),
+    );
+  }
+
+  /** POSTs api/reps/{oId}/welcome-email to (re)send the welcome email — resendable any number of times. */
+  sendWelcomeEmail(oId: number): Observable<RepRecord> {
+    return this.api.post<RepDto>(`reps/${oId}/welcome-email`, {}).pipe(
+      map((dto) => this.mergeDto(dto)),
+      tap((updated) => this.repsSignal.update((list) => list.map((r) => (r.oId === updated.oId ? updated : r)))),
     );
   }
 

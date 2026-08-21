@@ -152,16 +152,59 @@
   height: 15px;
 }
 
-.welcome-email-badge {
-  flex-shrink: 0;
-}
-
 // ---------- header actions ----------
 .detail-head-actions {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+}
+
+.welcome-email-btn {
+  height: 40px;
+  border-radius: 9px;
+  flex-shrink: 0;
+  font-weight: 600;
+  font-size: 13.5px;
+  border-color: #D7DEE8 !important;
+  color: var(--muted) !important;
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+    margin-right: 2px;
+  }
+
+  &.sent {
+    border-color: #BEE7D3 !important;
+    color: #1A8A5F !important;
+
+    &:hover {
+      background: #E4F7EE;
+    }
+  }
+
+  &:hover {
+    background: #F3F5F8;
+  }
+
+  &:disabled {
+    opacity: .6;
+  }
+}
+
+.welcome-email-btn-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.welcome-email-btn-status {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: .8;
 }
 
 .delete-rep-btn {
@@ -1041,7 +1084,8 @@
     width: 100%;
   }
 
-  .welcome-email-badge {
+  .welcome-email-btn {
+    width: 100%;
     justify-content: center;
   }
 

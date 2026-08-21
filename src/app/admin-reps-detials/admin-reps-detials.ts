@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TextFieldModule } from '@angular/cdk/text-field';
@@ -22,6 +23,7 @@ import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { Toast } from '../toast/toast';
 import { formatDateMDY } from '../shared/format-date';
 import { maskAccountNumber } from '../shared/mask-account-number';
+import { extractApiErrorMessage } from '../shared/extract-api-error-message';
 import { PHONE_PATTERN, formatPhoneInput } from '../shared/format-phone';
 import { extractYouTubeId, youTubeThumbnailUrl } from '../shared/youtube';
 
@@ -51,6 +53,7 @@ export class AdminRepsDetials {
 
   readonly viewing = signal(false);
   readonly deleting = signal(false);
+  readonly sendingWelcomeEmail = signal(false);
 
   readonly repId = input.required<string>();
 
@@ -132,6 +135,22 @@ export class AdminRepsDetials {
     this.directory.updateStatus(this.repId(), status).subscribe({
       next: () => this.toast.show(`Status updated to ${status}`),
       error: () => this.toast.show('Failed to update status'),
+    });
+  }
+
+  sendWelcomeEmail(): void {
+    const rep = this.rep();
+    if (!rep) return;
+    this.sendingWelcomeEmail.set(true);
+    this.directory.sendWelcomeEmail(rep.oId).subscribe({
+      next: () => {
+        this.sendingWelcomeEmail.set(false);
+        this.toast.show('Welcome email sent');
+      },
+      error: (err: HttpErrorResponse) => {
+        this.sendingWelcomeEmail.set(false);
+        this.toast.show(extractApiErrorMessage(err) ?? 'Failed to send welcome email');
+      },
     });
   }
 
@@ -235,7 +254,7 @@ export class AdminRepsDetials {
           this.editingContact.set(false);
           this.toast.show('Contact info updated');
         },
-        error: () => this.toast.show('Failed to update contact info'),
+        error: (err: HttpErrorResponse) => this.toast.show(extractApiErrorMessage(err) ?? 'Failed to update contact info'),
       });
   }
 
@@ -542,10 +561,18 @@ export class AdminRepsDetials {
     const rep = this.rep();
     if (!rep) return;
     const v = this.pwrRewardsForm.getRawValue();
+    const email = v.pwrRewardsEmail.trim();
+    const emailInUse = email
+      ? this.directory.reps().some((r) => r.oId !== rep.oId && r.pwrRewardsEmail.trim().toLowerCase() === email.toLowerCase())
+      : false;
+    if (emailInUse) {
+      this.toast.show(`PWR Rewards email '${email}' is already in use by another rep.`);
+      return;
+    }
     this.savingPwrRewards.set(true);
     this.directory
       .updateRep(rep.repId, {
-        pwrRewardsEmail: v.pwrRewardsEmail.trim(),
+        pwrRewardsEmail: email,
         pwrRewardsEmailPassword: v.pwrRewardsEmailPassword.trim(),
       })
       .pipe(finalize(() => this.savingPwrRewards.set(false)))
